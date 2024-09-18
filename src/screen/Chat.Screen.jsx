@@ -484,7 +484,7 @@ const ChatScreen = ({route, navigation}) => {
               ? toggleMessageSelection(item._id)
               : () => {}
           }
-          onPress={() => !editingMessage && handleEditMessage(item._id)}
+          // onPress={() => !editingMessage && handleEditMessage(item._id)}
           style={[
             styles.messageContainer,
             item.sender === user._id
