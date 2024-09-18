@@ -29,6 +29,7 @@
     "react-native": "0.73.6",
     "react-native-agora": "^4.3.2",
     "react-native-background-actions": "^3.0.1",
+    "react-native-base64": "^0.2.1",
     "react-native-calendars": "^1.1304.1",
     "react-native-credit-card-input": "^1.0.0",
     "react-native-gesture-handler": "^2.17.1",
@@ -47,6 +48,7 @@
     "react-native-tailwindcss": "^1.1.11",
     "react-native-vector-icons": "^10.0.3",
     "react-native-webrtc": "^118.0.7",
+    "sha256": "^0.2.0",
     "socket.io-client": "^4.7.5",
     "zustand": "^4.5.2"
   },

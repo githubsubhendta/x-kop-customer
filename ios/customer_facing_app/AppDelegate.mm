@@ -28,4 +28,14 @@
 #endif
 }
 
+- (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options
+{
+  NSMutableDictionary *userInfo = [[NSMutableDictionary alloc] init];
+  [userInfo setObject:options forKey:@"options"];
+  [userInfo setObject:url forKey:@"openUrl"];
+  [[NSNotificationCenter defaultCenter] postNotificationName: @"ApplicationOpenURLNotification" object:nil userInfo:userInfo];
+  return YES;
+}
+
+
 @end

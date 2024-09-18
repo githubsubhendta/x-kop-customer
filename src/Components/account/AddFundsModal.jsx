@@ -1,17 +1,73 @@
 import React, { useState } from 'react';
 import { Modal, StyleSheet, Text, View, TextInput, TouchableOpacity, Alert, ScrollView } from 'react-native';
+import useUserStore from '../../stores/user.store';
+import phonepeSDK from "react-native-phonepe-pg";
+import Base64 from "react-native-base64";
+import sha256 from "sha256"
 
 const AddFundsModal = ({ modalVisible, setModalVisible, addFunds }) => {
   const [amount, setAmount] = useState('');
+  const {user} = useUserStore();
+
+  const [environment,setEnvironment] = useState("SANDBOX");
+  const [merchantId,setMerchantId] = useState("ESHOPGENPARTUAT");
+  const [enableLogging,setEnableLogging] = useState(true);
+  const [appId,setAppId] = useState(null);
+
+
+
+
+
+  const generateTransactionId = ()=>{
+    const timestamp = Date.now();
+    const random = Math.floor(Math.random() * 1000000);
+    const merchantPrefix = "T";
+    return `${merchantPrefix}${timestamp}${random}`;
+  }
 
   const handleAddFunds = () => {
+   
     const value = parseFloat(amount);
     if (isNaN(value) || value <= 0) {
       Alert.alert('Invalid Amount', 'Please enter a valid amount.');
     } else {
-      addFunds(value);
-      setAmount('');
-      setModalVisible(false);
+
+      phonepeSDK.init(environment,merchantId,appId,enableLogging).then(res=>{
+       const requestBody = {
+        merchantId:merchantId,
+        merchantTransactionId:generateTransactionId(),
+        merchantUserId:"",
+        amount: parseInt(amount)*100,
+        mobileNumber:user.mobile,
+        callbackUrl:"",
+        paymentInstrument:{
+          type:"PAY_PAGE"
+        }
+       }
+
+       const salt_key = "099eb0cd-02cf-4e2a-8aca-3e6c6aff0399";
+       const salt_Index = 1;
+       const payload = JSON.stringify(requestBody);
+       const payload_main = Base64.encode(payload);
+       const string = payload_main+"/pg/v1/pay"+salt_key;
+       const checksum = sha256(string)+"###"+salt_Index;
+
+        phonepeSDK.startTransaction(
+          payload_main,
+          checksum,
+          null,
+          null
+        ).then(res=>{
+
+        }).catch(err=>{
+          console.log("transaction start",err)
+        })
+      }).catch(err=>{
+        console.log(err)
+      })
+      // addFunds(value);
+      // setAmount('');
+      // setModalVisible(false);
     }
   };
 
