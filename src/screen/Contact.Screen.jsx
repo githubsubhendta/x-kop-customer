@@ -40,7 +40,7 @@ const ContactScreen = () => {
 <ScrollView>
   {user?.chats?.length > 0 ? (
     user.chats.map((chat, index) => (
-      <TouchableOpacity key={index} className="ml-4 mr-4" onPress={()=>navigate("ChatScreen",{chats:chat})}>
+      <TouchableOpacity key={index} className="ml-4 mr-4" onPress={()=>navigate("ChatScreen",{chatId:chat._id})}>
         <Card.Title
           title={chat.participants.filter(user=>user.officerDetails)[0].name} 
           subtitle={chat?.participants?.filter(user=>user.officerDetails)[0]?.officerDetails?.ConsultationTypeID?.ConsultationTypeName ||"General Offences22e"} // Assuming subject exists in chat, with fallback
