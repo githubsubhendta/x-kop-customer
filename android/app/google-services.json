@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1094743189436",
+    "project_id": "xkop-customer",
+    "storage_bucket": "xkop-customer.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1094743189436:android:d8eb4e8678626d8e66edb9",
+        "android_client_info": {
+          "package_name": "com.xkopconsultancy.xkop"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD9AdXIXhn6n9_V0DfL1o2q0166tiV2xS0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,256 @@
+import React, {useCallback, useEffect, useState} from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  Alert,
+} from 'react-native';
+import {SvgXml} from 'react-native-svg';
+import {RtcSurfaceView} from 'react-native-agora';
+import useAgoraEngine from '../../hooks/useAgoraEngine';
+import {
+  SVG_hangout_red,
+  SVG_mute_mic,
+  SVG_request_video,
+  SVG_speaker,
+  SVG_speakeroff,
+  SVG_unmute_mic,
+} from '../../utils/SVGImage.js';
+import MessageInput from '../../Components/MessageInput.jsx';
+import Counter from '../../Components/Counter.jsx';
+import {useWebSocket} from '../../shared/WebSocketProvider.jsx';
+
+const AudioScreen = ({route, navigation}) => {
+  const {config, mobile} = route.params || {};
+  const {webSocket} = useWebSocket();
+  const [isMuted, setIsMuted] = useState(false);
+  const [isSpeakerEnabled, setIsSpeakerEnabled] = useState(true);
+  const [connectionStatus, setConnectionStatus] = useState('Not Connected');
+  const [peerIds, setPeerIds] = useState([]);
+
+  //   const startTime = new Date("2024-09-08T13:15:25.613Z"); // Call start time
+  // const callDurationInterval = setInterval(() => {
+  //   const currentTime = new Date(); // Get current time
+  //   const timeDifference = currentTime - startTime; // Calculate the time difference in milliseconds
+
+  //   // Convert the time difference to hours, minutes, and seconds
+  //   const seconds = Math.floor((timeDifference / 1000) % 60);
+  //   const minutes = Math.floor((timeDifference / (1000 * 60)) % 60);
+  //   const hours = Math.floor((timeDifference / (1000 * 60 * 60)) % 24);
+
+  //   // Display the duration of the call
+  //   console.log(`Call duration: ${hours}h ${minutes}m ${seconds}s`);
+
+  // }, 1000);
+
+  const {engine, isJoined} = useAgoraEngine(
+    config,
+    () => setConnectionStatus('Connected'),
+    Uid => {
+      if (!peerIds.includes(Uid)) {
+        setPeerIds(prev => [...prev, Uid]);
+      }
+    },
+    Uid => {
+      setPeerIds(prev => prev.filter(id => id !== Uid));
+    },
+    () => setConnectionStatus('Not Connected'),
+  );
+
+  const toggleMute = useCallback(async () => {
+    if (engine.current) {
+      await engine.current.muteLocalAudioStream(!isMuted);
+      setIsMuted(prev => !prev);
+    }
+  }, [isMuted, engine]);
+
+  const toggleSpeaker = useCallback(async () => {
+    if (engine.current) {
+      await engine.current.setEnableSpeakerphone(!isSpeakerEnabled);
+      setIsSpeakerEnabled(prev => !prev);
+    }
+  }, [isSpeakerEnabled, engine]);
+
+  const endCall = useCallback(async () => {
+    if (engine.current) {
+      await engine.current.leaveChannel();
+      webSocket.emit('handsup', {otherUserId: mobile});
+      navigation.navigate('FindAnOfficerScreen');
+    }
+  }, [engine, webSocket, mobile, navigation]);
+
+  const switchToVideoCall = useCallback(async () => {
+    if (engine.current) {
+      webSocket.emit('videocall', {calleeId: mobile});
+    }
+  }, [engine, webSocket, mobile]);
+
+  useEffect(() => {
+    const handleHandsup = () => navigation.navigate('FindAnOfficerScreen');
+    webSocket.on('appyHandsup', handleHandsup);
+    return () => webSocket.off('appyHandsup', handleHandsup);
+  }, [webSocket, navigation]);
+
+  const createTwoButtonAlert = () => {
+    Alert.alert('Call', 'Requesting for Video Call', [
+      {
+        text: 'Cancel',
+        onPress: () => console.log('Cancel Pressed'),
+        style: 'cancel',
+      },
+      {
+        text: 'OK',
+        onPress: async () => {
+          webSocket.emit('VideoCallanswerCall', {callerId: mobile});
+          await engine.current?.leaveChannel();
+          setTimeout(() => {
+            navigation.navigate('VideoCallScreen', {config, mobile});
+          }, 300);
+        },
+      },
+    ]);
+  };
+
+  useEffect(() => {
+    webSocket.on('newVideoCall', createTwoButtonAlert);
+    webSocket.on('VideoCallAnswered', async () => {
+      await engine.current?.leaveChannel();
+      navigation.navigate('VideoCallScreen', {config, mobile});
+    });
+    return () => {
+      webSocket.off('newVideoCall', createTwoButtonAlert);
+      webSocket.off('VideoCallAnswered', async () => {
+        await engine.current?.leaveChannel();
+        navigation.navigate('VideoCallScreen', {config, mobile});
+      });
+    };
+  }, [webSocket, engine, createTwoButtonAlert, navigation, config, mobile]);
+
+  return (
+    <View style={styles.container}>
+      {connectionStatus !== 'Connected' ? (
+        <Text style={styles.connectionStatus}>{connectionStatus}</Text>
+      ) : (
+        <View style={styles.mainContent}>
+          <View style={styles.endCallButton}>
+            <TouchableOpacity onPress={endCall}>
+              <SvgXml xml={SVG_hangout_red} width={80} height={80} />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.infoContainer}>
+            <Image
+              source={require('./../../images/book2.jpg')}
+              style={styles.profileImage}
+            />
+            <View style={styles.textContainer}>
+              <Text style={styles.name}>Rahul Sharma</Text>
+              <Text style={styles.title}>General Offences</Text>
+              <Text style={styles.status}>Call in Progress</Text>
+              <View style={styles.counterContainer}>
+                <Counter />
+              </View>
+            </View>
+          </View>
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity style={styles.button} onPress={switchToVideoCall}>
+              <SvgXml xml={SVG_request_video} />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={toggleMute}>
+              {isMuted ? (
+                <SvgXml xml={SVG_mute_mic} />
+              ) : (
+                <SvgXml xml={SVG_unmute_mic} />
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={toggleSpeaker}>
+              {isSpeakerEnabled ? (
+                <SvgXml xml={SVG_speaker} />
+              ) : (
+                <SvgXml xml={SVG_speakeroff} />
+              )}
+            </TouchableOpacity>
+          </View>
+          <View style={styles.messageInputContainer}>
+            <MessageInput />
+          </View>
+        </View>
+      )}
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  connectionStatus: {
+    textAlign: 'center',
+    marginTop: 20,
+    color: 'black',
+  },
+  mainContent: {
+    flex: 1,
+    justifyContent: 'space-between',
+  },
+  endCallButton: {
+    margin: 20,
+    alignItems: 'flex-end',
+  },
+  infoContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  profileImage: {
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+  },
+  textContainer: {
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  name: {
+    fontSize: 24,
+    fontWeight: '500',
+  },
+  title: {
+    fontSize: 20,
+  },
+  status: {
+    fontSize: 16,
+    color: 'gray',
+  },
+  counterContainer: {
+    backgroundColor: '#997654',
+    borderRadius: 15,
+    marginTop: 10,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+  },
+  button: {
+    width: 62,
+    height: 62,
+    borderRadius: 31,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderColor: 'slategray',
+    borderWidth: 2,
+  },
+  messageInputContainer: {
+    paddingHorizontal: 10,
+    paddingBottom: 10,
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+});
+
+export default AudioScreen;
