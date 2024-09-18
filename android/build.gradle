@@ -40,6 +40,10 @@ allprojects {
             url 'https://maven.google.com/'
             name 'Google'
         }
+  // phonepe
+        maven {
+            url  "https://phonepe.mycloudrepo.io/public/repositories/phonepe-intentsdk-android"
+       }
     }
 }
 
