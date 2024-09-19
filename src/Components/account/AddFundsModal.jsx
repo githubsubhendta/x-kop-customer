@@ -4,6 +4,7 @@ import useUserStore from '../../stores/user.store';
 import phonepeSDK from 'react-native-phonepe-pg';
 import Base64 from 'react-native-base64';
 import sha256 from 'sha256';
+import axios from 'axios';
 
 const AddFundsModal = ({ modalVisible, setModalVisible, addFunds }) => {
   const [amount, setAmount] = useState('');
@@ -37,13 +38,13 @@ const AddFundsModal = ({ modalVisible, setModalVisible, addFunds }) => {
     }
 
     phonepeSDK.init(environment, merchantId, appId, enableLogging)
-      .then(() => {
+      .then(async() => {
         const requestBody = {
           merchantId: merchantId,
           merchantTransactionId: generateTransactionId(),
-          merchantUserId: '',
+          merchantUserId: user._id,
           amount: parseInt(amount) * 100,
-          mobileNumber: "9598162434",
+          mobileNumber: user.mobile,
           callbackUrl: 'https://42ed-49-36-211-10.ngrok-free.app/api/v1/payment/callback',
           paymentInstrument: {
             type: 'PAY_PAGE'
@@ -56,6 +57,23 @@ const AddFundsModal = ({ modalVisible, setModalVisible, addFunds }) => {
         const payload_main = Base64.encode(payload);
         const stringData = `${payload_main}/pg/v1/pay${salt_key}`;
         const checksum = `${sha256(stringData)}###${salt_Index}`;
+try {
+  const res_pay = await axios.post('https://42ed-49-36-211-10.ngrok-free.app/api/v1/payment/store-user-info', {
+    transactionId: requestBody.merchantTransactionId,
+    userId: user._id,
+    amount: parseInt(amount)
+  },
+  {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+);
+  console.log("res_pay====",res_pay);
+} catch (error) {
+  console.log("error==",error)
+}
+      
 
         phonepeSDK.startTransaction(
           payload_main,
