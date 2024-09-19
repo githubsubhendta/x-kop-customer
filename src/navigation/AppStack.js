@@ -15,7 +15,7 @@ import FirebaseProvider from '../shared/FirebaseProvider.jsx';
 import {WebSocketProvider} from '../shared/WebSocketProvider.jsx';
 import ParantWrapperProvider from '../shared/ParantWrapperProvider.jsx';
 import ChatScreen from '../screen/Chat.Screen.jsx';
-import { AppProvider } from '../shared/AppProvider.js';
+
 
 const Stack = createStackNavigator();
 
@@ -26,7 +26,6 @@ const AppStack = () => {
     <FirebaseProvider>
       <WebSocketProvider>
         <ParantWrapperProvider>
-          <AppProvider>
           <Stack.Navigator
             initialRouteName={
               !whatwedoStatus ? 'WhatWeDoScreen' : 'LayoutScreen'
@@ -88,7 +87,6 @@ const AppStack = () => {
               options={{headerShown: false}}
             />
           </Stack.Navigator>
-          </AppProvider>
         </ParantWrapperProvider>
       </WebSocketProvider>
     </FirebaseProvider>
