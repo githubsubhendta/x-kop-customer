@@ -86,6 +86,7 @@ const FindAnOfficerScreen = ({route, navigation}) => {
 
   useEffect(()=>{
     if(error){
+      console.log("error==>",error)
       navigation.goBack();
     }
   },[error]);

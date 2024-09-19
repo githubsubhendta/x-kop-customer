@@ -23,7 +23,7 @@ import Counter from '../../Components/Counter.jsx';
 import {useWebSocket} from '../../shared/WebSocketProvider.jsx';
 
 const AudioScreen = ({route, navigation}) => {
-  const {config, mobile} = route.params || {};
+  const {config, mobile,reciever_data} = route.params || {};
   const {webSocket} = useWebSocket();
   const [isMuted, setIsMuted] = useState(false);
   const [isSpeakerEnabled, setIsSpeakerEnabled] = useState(true);
@@ -141,11 +141,11 @@ const AudioScreen = ({route, navigation}) => {
           </View>
           <View style={styles.infoContainer}>
             <Image
-              source={require('./../../images/book2.jpg')}
+              source={{uri:reciever_data?.userInfo?.avatar}}
               style={styles.profileImage}
             />
             <View style={styles.textContainer}>
-              <Text style={styles.name}>Rahul Sharma</Text>
+              <Text style={styles.name} className="text-black">{reciever_data?.userInfo?.name}</Text>
               <Text style={styles.title}>General Offences</Text>
               <Text style={styles.status}>Call in Progress</Text>
               <View style={styles.counterContainer}>
@@ -254,3 +254,4 @@ const styles = StyleSheet.create({
 });
 
 export default AudioScreen;
+
