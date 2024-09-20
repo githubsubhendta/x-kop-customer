@@ -16,6 +16,7 @@ import {
   requestUserPermission,
 } from './src/utils/notificationService.js';
 import {SnackbarProvider} from './src/shared/SnackbarProvider.js';
+import { NetworkProvider } from './src/shared/NetworkProvider.js';
 
 function App() {
   const appState = useRef(AppState.currentState);
@@ -100,6 +101,7 @@ function App() {
         isReadyRef.current = true;
         processNavigationQueue();
       }}>
+    <NetworkProvider>
       <SafeAreaView style={{flex: 1}}>
         <SnackbarProvider>
           <LoadingProvider>
@@ -107,6 +109,7 @@ function App() {
           </LoadingProvider>
         </SnackbarProvider>
       </SafeAreaView>
+      </NetworkProvider>
     </NavigationContainer>
   );
 }

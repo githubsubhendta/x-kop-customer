@@ -133,10 +133,10 @@ const useUserStore = create(
       storage: {
         getItem: async (name) => {
           const value = await AsyncStorage.getItem(name);
-          return value ? JSON.parse(value) : null;  // Deserialize the value (from string to object)
+          return value ? JSON.parse(value) : null;  
         },
         setItem: async (name, value) => {
-          await AsyncStorage.setItem(name, JSON.stringify(value));  // Serialize the value (from object to string)
+          await AsyncStorage.setItem(name, JSON.stringify(value)); 
         },
         removeItem: async (name) => {
           await AsyncStorage.removeItem(name);

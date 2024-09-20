@@ -5,13 +5,15 @@ import ScheduleScreen from './Schedule.Screen';
 import AccountScreen from './Account.Screen';
 import { SVG_Home, SVG_calender, SVG_person, SVG_chat } from '../utils/SVGImage.js';
 import { SvgXml } from 'react-native-svg';
-import { View, BackHandler, Alert, TouchableOpacity } from 'react-native';
+import { View, BackHandler, Alert, TouchableOpacity,Text } from 'react-native';
 import ContactScreen from './Contact.Screen.jsx';
+import { useNetwork } from '../shared/NetworkProvider.js';
 
 const Tab = createBottomTabNavigator();
 
 const LayoutScreen = ({ navigation }) => {
 const [selectedTab, setSelectedTab] = useState('Home');
+
 
 
   useEffect(() => {
@@ -124,7 +126,9 @@ const [selectedTab, setSelectedTab] = useState('Home');
 };
 
 const TabBarWithBorder = ({ state, descriptors, navigation, selectedTab }) => {
+  const { isConnected } = useNetwork(); 
   return (
+    <>
     <View style={{ flexDirection: 'row' }}>
       {state.routes.map((route, index) => {
         const { options } = descriptors[route.key];
@@ -167,6 +171,10 @@ const TabBarWithBorder = ({ state, descriptors, navigation, selectedTab }) => {
         );
       })}
     </View>
+     {
+      !isConnected && <Text className="py-2 text-white mt-1 text-center bg-red-700">No Internet Connection</Text>
+    }
+    </>
   );
 };
 
