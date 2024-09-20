@@ -5,14 +5,17 @@ import userStoreAction from '../../stores/user.store';
 import useHttpRequest from '../../hooks/useHttpRequest';
 import { SvgXml } from 'react-native-svg';
 import { SVG_arrow_back, SVG_download } from '../../utils/SVGImage';
+import { useSnackbar } from '../../shared/SnackbarProvider';
+
 
 const WalletScreen = ({navigation}) => {
   const {loading, error, data, fetchData} = useHttpRequest();
     const {user,addLoggedInUserAction} = userStoreAction(
         state => state,
       );
-  const [balance, setBalance] = useState(250.75);
+
   const [isModalVisible, setModalVisible] = useState(false);
+  const { showSnackbar } = useSnackbar();
 
 
   const [transactions, setTransactions] = useState([
@@ -33,13 +36,12 @@ const WalletScreen = ({navigation}) => {
   ]);
 
 
-  const addFunds = (amount) => {
-    // setBalance(balance + amount);
-    fetchData("/users/wallet","POST",{amount:amount,type:"credit",description:""});
-    // addLoggedInUserAction({...result_user.data.data.user}, true);
+  const alertMessage = (message,type) => {
+    showSnackbar(message,type)
   };
 
   useEffect(()=>{
+    
   if(data != null){
     addLoggedInUserAction({...data.data.user}, true);
   }
@@ -105,14 +107,14 @@ const WalletScreen = ({navigation}) => {
           <Text style={styles.buttonText}>Add Money</Text>
         </TouchableOpacity>
         {/* onPress={()=>navigation.push("PaymentScreen")} */}
-        <TouchableOpacity style={styles.button}  onPress={()=>navigation.push("PaymentScreen")}>
+        <TouchableOpacity style={styles.button}  >
           <Text style={styles.buttonText}>Withdraw</Text>
         </TouchableOpacity>
 
         <AddFundsModal
         modalVisible={isModalVisible}
         setModalVisible={setModalVisible}
-        addFunds={addFunds}
+        alertMessage={alertMessage}
       />
       </View>
     </View>

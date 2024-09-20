@@ -6,8 +6,9 @@ import Base64 from 'react-native-base64';
 import sha256 from 'sha256';
 import axios from 'axios';
 import { getCurrentUser } from '../../Api/user.api';
+import { BASE_URI } from '../../Api/ApiManager';
 
-const AddFundsModal = ({ modalVisible, setModalVisible, addFunds }) => {
+const AddFundsModal = ({ modalVisible, setModalVisible, alertMessage }) => {
   const [amount, setAmount] = useState('');
   const { user,localTokens,handleUpdateUser } = useUserStore();
 
@@ -15,6 +16,7 @@ const AddFundsModal = ({ modalVisible, setModalVisible, addFunds }) => {
   const [merchantId, setMerchantId] = useState('ESHOPGENPARTUAT');
   const [enableLogging, setEnableLogging] = useState(true);
   const [appId, setAppId] = useState(null);
+
 
   const debounce = (func, delay) => {
     let timeoutId;
@@ -46,7 +48,7 @@ const AddFundsModal = ({ modalVisible, setModalVisible, addFunds }) => {
           merchantUserId: user._id,
           amount: parseInt(amount) * 100,
           mobileNumber: user.mobile,
-          callbackUrl: 'https://4592-2405-201-6007-5823-b0c5-25c1-9695-38c1.ngrok-free.app/api/v1/payment/callback',
+          callbackUrl: BASE_URI+'/payment/callback',
           paymentInstrument: {
             type: 'PAY_PAGE'
           }
@@ -59,7 +61,7 @@ const AddFundsModal = ({ modalVisible, setModalVisible, addFunds }) => {
         const stringData = `${payload_main}/pg/v1/pay${salt_key}`;
         const checksum = `${sha256(stringData)}###${salt_Index}`;
 try {
-  const res_pay = await axios.post('https://4592-2405-201-6007-5823-b0c5-25c1-9695-38c1.ngrok-free.app/api/v1/payment/store-user-info', {
+  const res_pay = await axios.post(BASE_URI+'/payment/store-user-info', {
     transactionId: requestBody.merchantTransactionId,
     userId: user._id,
     amount: parseInt(amount)
@@ -70,7 +72,6 @@ try {
         },
       }
 );
-
 } catch (error) {
   console.log("error==",error)
 }
@@ -84,6 +85,11 @@ try {
       try {
         const data = await getCurrentUser(localTokens);
         handleUpdateUser(data.data.data.user);
+        alertMessage("Payment has been successfully added to your wallet.","success");
+        setTimeout(()=>{
+        setModalVisible(false)
+      },1000)
+     
       } catch (error) {
         console.log("refresh user=>",error);
       }

@@ -4,7 +4,6 @@ import AuthStack from './AuthStack';
 import AppStack from './AppStack';
 import useCheckUser from './../hooks/useCheckUser';
 import { useLoading } from '../shared/LoadingProvider';
-// import { navigationRef } from './NavigationService.js';
 
 const Stack = createStackNavigator();
 

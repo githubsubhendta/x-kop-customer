@@ -14,8 +14,6 @@ const Tab = createBottomTabNavigator();
 const LayoutScreen = ({ navigation }) => {
 const [selectedTab, setSelectedTab] = useState('Home');
 
-
-
   useEffect(() => {
     const backAction = () => {
       if (navigation.isFocused()) {

@@ -9,7 +9,6 @@ import TransactionsScreen from './../screen/profile/Transactions.Screen.jsx';
 import SelectConsultantsScreen from './../screen/SelectConsultants.Screen.jsx';
 import EditProfile from './../screen/profile/EditProfile.jsx';
 import WalletScreen from './../screen/profile/WalletScreen.jsx';
-import PaymentScreen from './../screen/profile/PaymentScreen.jsx';
 import useCheckUser from '../hooks/useCheckUser.js';
 import FirebaseProvider from '../shared/FirebaseProvider.jsx';
 import {WebSocketProvider} from '../shared/WebSocketProvider.jsx';
@@ -76,11 +75,7 @@ const AppStack = () => {
               component={WalletScreen}
               options={{headerShown: false}}
             />
-            <Stack.Screen
-              name="PaymentScreen"
-              component={PaymentScreen}
-              options={{headerShown: false}}
-            />
+       
             <Stack.Screen
               name="ChatScreen"
               component={ChatScreen}

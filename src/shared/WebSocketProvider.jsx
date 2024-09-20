@@ -118,7 +118,7 @@ export const WebSocketProvider = ({ children }) => {
       });
 
       socket.on('connect_error', async error => {
-        console.error('WebSocket connection error:', error);
+        // console.error('WebSocket connection error:', error);
         const newTokens = await userStoreAction(state => state.refreshTokens);
         if (newTokens) {
           socket.io.opts.extraHeaders.Authorization = `Bearer ${newTokens.accessToken}`;
@@ -128,7 +128,7 @@ export const WebSocketProvider = ({ children }) => {
 
       setWebSocket(socket);
     } catch (error) {
-      console.error('Error creating WebSocket:', error);
+      // console.error('Error creating WebSocket:', error);
     }
   };
 

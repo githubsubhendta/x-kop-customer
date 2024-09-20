@@ -23,27 +23,44 @@ import Counter from '../../Components/Counter.jsx';
 import {useWebSocket} from '../../shared/WebSocketProvider.jsx';
 
 const AudioScreen = ({route, navigation}) => {
-  const {config, mobile,reciever_data} = route.params || {};
+  const {config, mobile, reciever_data} = route.params || {};
   const {webSocket} = useWebSocket();
   const [isMuted, setIsMuted] = useState(false);
   const [isSpeakerEnabled, setIsSpeakerEnabled] = useState(true);
   const [connectionStatus, setConnectionStatus] = useState('Not Connected');
   const [peerIds, setPeerIds] = useState([]);
+  const [callDuration, setCallDuration] = useState('00:00:00');
+  let callDurationInterval;
 
-  //   const startTime = new Date("2024-09-08T13:15:25.613Z"); // Call start time
-  // const callDurationInterval = setInterval(() => {
-  //   const currentTime = new Date(); // Get current time
-  //   const timeDifference = currentTime - startTime; // Calculate the time difference in milliseconds
+  const startTime = new Date(reciever_data.consultationData.startCallTime);
 
-  //   // Convert the time difference to hours, minutes, and seconds
-  //   const seconds = Math.floor((timeDifference / 1000) % 60);
-  //   const minutes = Math.floor((timeDifference / (1000 * 60)) % 60);
-  //   const hours = Math.floor((timeDifference / (1000 * 60 * 60)) % 24);
+  useEffect(() => {
+    callDurationInterval = setInterval(() => {
+      const currentTime = new Date();
+      const timeDifference = currentTime - startTime;
+      const seconds = Math.floor((timeDifference / 1000) % 60);
+      const minutes = Math.floor((timeDifference / (1000 * 60)) % 60);
+      const hours = Math.floor((timeDifference / (1000 * 60 * 60)) % 24);
 
-  //   // Display the duration of the call
-  //   console.log(`Call duration: ${hours}h ${minutes}m ${seconds}s`);
+      const formattedDuration = `${String(hours).padStart(2, '0')}:${String(
+        minutes,
+      ).padStart(2, '0')}:${String(seconds).padStart(2, '0')} min`;
+      setCallDuration(formattedDuration);
 
-  // }, 1000);
+     
+      if(seconds==59){
+      // WebSocket.emit("updateCallWallet",({}));
+   
+      }
+
+   
+  
+    }, 1000);
+
+    return () => {
+      clearInterval(callDurationInterval);
+    };
+  }, []);
 
   const {engine, isJoined} = useAgoraEngine(
     config,
@@ -77,6 +94,7 @@ const AudioScreen = ({route, navigation}) => {
     if (engine.current) {
       await engine.current.leaveChannel();
       webSocket.emit('handsup', {otherUserId: mobile});
+      clearInterval(callDurationInterval);
       navigation.navigate('FindAnOfficerScreen');
     }
   }, [engine, webSocket, mobile, navigation]);
@@ -88,7 +106,10 @@ const AudioScreen = ({route, navigation}) => {
   }, [engine, webSocket, mobile]);
 
   useEffect(() => {
-    const handleHandsup = () => navigation.navigate('FindAnOfficerScreen');
+    const handleHandsup = () => {
+      clearInterval(callDurationInterval);
+      navigation.navigate('FindAnOfficerScreen');
+    };
     webSocket.on('appyHandsup', handleHandsup);
     return () => webSocket.off('appyHandsup', handleHandsup);
   }, [webSocket, navigation]);
@@ -141,15 +162,17 @@ const AudioScreen = ({route, navigation}) => {
           </View>
           <View style={styles.infoContainer}>
             <Image
-              source={{uri:reciever_data?.userInfo?.avatar}}
+              source={{uri: reciever_data?.userInfo?.avatar}}
               style={styles.profileImage}
             />
             <View style={styles.textContainer}>
-              <Text style={styles.name} className="text-black">{reciever_data?.userInfo?.name}</Text>
+              <Text style={styles.name} className="text-black">
+                {reciever_data?.userInfo?.name}
+              </Text>
               <Text style={styles.title}>General Offences</Text>
               <Text style={styles.status}>Call in Progress</Text>
               <View style={styles.counterContainer}>
-                <Counter />
+                <Text style={styles.callDuration}>{callDuration}</Text>
               </View>
             </View>
           </View>
@@ -228,6 +251,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#997654',
     borderRadius: 15,
     marginTop: 10,
+    padding: 10,
+  },
+  callDuration: {
+    fontSize: 18,
+    color: 'white',
   },
   buttonContainer: {
     flexDirection: 'row',
@@ -254,4 +282,3 @@ const styles = StyleSheet.create({
 });
 
 export default AudioScreen;
-

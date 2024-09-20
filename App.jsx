@@ -35,18 +35,6 @@ function App() {
     }
   }, [isReadyRef.current]);
 
-  // useEffect(()=>{
-  //   if(Platform.OS=="android"){
-  //     PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS).then(res=>{
-  //       console.log("notification permission done.");
-  //       if(!!res && res=="granted"){
-  //         requestUserPermission();
-  //         notificationListeners();
-  //       }
-  //     }).catch(error=>console.log("notification permission problem"));
-  //   }
-
-  // },[])
 
   useEffect(() => {
     const subscription = AppState.addEventListener('change', nextAppState => {
@@ -67,32 +55,6 @@ function App() {
     };
   }, []);
 
-  // useEffect(() => {
-
-  //   const unsubscribe = messaging().onMessage(async remoteMessage => {
-  //     const { notification, data } = remoteMessage;
-
-  //   });
-
-  //   messaging().setBackgroundMessageHandler(async remoteMessage => {
-  //     console.log('Message handled in the background!', remoteMessage);
-
-  //   });
-
-  //   return () => {
-  //     unsubscribe();
-  //   };
-  // }, []);
-
-  // const handleAnswerCall = (data) => {
-  //   Alert.alert('Call Answered', `Caller ID: ${data.callerId}`);
-  //   // Navigate to call screen or start the call
-  // };
-
-  // const handleDeclineCall = (data) => {
-  //   Alert.alert('Call Declined', `Caller ID: ${data.callerId}`);
-  //   // End the call or take other appropriate action
-  // };
 
   return (
     <NavigationContainer
