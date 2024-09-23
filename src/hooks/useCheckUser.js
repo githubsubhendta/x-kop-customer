@@ -2,17 +2,20 @@ import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import useUserStore from '../stores/user.store';
 import { getCurrentUser, refreshToken } from '../Api/user.api';
+import { useNetwork } from '../shared/NetworkProvider';
 
 const useCheckUser = () => {
   const { localTokens, isLoggedIn, user, addLoggedInUserAction, addLocalTokens } = useUserStore();
   const [loading, setLoading] = useState(true);
+  const { isConnected } = useNetwork();
 
 
   useEffect(() => {
     const checkUser = async () => {
-      if (!user.name && localTokens) {
+      
+      if (localTokens) {
         try {
-          console.log("token===>",localTokens)
+          // console.log("token===>",localTokens)
           setLoading(true);
           const result = await getCurrentUser(localTokens);
           addLoggedInUserAction(result.data.data.user, true);
@@ -43,9 +46,9 @@ const useCheckUser = () => {
       }
     };
 
-    checkUser();
+    isConnected && checkUser();
     // console.log("token===>",user)
-  }, [localTokens, user.name]);
+  }, [localTokens]);
 
 
 

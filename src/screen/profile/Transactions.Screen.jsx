@@ -3,39 +3,24 @@ import React from 'react'
 import { Image } from 'react-native';
 import { SVG_arrow_back, SVG_download } from '../../utils/SVGImage.js';
 import { SvgXml } from 'react-native-svg';
+import useUserStore from '../../stores/user.store.js';
 
 const TransactionsScreen = ({navigation}) => { 
-  const DATA = [
-    {
-      id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
-      officer_name: 'Shivaji Narayan',
-      payment_type:"G Pay",
-      pay_fee:"1000",
-      officer_avatar:"https://img.freepik.com/free-photo/young-bearded-man-with-striped-shirt_273609-5677.jpg"
-    },
-    {
-      id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
-      officer_name: 'Shivaji Narayan',
-      payment_type:"G Pay",
-      pay_fee:"500",
-      officer_avatar:"https://img.freepik.com/free-photo/young-bearded-man-with-striped-shirt_273609-5677.jpg"
-    },
-  ];
-
-
+  const {user} = useUserStore();
+ 
 
   const itemRender = ({item})=>{
     return (
-    <View className="flex  flex-row justify-between p-2 border-b-2 border-slate-200">
+    <View className="flex  flex-row justify-between p-2 border-b-2 border-slate-200 my-2">
       <View className="flex flex-row gap-10">
          <View className="w-[50px] h-[50px] rounded-full">
-          <Image source={{uri:item.officer_avatar}} className="w-[100%] h-[100%] rounded-full"  />
+          <Image source={{uri:user.avatar}} className="w-[100%] h-[100%] rounded-full"  />
          </View>
       <View>
-        <Text className="text-slate-600">{item.officer_name}</Text>
+        <Text className="text-slate-600">{user.name}</Text>
         <View className="flex flex-row gap-5">
-          <Text className="text-slate-600">Paid Via: {item.payment_type}</Text>
-          <Text className="text-slate-600">Fee: {item.pay_fee}</Text>
+          <Text className="text-slate-600">Paid Via: {item.method}</Text>
+          <Text className="text-slate-600">Rs: {item.amount}</Text>
         </View>
       </View>
          </View>
@@ -64,12 +49,15 @@ const TransactionsScreen = ({navigation}) => {
         <Text className="text-slate-500 text-xl">Previous Receipts</Text>
       </View>
       <View className="bg-slate-300 h-[1px] my-3"  />
-      <View className="p-7">
-      <FlatList
-        data={DATA}
-        renderItem={itemRender}
-        keyExtractor={item => item.id}
-      />
+      <View className="py-10">
+        {
+    user?.transactions.length>0&& <FlatList
+    data={user?.transactions}
+    renderItem={itemRender}
+    keyExtractor={item => item.id}
+  />
+        }
+     
       </View>
     </SafeAreaView>
   )
