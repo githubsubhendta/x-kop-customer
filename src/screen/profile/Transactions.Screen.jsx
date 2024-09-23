@@ -5,8 +5,36 @@ import { SVG_arrow_back, SVG_download } from '../../utils/SVGImage.js';
 import { SvgXml } from 'react-native-svg';
 import useUserStore from '../../stores/user.store.js';
 
+import axios from 'axios';
+import RNFetchBlob from 'rn-fetch-blob';
+import { BASE_URI } from '../../Api/ApiManager.js';
+
 const TransactionsScreen = ({navigation}) => { 
   const {user} = useUserStore();
+
+
+  const downloadSlip = async (transactionId) => {
+    try {
+      const { dirs } = RNFetchBlob.fs;
+      const path = Platform.OS === 'ios' ? dirs.DocumentDir : dirs.DownloadDir;
+      const filePath = `${path}/transaction-${transactionId}.pdf`;
+
+      const response = await axios({
+        url: BASE_URI+`/payment/download/${transactionId}`, // Replace with your API URL
+        method: 'GET',
+        responseType: 'blob',
+      });
+      RNFetchBlob.fs
+        .writeFile(filePath, response.data, 'base64')
+        .then(() => {
+          console.log('File saved successfully');
+        })
+        .catch((error) => console.log('Error saving file:', error));
+      RNFetchBlob.android.actionViewIntent(filePath, 'application/pdf');
+    } catch (error) {
+      console.log('Error downloading PDF:', error);
+    }
+  };
  
 
   const itemRender = ({item})=>{
@@ -25,7 +53,7 @@ const TransactionsScreen = ({navigation}) => {
       </View>
          </View>
         <View className="flex flex-col justify-center">
-        <TouchableOpacity className="w-8 h-8 flex justify-start" onPress={()=>{}}>
+        <TouchableOpacity className="w-8 h-8 flex justify-start" onPress={()=>downloadSlip(item._id)}>
            <SvgXml xml={SVG_download} height={"100%"} width={"100%"} />
        </TouchableOpacity>
         </View>
@@ -49,12 +77,12 @@ const TransactionsScreen = ({navigation}) => {
         <Text className="text-slate-500 text-xl">Previous Receipts</Text>
       </View>
       <View className="bg-slate-300 h-[1px] my-3"  />
-      <View className="py-10">
+      <View className="py-10 px-5">
         {
     user?.transactions.length>0&& <FlatList
     data={user?.transactions}
     renderItem={itemRender}
-    keyExtractor={item => item.id}
+    keyExtractor={item => item._id}
   />
         }
      
