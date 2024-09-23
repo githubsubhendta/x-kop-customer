@@ -20,7 +20,7 @@ const TransactionsScreen = ({navigation}) => {
       const filePath = `${path}/transaction-${transactionId}.pdf`;
 
       const response = await axios({
-        url: BASE_URI+`/payment/download/${transactionId}`, // Replace with your API URL
+        url: BASE_URI+`/payment/download/${transactionId}`, 
         method: 'GET',
         responseType: 'blob',
       });
