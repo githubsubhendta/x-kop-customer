@@ -18,9 +18,9 @@ const TransactionsScreen = ({navigation}) => {
       const { dirs } = RNFetchBlob.fs;
       const path = Platform.OS === 'ios' ? dirs.DocumentDir : dirs.DownloadDir;
       const filePath = `${path}/transaction-${transactionId}.pdf`;
-
+      // BASE_URI+
       const response = await axios({
-        url: BASE_URI+`/payment/download/${transactionId}`, 
+        url: `https://8883-49-36-211-10.ngrok-free.app/api/v1/payment/download/${transactionId}`, 
         method: 'GET',
         responseType: 'blob',
       });
