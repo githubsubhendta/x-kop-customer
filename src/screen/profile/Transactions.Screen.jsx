@@ -4,6 +4,7 @@ import { SvgXml } from 'react-native-svg';
 import RNFetchBlob from 'react-native-blob-util';
 import useUserStore from '../../stores/user.store.js';
 import { SVG_arrow_back, SVG_download } from '../../utils/SVGImage.js';
+import { BASE_URI } from '../../Api/ApiManager.js';
 
 const TransactionsScreen = ({ navigation }) => {
   const { user } = useUserStore();
@@ -57,7 +58,7 @@ const TransactionsScreen = ({ navigation }) => {
       const response = await RNFetchBlob.config({
         path: filePath, 
         fileCache: true, 
-      }).fetch('GET', `https://b67d-49-36-169-227.ngrok-free.app/api/v1/payment/download/${transactionId}`);
+      }).fetch('GET', `${BASE_URI}/payment/download/${transactionId}`);
 
       if (response.respInfo.status === 200) {
         console.log('File saved successfully at:', filePath);
