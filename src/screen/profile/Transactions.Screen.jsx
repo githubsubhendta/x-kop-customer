@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, SafeAreaView, TouchableOpacity, FlatList, PermissionsAndroid, Alert, ActivityIndicator, Image, Platform } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 import RNFetchBlob from 'react-native-blob-util';
@@ -10,36 +10,33 @@ const TransactionsScreen = ({ navigation }) => {
   const { user } = useUserStore();
   const [loading, setLoading] = React.useState(false); 
 
-  const requestStoragePermission = async () => {
-    if (Platform.OS === 'android') {
-      try {
- 
-        const permission = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE);
-        if (permission) {
-          return true;
-        }
-
-    
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-          {
-            title: 'Storage Permission Required',
-            message: 'This app needs access to your storage to download files.',
-            buttonNeutral: 'Ask Me Later',
-            buttonNegative: 'Cancel',
-            buttonPositive: 'OK',
-          },
-        );
-
-        return granted === PermissionsAndroid.RESULTS.GRANTED;
-      } catch (err) {
-        console.warn(err);
-        return false;
+  const requestCameraPermission = async () => {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+        {
+          title: 'Cool Photo App Camera Permission',
+          message:
+            'Cool Photo App needs access to your camera ' +
+            'so you can take awesome pictures.',
+          buttonNeutral: 'Ask Me Later',
+          buttonNegative: 'Cancel',
+          buttonPositive: 'OK',
+        },
+      );
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        console.log('You can use the camera');
+      } else {
+        console.log('Camera permission denied');
       }
-    } else {
-      return true; 
+    } catch (err) {
+      console.warn(err);
     }
   };
+
+  // useEffect(()=>{
+  //   requestCameraPermission();
+  // },[])
 
   const downloadSlip = async (transactionId) => {
     try {

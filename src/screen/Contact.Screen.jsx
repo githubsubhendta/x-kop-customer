@@ -79,11 +79,11 @@ const ContactScreen = () => {
               )}
             </ScrollView>
           </View>
-         <View className="p-1 bg-[#F6F6F6] m-1 rounded-full">
+         <View className="py-2 bg-[#F6F6F6] mx-3 rounded-full">
          <ScrollView showsVerticalScrollIndicator={false} >
             {alphabet.map((letter, index) => (
               <TouchableOpacity key={index} onPress={() => setSelectedLetter(letter)}>
-                <Text className={`p-[3px] ${selectedLetter === letter ? 'text-blue-500' : 'text-gray-500'} text-center`}>
+                <Text className={`px-[10px] py-[2px] ${selectedLetter === letter ? 'text-blue-500' : 'text-gray-500'} text-center`}>
                   {letter}
                 </Text>
               </TouchableOpacity>
