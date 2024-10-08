@@ -31,6 +31,7 @@ const AudioScreen = ({route, navigation}) => {
   const [peerIds, setPeerIds] = useState([]);
   const [callDuration, setCallDuration] = useState('00:00:00');
   let callDurationInterval;
+  let callMinUpdate;
 
   const startTime = new Date(reciever_data.consultationData.startCallTime);
 
@@ -48,19 +49,31 @@ const AudioScreen = ({route, navigation}) => {
       setCallDuration(formattedDuration);
 
      
-      if(seconds==59){
-      // WebSocket.emit("updateCallWallet",({}));
+      // if(seconds==59){
+      // // WebSocket.emit("updateCallWallet",({}));
    
-      }
-
-   
-  
+      // }
     }, 1000);
+
 
     return () => {
       clearInterval(callDurationInterval);
     };
   }, []);
+
+
+  useEffect(()=>{
+    console.log("reciever_data=====>",reciever_data)
+    // callMinUpdate = setInterval(() => {
+    // webSocket.emit("callmincheck",{})
+
+    // },60000);
+    // return () => {
+    //   clearInterval(callMinUpdate);
+    // };
+  },[])
+
+
 
   const {engine, isJoined} = useAgoraEngine(
     config,
