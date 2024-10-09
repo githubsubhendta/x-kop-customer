@@ -78,12 +78,13 @@ import { io as SocketIOClient } from 'socket.io-client';
 import { BASE_URI_websocket } from '../Api/ApiManager.js';
 import userStoreAction from './../stores/user.store.js';
 import { useNetwork } from './NetworkProvider'; 
+import { getCurrentUser } from '../Api/user.api.js';
 
 const WebSocketContext = createContext();
 
 export const WebSocketProvider = ({ children }) => {
   const [webSocket, setWebSocket] = useState(null);
-  const { user, localTokens } = userStoreAction(state => state);
+  const { user, localTokens, handleUpdateUser } = userStoreAction(state => state);
   const { isConnected } = useNetwork(); 
 
   const createWebSocket = async () => {
@@ -112,6 +113,15 @@ export const WebSocketProvider = ({ children }) => {
       socket.on('connect', () => {
         console.log(user.mobile + ' WebSocket connected ' + user.name);
       });
+
+      socket.on("updateUser",async()=>{
+        try {
+          const data = await getCurrentUser(localTokens);
+          handleUpdateUser(data.data.data.user); 
+        } catch (error) {
+          console.log("error",error)
+        }
+      })
 
       socket.on('disconnect', () => {
         console.log('WebSocket disconnected');

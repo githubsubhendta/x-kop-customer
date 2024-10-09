@@ -41,37 +41,7 @@ const ScheduleScreen = ({navigation}) => {
     [selected],
   );
 
-  const DATA = [
-    {
-      id: '1', // Unique id
-      officer_name: 'Shivaji Narayan',
-      duration: '60000',
-      pay_fee: '1000',
-      officer_avatar:
-        'https://img.freepik.com/free-photo/young-bearded-man-with-striped-shirt_273609-5677.jpg',
-    },
-    {
-      id: '2', // Unique id
-      officer_name: 'Shivaji Narayan',
-      duration: '30000',
-      pay_fee: '500',
-      officer_avatar:
-        'https://img.freepik.com/free-photo/young-bearded-man-with-striped-shirt_273609-5677.jpg',
-    },
-  ];
 
-  const DATA2 = [
-    {
-      id: '3', // Unique id
-      officer_name: 'Scheduling Call',
-      duration: '30000',
-      pay_fee: '500',
-      payment_status: 'Paid',
-      date_time: '2024-04-25T06:48:42.036+00:00',
-      officer_avatar:
-        'https://img.freepik.com/free-photo/young-bearded-man-with-striped-shirt_273609-5677.jpg',
-    },
-  ];
 
   const dateFormate = dateString => {
     const date = new Date(dateString);
@@ -161,8 +131,8 @@ const ScheduleScreen = ({navigation}) => {
     }
 
     let endTime = new Date();
-    endTime.setHours(18, 0, 0, 0); // 7:00 PM
-    let interval = 30 * 60 * 1000; // 30 minutes
+    endTime.setHours(18, 0, 0, 0); 
+    let interval = 30 * 60 * 1000; 
 
     if (startTime) {
       setTimeSlots(generateTimeSlots(startTime, endTime, interval));
@@ -190,11 +160,11 @@ const ScheduleScreen = ({navigation}) => {
                 item?.endCallTime !== undefined && (
                   <Text className="text-secondary text-sm font-light">
                     Duration:{' '}
-                    {parseFloat(
+                    {Math.ceil(parseFloat(
                       (new Date(item.endCallTime) -
                         new Date(item.startCallTime)) /
                         (1000 * 60),
-                    ).toFixed(2)}{' '}
+                    ).toFixed(2))}{' '}
                     min
                   </Text>
                 )}
@@ -203,17 +173,7 @@ const ScheduleScreen = ({navigation}) => {
                   item?.endCallTime !== undefined && (
                     <>
                       Fee: ₹
-                      {(
-                        parseFloat(
-                          (new Date(item.endCallTime) -
-                            new Date(item.startCallTime)) /
-                            (1000 * 60),
-                        ) *
-                        parseFloat(
-                          item?.officer?.officerDetails?.ConsultationTypeID
-                            ?.FeePerMinute,
-                        )
-                      ).toFixed(2)}
+                      {item?.totalCallPrice | 0}
                     </>
                   )}
               </Text>
@@ -349,6 +309,8 @@ const ScheduleScreen = ({navigation}) => {
                     </View>
                   )}
                   keyExtractor={item => item._id}
+                  scrollEnabled
+                  style={{ height: 100, }}
                 />
               )}
             </View>
@@ -365,6 +327,8 @@ const ScheduleScreen = ({navigation}) => {
                   data={user.consultations}
                   renderItem={itemRender}
                   keyExtractor={item => item._id}
+                  scrollEnabled
+                  style={{ height: 350, }}
                 />
               )}
             </View>

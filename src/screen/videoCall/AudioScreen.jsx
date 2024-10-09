@@ -19,8 +19,9 @@ import {
   SVG_unmute_mic,
 } from '../../utils/SVGImage.js';
 import MessageInput from '../../Components/MessageInput.jsx';
-import Counter from '../../Components/Counter.jsx';
 import {useWebSocket} from '../../shared/WebSocketProvider.jsx';
+
+
 
 const AudioScreen = ({route, navigation}) => {
   const {config, mobile, reciever_data} = route.params || {};
@@ -32,6 +33,7 @@ const AudioScreen = ({route, navigation}) => {
   const [callDuration, setCallDuration] = useState('00:00:00');
   let callDurationInterval;
   let callMinUpdate;
+
 
   const startTime = new Date(reciever_data.consultationData.startCallTime);
 
@@ -108,7 +110,10 @@ const AudioScreen = ({route, navigation}) => {
       await engine.current.leaveChannel();
       webSocket.emit('handsup', {otherUserId: mobile});
       clearInterval(callDurationInterval);
-      navigation.navigate('FindAnOfficerScreen');
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "LayoutScreen" }],
+      });
     }
   }, [engine, webSocket, mobile, navigation]);
 
@@ -118,10 +123,15 @@ const AudioScreen = ({route, navigation}) => {
     }
   }, [engine, webSocket, mobile]);
 
+  
+
   useEffect(() => {
-    const handleHandsup = () => {
+    const handleHandsup = async() => {
       clearInterval(callDurationInterval);
-      navigation.navigate('FindAnOfficerScreen');
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "LayoutScreen" }],
+      });
     };
     webSocket.on('appyHandsup', handleHandsup);
     return () => webSocket.off('appyHandsup', handleHandsup);
