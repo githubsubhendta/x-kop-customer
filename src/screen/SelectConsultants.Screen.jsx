@@ -8,10 +8,12 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import useHttpRequest from '../hooks/useHttpRequest.jsx';
 import {currencySymbol} from '../Constant/theme.js';
+import useUserStore from '../stores/user.store.js';
 
 const SelectConsultantsScreen = ({route, navigation}) => {
   const {data, fetchData, error, loading} = useHttpRequest();
   const recieve_params = route.params;
+  const {user} = useUserStore();
 
   const [selected, setSelected] = useState(null);
 
@@ -28,7 +30,6 @@ const SelectConsultantsScreen = ({route, navigation}) => {
   }, []);
 
   useEffect(() => {
-    // console.log("check get_All_CunsultantType.data all===>",data.data)
     if (data?.data?.length && data.data[0].ConsultationTypeName !== undefined) {
       setArr_type(data.data);
     }
@@ -57,6 +58,14 @@ const SelectConsultantsScreen = ({route, navigation}) => {
         <Text className="text-black">Laoding...</Text>
       </View>
     );
+  }
+
+  const handleSelection = (indx)=>{
+    if(parseInt(user.wallet) <= parseInt(arr_type[indx].FeePerMinute)*2){
+      Alert.alert("Your balance is not sufficient for this call.");
+       return false;
+    }
+    setSelected(indx)
   }
   return (
     <SafeAreaView className="px-8 py-2 flex-1">
@@ -87,7 +96,7 @@ const SelectConsultantsScreen = ({route, navigation}) => {
                    selected == index && 'border-2 border-red-600'
                  }
                  `}
-                onPress={() => setSelected(index)}>
+                onPress={() => handleSelection(index)}>
                 {selected == index && (
                   <View className="absolute right-4 top-2 z-50">
                     <AntDesign
@@ -145,7 +154,8 @@ const SelectConsultantsScreen = ({route, navigation}) => {
             </TouchableOpacity>
           ) : (
             <TouchableOpacity
-              className="bg-orange-900 py-5 px-20 rounded-2xl"
+              className={`${selected==null?"bg-[#D3D3D3]":"bg-orange-900"} py-5 px-20 rounded-2xl`}
+              disabled={selected==null}
               onPress={() => {
                 selected != null &&
                   navigation.navigate(
@@ -153,7 +163,6 @@ const SelectConsultantsScreen = ({route, navigation}) => {
                     arr_type[selected],
                   );
               }}>
-              {/* Proceed To Payment */}
               <Text className="text-[16px] font-semibold text-white">
                 Call To Officer
               </Text>
