@@ -94,8 +94,9 @@ const FirebaseProvider = ({ children }) => {
 
         if (enabled) {
           const token = await messaging().getToken();
+          console.log('FCM Token:===>', token);
           setFcmToken(token);
-          console.log('FCM Token:', token);
+         
         }
       } catch (error) {
         console.error('Failed to get permission or FCM token:', error);

@@ -79,7 +79,7 @@ const TransactionsScreen = ({ navigation }) => {
         </View>
         <View>
           <Text className="text-slate-600">{user.name}</Text>
-          <View className="flex flex-row gap-5">
+          <View className="flex flex-row w-52 justify-between">
             <Text className="text-slate-600">Paid Via: {item.method}</Text>
             <Text className="text-slate-600">Rs: {item.amount}</Text>
           </View>
@@ -114,6 +114,7 @@ const TransactionsScreen = ({ navigation }) => {
             data={user?.transactions}
             renderItem={itemRender}
             keyExtractor={item => item._id}
+            style={{marginBottom:200}}
           />
         )}
       </View>

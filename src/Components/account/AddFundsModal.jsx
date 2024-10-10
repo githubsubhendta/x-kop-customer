@@ -82,9 +82,13 @@ try {
           null,
           null
         ).then(async result => {
+          if(result.status=="FAILURE"){
+            return false;
+          }
       try {
         const data = await getCurrentUser(localTokens);
         handleUpdateUser(data.data.data.user);
+        
         alertMessage("Payment has been successfully added to your wallet.","success");
         setTimeout(()=>{
         setModalVisible(false)
