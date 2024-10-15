@@ -534,7 +534,7 @@ const ChatScreen = ({route, navigation}) => {
   const markMessageAsRead = useCallback(
     messageId => {
       if (webSocket) {
-        webSocket.emit('sendmessage', {messageId});
+        webSocket.emit('readmessage', {messageId});
       }
     },
     [webSocket],
