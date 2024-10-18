@@ -469,6 +469,7 @@ const ChatScreen = ({route, navigation}) => {
           reciever: {id: officer._id, mobile: officer.mobile},
         });
       }
+      setSelectedMessages([]);
       setEditingMessage(null);
       setEditContent('');
     }
@@ -669,8 +670,10 @@ const ChatScreen = ({route, navigation}) => {
               <Button
                 title="Cancel"
                 onPress={() => {
+                  setSelectedMessages([]);
                   setEditingMessage(null);
                   setEditContent('');
+                  
                 }}
               />
             </View>
