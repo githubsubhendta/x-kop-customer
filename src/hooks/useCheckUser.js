@@ -20,24 +20,27 @@ const useCheckUser = () => {
           const result = await getCurrentUser(localTokens);
           addLoggedInUserAction(result.data.data.user, true);
         } catch (error) {
-          if (error.response.status === 401 || error.response.status === 500) {
-            try {
-              const refreshRes = await refreshToken({ refreshToken: localTokens.refreshToken });
-              const authData = {
-                accessToken: refreshRes.data.data.accessToken,
-                refreshToken: refreshRes.data.data.refreshToken,
-              };
-              await AsyncStorage.setItem('Authorized_data', JSON.stringify(authData));
-              const resultUpdate = await getCurrentUser(refreshRes.data.data);
-              addLoggedInUserAction(resultUpdate.data.data.user, true, authData);
-            } catch (err) {
-              addLocalTokens(null);
-              await AsyncStorage.removeItem('Authorized_data');
-              addLoggedInUserAction({}, false);
-            }
+          addLocalTokens(null);
+          await AsyncStorage.removeItem('Authorized_data');
+          addLoggedInUserAction({}, false);
+          // if (error.response.status === 401 || error.response.status === 500) {
+          //   try {
+          //     const refreshRes = await refreshToken({ refreshToken: localTokens.refreshToken });
+          //     const authData = {
+          //       accessToken: refreshRes.data.data.accessToken,
+          //       refreshToken: refreshRes.data.data.refreshToken,
+          //     };
+          //     await AsyncStorage.setItem('Authorized_data', JSON.stringify(authData));
+          //     const resultUpdate = await getCurrentUser(refreshRes.data.data);
+          //     addLoggedInUserAction(resultUpdate.data.data.user, true, authData);
+          //   } catch (err) {
+          //     addLocalTokens(null);
+          //     await AsyncStorage.removeItem('Authorized_data');
+          //     addLoggedInUserAction({}, false);
+          //   }
 
-            console.log("user===>",user)
-          }
+          //   console.log("user===>",user)
+          // }
         } finally {
           setLoading(false);
         }

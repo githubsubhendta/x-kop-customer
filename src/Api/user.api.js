@@ -74,6 +74,7 @@
 // };
 
 
+import { appAxios } from './apiInterceptors.js';
 import { BASE_URI } from './ApiManager.js';
 import axios from 'axios';
 
@@ -86,9 +87,11 @@ export const userLogin = (data) => axiosInstance.post('/users/signin', data);
 export const userSignup = (data) => axiosInstance.post('/users/signup', data);
 export const verifyOTP = (data) => axiosInstance.post('/users/verify', data);
 
-export const getCurrentUser = (Auth_data) => axiosInstance.get('/users/current-user', {
-  headers: { Authorization: `Bearer ${Auth_data.accessToken}` },
-});
+export const getCurrentUser = (Auth_data) => appAxios.get('/users/current-user');
+//   , {
+//   headers: { Authorization: `Bearer ${Auth_data.accessToken}` },
+// }
+// );
 
 export const refreshToken = (data) => axiosInstance.post('/users/refresh-token', data);
 
