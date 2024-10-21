@@ -1,5 +1,6 @@
 import axios from "axios";
 import { BASE_URI } from "./ApiManager";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const appAxios = axios.create({
     baseURL:BASE_URI
@@ -53,3 +54,5 @@ appAxios.interceptors.response.use(
         return Promise.reject(error);
     }
 )
+
+

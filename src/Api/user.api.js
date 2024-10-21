@@ -104,3 +104,35 @@ export const updateAvatar = (Auth_data, data) => {
     },
   });
 };
+
+
+export const uploadFileForChatUser = async (Auth_data, formData, onUploadProgress) => {
+  try {
+    const response = await axios.post(`${BASE_URI}/chats/uploadChat`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        Authorization: `Bearer ${Auth_data}`,
+      },
+      onUploadProgress: progressEvent => {
+        if (onUploadProgress) {
+          onUploadProgress({
+            loaded: progressEvent.loaded,
+            total: progressEvent.total,
+            progress: Math.round((progressEvent.loaded * 100) / progressEvent.total),
+          });
+        }
+      },
+      timeout: 600000, // Set timeout for the request (10 minutes)
+    });
+    return response; 
+  } catch (error) {
+    if (error.response) {
+      console.error('Server responded with an error:', error.response.data);
+    } else if (error.request) {
+      console.error('No response received:', error.request);
+    } else {
+      console.error('Error during setup:', error.message);
+    }
+    throw error; 
+  }
+};
