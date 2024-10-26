@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Image,
   Alert,
+  TextInput,
 } from 'react-native';
 import {SvgXml} from 'react-native-svg';
 import {RtcSurfaceView} from 'react-native-agora';
@@ -35,33 +36,33 @@ const AudioScreen = ({route, navigation}) => {
   let callMinUpdate;
 
 
-  const startTime = new Date(reciever_data.consultationData.startCallTime);
+  // const startTime = new Date(reciever_data.consultationData.startCallTime);
 
-  useEffect(() => {
-    callDurationInterval = setInterval(() => {
-      const currentTime = new Date();
-      const timeDifference = currentTime - startTime;
-      const seconds = Math.floor((timeDifference / 1000) % 60);
-      const minutes = Math.floor((timeDifference / (1000 * 60)) % 60);
-      const hours = Math.floor((timeDifference / (1000 * 60 * 60)) % 24);
+  // useEffect(() => {
+  //   callDurationInterval = setInterval(() => {
+  //     const currentTime = new Date();
+  //     const timeDifference = currentTime - startTime;
+  //     const seconds = Math.floor((timeDifference / 1000) % 60);
+  //     const minutes = Math.floor((timeDifference / (1000 * 60)) % 60);
+  //     const hours = Math.floor((timeDifference / (1000 * 60 * 60)) % 24);
 
-      const formattedDuration = `${String(hours).padStart(2, '0')}:${String(
-        minutes,
-      ).padStart(2, '0')}:${String(seconds).padStart(2, '0')} min`;
-      setCallDuration(formattedDuration);
+  //     const formattedDuration = `${String(hours).padStart(2, '0')}:${String(
+  //       minutes,
+  //     ).padStart(2, '0')}:${String(seconds).padStart(2, '0')} min`;
+  //     setCallDuration(formattedDuration);
 
      
-      // if(seconds==59){
-      // // WebSocket.emit("updateCallWallet",({}));
+  //     // if(seconds==59){
+  //     // // WebSocket.emit("updateCallWallet",({}));
    
-      // }
-    }, 1000);
+  //     // }
+  //   }, 1000);
 
 
-    return () => {
-      clearInterval(callDurationInterval);
-    };
-  }, []);
+  //   return () => {
+  //     clearInterval(callDurationInterval);
+  //   };
+  // }, []);
 
 
   useEffect(()=>{
@@ -219,7 +220,25 @@ const AudioScreen = ({route, navigation}) => {
             </TouchableOpacity>
           </View>
           <View style={styles.messageInputContainer}>
-            <MessageInput />
+          <View style={styles.InputContainer}>
+      <TextInput
+        style={styles.input}
+        placeholder="Start Typing Here"
+        placeholderTextColor="#888"
+        value={message} 
+        onPress={()=>{}} 
+      />
+      <View style={styles.iconsContainer}>
+        {/* Attach File Button */}
+        <TouchableOpacity style={styles.iconButton} >
+          <Icon name="attach-file" size={24} color="#888" />
+        </TouchableOpacity>
+        {/* Send Message Button */}
+        <TouchableOpacity style={styles.iconButton}>
+          <Icon name="send" size={24} color="#888" />
+        </TouchableOpacity>
+      </View>
+    </View>
           </View>
         </View>
       )}
@@ -301,6 +320,28 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
     flexDirection: 'row',
     justifyContent: 'center',
+  },
+  input: {
+    flex: 1,
+    fontSize: 16,
+    color: '#000',
+  },
+  iconsContainer: {
+    flexDirection: 'row',
+  },
+  iconButton: {
+    padding: 5,
+    marginLeft: 5,
+  },
+  InputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    margin: 10,
   },
 });
 
