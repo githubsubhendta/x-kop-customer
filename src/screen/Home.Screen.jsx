@@ -16,7 +16,7 @@ import {SVG_Scroll_Swipe} from '../utils/SVGImage.js';
 import requestCameraAndAudioPermission from '../Components/permissions';
 import {navigate} from '../navigation/NavigationService.js';
 
-const HomeScreen = ({navigation}) => {
+const HomeScreen = ({handleTabPress}) => {
   useEffect(() => {
     if (Platform.OS === 'android') {
       requestCameraAndAudioPermission().then(() => {
@@ -52,9 +52,10 @@ const HomeScreen = ({navigation}) => {
             </TouchableOpacity>
             <TouchableOpacity
               className="mt-4 rounded-lg flex justify-center"
-              // onPress={() => {
-              //   navigate('FindAnOfficerScreen');
-              // }}
+              onPress={() => {
+                navigate('Schedule')
+                handleTabPress('Schedule');
+              }}
             >
               <Text className="text-[16px] font-medium text-primary text-center">
                 Schedule For Later

@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {SvgXml} from 'react-native-svg';
-import {SVG_calender1} from '../utils/SVGImage.js';
+import {SVG_arrow_back, SVG_calender1} from '../utils/SVGImage.js';
 import {Calendar} from 'react-native-calendars';
 import {RadioButton} from 'react-native-paper';
 import moment from 'moment';
@@ -178,6 +178,9 @@ const ScheduleScreen = ({navigation}) => {
                   )}
               </Text>
             </View>
+            <Text className="text-black text-sm font-medium">
+                  {dateFormate(item.startCallTime)}
+                </Text>
             {item.date_time !== undefined && (
               <View className="flex flex-row">
                 <Text className="text-black text-sm font-medium">
@@ -239,14 +242,14 @@ const ScheduleScreen = ({navigation}) => {
             </Text>
           </View>
 
-          <View className="mt-2 mb-20">
+          <View className="mt-2">
             <View className="px-5">
               <Text className="text-[#997654] font-medium text-sm">
-                Previous Calls
+                New Calls schedules
               </Text>
             </View>
             <View className="bg-[#C9C9C9] h-[1px] my-3 mb-4" />
-            <View className="px-5">
+            <View className="px-5 h-44">
               {user.schedules.length > 0 && (
                 <FlatList
                   data={user.schedules}
@@ -316,19 +319,22 @@ const ScheduleScreen = ({navigation}) => {
             </View>
           </View>
 
-          <View className="my-2">
+          <View className="mb-40">
             <View className="px-5">
               <Text className="text-[#997654] text-md">Previous Calls</Text>
             </View>
             <View className="bg-slate-300 h-[1px] my-3" />
             <View className="px-5">
+              {/* {
+                console.log())
+              } */}
               {user.consultations.length > 0 && (
                 <FlatList
-                  data={user.consultations}
+                  data={user.consultations.sort((a,b)=>new Date(b.endCallTime)-new Date(a.endCallTime))}
                   renderItem={itemRender}
                   keyExtractor={item => item._id}
                   scrollEnabled
-                  style={{ height: 350, }}
+                  style={{ marginBottom: 350, }}
                 />
               )}
             </View>
@@ -348,10 +354,17 @@ const ScheduleScreen = ({navigation}) => {
         </>
       ) : (
         <>
-          <View className="px-5 pb-20 pt-10">
-            <Text className="text-[#862A0D] font-medium text-2xl">
+          <View className="px-5 pb-20 pt-2">
+    <View className="flex flex-row items-center">
+    <TouchableOpacity
+        className="w-[10%] h-8 justify-start my-2"
+        onPress={() => setScheduleCall(false)}>
+        <SvgXml xml={SVG_arrow_back} height={'100%'} width={'100%'} />
+      </TouchableOpacity>
+      <Text className="text-[#862A0D] font-medium text-2xl text-center w-[90%]">
               Schedule Call
             </Text>
+    </View>
             <View className="pt-2 mb-10">
               <Calendar
                 disableAllTouchEventsForDisabledDays={true}

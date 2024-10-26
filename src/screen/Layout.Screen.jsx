@@ -72,7 +72,11 @@ const [selectedTab, setSelectedTab] = useState('Home');
     >
       <Tab.Screen
         name="Home"
-        component={HomeScreen}
+        children={() => (
+          <HomeScreen
+            handleTabPress={handleTabPress}
+          />
+        )}
         listeners={{
           tabPress: () => handleTabPress('Home'),
         }}

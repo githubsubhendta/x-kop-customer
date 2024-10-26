@@ -2,11 +2,13 @@ import { useWebSocket } from './WebSocketProvider';
 import { useEffect } from 'react';
 import { useFirebase } from './FirebaseProvider.jsx';
 import useUserStore from '../stores/user.store.js';
+import useChatStore from '../stores/chat.store.js';
 
 const ParantWrapperProvider = ({children}) => {
     const {webSocket} = useWebSocket();
     const {fcmToken} = useFirebase();
     const { user, handleUpdateUser } = useUserStore();
+    const { conversations,setConversations } = useChatStore();
 
 
   useEffect(()=>{
@@ -18,59 +20,69 @@ const ParantWrapperProvider = ({children}) => {
   }
   },[webSocket,fcmToken]);
 
+
+  const updateNewMessageStore = (newMessage,chatId) => {
+    const updatedConversations = conversations.map(convo => {
+      if (convo.conversationId === chatId) {
+        return {
+          ...convo,
+          messages: newMessage,
+        };
+      }
+      return convo;
+    });
+
+    setConversations(updatedConversations);
+  };
+
   useEffect(() => {
     const handleMessage = data => {
-      const updatedChats = user.chats.map(chat => {
-        if (chat._id === data.message.chat_id) {
-          return {
-            ...chat,
-            messages: [...chat.messages, data.message],
-          };
-        }
-        return chat;
-      });
+      const currentConversation = conversations.find(convo => convo.conversationId === data.message.chat);
 
-      handleUpdateUser({
-        ...user,
-        chats: updatedChats,
-      });
+      if (currentConversation) {
+          const updatedConversations = conversations.map((convo) => {
+              if (convo.conversationId === data.message.chat) {
+                  let allMessages = [...convo.messages];
+                  allMessages.unshift(data.message)
+                  return {
+                      ...convo,
+                      messages: allMessages,
+                  };
+              }
+              return convo;
+          });
+          setConversations(updatedConversations);
+      }
+       else {
+          setConversations([...conversations, { conversationId: data.message.chat, messages: [data.message] }]);
+      }
 
     };
 
     const handleMessageUpdate = updatedMessage => {
-      const updatedChats = user.chats.map(chat => {
-        if (chat._id === updatedMessage.message.chat_id) {
-          return {
-            ...chat,
-            messages: chat.messages.map(msg =>
-              msg._id === updatedMessage.message._id ? updatedMessage.message : msg
-            ),
-          };
+      const currentConversation = conversations.find(
+        convo => convo.conversationId === updatedMessage.message.chat,
+      );
+      let filteredMessages = currentConversation.messages.map(
+        (msg) => {
+           if(msg._id===updatedMessage.message._id){
+          msg.content=updatedMessage.message.content
         }
-        return chat;
-      });
-
-      handleUpdateUser({
-        ...user,
-        chats: updatedChats,
-      });
+        return msg;
+      }
+      );
+      updateNewMessageStore(filteredMessages,updatedMessage.message.chat);
     };
 
     const handleMessageDeletion = ({ messageIds,chat_id }) => {
-      const updatedChats = user.chats.map(chat => {
-        if (chat._id === chat_id) {
-          return {
-            ...chat,
-            messages: chat.messages.filter(msg => !messageIds.includes(msg._id)),
-          };
-        }
-        return chat;
-      });
-
-      handleUpdateUser({
-        ...user,
-        chats: updatedChats,
-      });
+      const currentConversation = conversations.find(
+        convo => convo.conversationId === chat_id,
+      );
+      let filteredMessages = currentConversation.messages.filter(
+        msg => !messageIds.includes(msg._id),
+      );
+     
+      updateNewMessageStore(filteredMessages,chat_id);
     };
 
     if (webSocket) {
@@ -86,10 +98,7 @@ const ParantWrapperProvider = ({children}) => {
         webSocket.off('messageDeleted', handleMessageDeletion);
       }
     };
-  }, [webSocket, user, handleUpdateUser]);
-
-
-
+  }, [webSocket, user, handleUpdateUser,conversations]);
 
   return (
     <>
