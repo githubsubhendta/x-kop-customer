@@ -36,7 +36,6 @@ const SelectConsultantsScreen = ({route, navigation}) => {
   }, [data]);
 
   const handleScheduleSubmit = async () => {
-    console.log('eebejfbebfj', recieve_params);
     if (selected != null) {
       fetchData('/officer_schedule/schedules', 'POST', {
         consultationTypeName: arr_type[selected].ConsultationTypeName,
