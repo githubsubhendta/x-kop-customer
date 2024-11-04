@@ -17,7 +17,7 @@ const LoginScreen = ({navigation}) => {
   const handleLoginSubmit = async () => {
     if (mobile.length === 10) {
       try {
-        const result = await userLogin({mobile});
+        const result = await userLogin({mobile,role:"user"});
         if (result.data.data.isOTP) {
           const jsonValue = JSON.stringify({mobile: result.data.data.mobile});
           await AsyncStorage.setItem('loggedin-mobile', jsonValue);
