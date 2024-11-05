@@ -22,7 +22,8 @@ import {
 import MessageInput from '../../Components/MessageInput.jsx';
 import {useWebSocket} from '../../shared/WebSocketProvider.jsx';
 
-
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import ChatModal from '../../Components/chat/ChatModal.jsx';
 
 const AudioScreen = ({route, navigation}) => {
   const {config, mobile, reciever_data} = route.params || {};
@@ -34,6 +35,9 @@ const AudioScreen = ({route, navigation}) => {
   const [callDuration, setCallDuration] = useState('00:00:00');
   let callDurationInterval;
   let callMinUpdate;
+  const [modelChat,setModelChat] = useState(false);
+
+  const chatId=1231;
 
 
   // const startTime = new Date(reciever_data.consultationData.startCallTime);
@@ -219,29 +223,35 @@ const AudioScreen = ({route, navigation}) => {
               )}
             </TouchableOpacity>
           </View>
-          <View style={styles.messageInputContainer}>
-          <View style={styles.InputContainer}>
+       
+        </View>
+      )}
+         <View style={styles.messageInputContainer}>
+          <TouchableOpacity style={styles.InputContainer} onPress={()=>setModelChat(true)}>
       <TextInput
         style={styles.input}
         placeholder="Start Typing Here"
         placeholderTextColor="#888"
-        value={message} 
-        onPress={()=>{}} 
+        editable={false}
       />
       <View style={styles.iconsContainer}>
         {/* Attach File Button */}
-        <TouchableOpacity style={styles.iconButton} >
+        <View style={styles.iconButton} >
+       
           <Icon name="attach-file" size={24} color="#888" />
-        </TouchableOpacity>
-        {/* Send Message Button */}
-        <TouchableOpacity style={styles.iconButton}>
-          <Icon name="send" size={24} color="#888" />
-        </TouchableOpacity>
-      </View>
-    </View>
-          </View>
         </View>
-      )}
+        <View style={styles.iconButton}>
+          <Icon name="send" size={24} color="#888" />
+        </View>
+      </View>
+    </TouchableOpacity>
+          </View>
+  {
+    modelChat && (
+      <ChatModal chatId={chatId} /> 
+    )
+  }
+    
     </View>
   );
 };
@@ -322,12 +332,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   input: {
-    flex: 1,
+    // flex: 1,
     fontSize: 16,
     color: '#000',
+    width:"auto"
   },
   iconsContainer: {
     flexDirection: 'row',
+    // width:"100%",
   },
   iconButton: {
     padding: 5,
