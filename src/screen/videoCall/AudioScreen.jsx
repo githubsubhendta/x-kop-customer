@@ -19,7 +19,6 @@ import {
   SVG_speakeroff,
   SVG_unmute_mic,
 } from '../../utils/SVGImage.js';
-import MessageInput from '../../Components/MessageInput.jsx';
 import {useWebSocket} from '../../shared/WebSocketProvider.jsx';
 
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -35,10 +34,9 @@ const AudioScreen = ({route, navigation}) => {
   const [callDuration, setCallDuration] = useState('00:00:00');
   let callDurationInterval;
   let callMinUpdate;
-  const [modelChat,setModelChat] = useState(false);
+  const [modelChat, setModelChat] = useState(false);
 
-  const chatId=1231;
-
+  
 
   // const startTime = new Date(reciever_data.consultationData.startCallTime);
 
@@ -55,22 +53,19 @@ const AudioScreen = ({route, navigation}) => {
   //     ).padStart(2, '0')}:${String(seconds).padStart(2, '0')} min`;
   //     setCallDuration(formattedDuration);
 
-     
   //     // if(seconds==59){
   //     // // WebSocket.emit("updateCallWallet",({}));
-   
+
   //     // }
   //   }, 1000);
-
 
   //   return () => {
   //     clearInterval(callDurationInterval);
   //   };
   // }, []);
 
-
-  useEffect(()=>{
-    console.log("reciever_data=====>",reciever_data)
+  useEffect(() => {
+    console.log('reciever_data=====>', reciever_data);
     // callMinUpdate = setInterval(() => {
     // webSocket.emit("callmincheck",{})
 
@@ -78,9 +73,7 @@ const AudioScreen = ({route, navigation}) => {
     // return () => {
     //   clearInterval(callMinUpdate);
     // };
-  },[])
-
-
+  }, []);
 
   const {engine, isJoined} = useAgoraEngine(
     config,
@@ -117,7 +110,7 @@ const AudioScreen = ({route, navigation}) => {
       clearInterval(callDurationInterval);
       navigation.reset({
         index: 0,
-        routes: [{ name: "LayoutScreen" }],
+        routes: [{name: 'LayoutScreen'}],
       });
     }
   }, [engine, webSocket, mobile, navigation]);
@@ -128,14 +121,12 @@ const AudioScreen = ({route, navigation}) => {
     }
   }, [engine, webSocket, mobile]);
 
-  
-
   useEffect(() => {
-    const handleHandsup = async() => {
+    const handleHandsup = async () => {
       clearInterval(callDurationInterval);
       navigation.reset({
         index: 0,
-        routes: [{ name: "LayoutScreen" }],
+        routes: [{name: 'LayoutScreen'}],
       });
     };
     webSocket.on('appyHandsup', handleHandsup);
@@ -223,35 +214,30 @@ const AudioScreen = ({route, navigation}) => {
               )}
             </TouchableOpacity>
           </View>
-       
         </View>
       )}
-         <View style={styles.messageInputContainer}>
-          <TouchableOpacity style={styles.InputContainer} onPress={()=>setModelChat(true)}>
-      <TextInput
-        style={styles.input}
-        placeholder="Start Typing Here"
-        placeholderTextColor="#888"
-        editable={false}
-      />
-      <View style={styles.iconsContainer}>
-        {/* Attach File Button */}
-        <View style={styles.iconButton} >
-       
-          <Icon name="attach-file" size={24} color="#888" />
-        </View>
-        <View style={styles.iconButton}>
-          <Icon name="send" size={24} color="#888" />
-        </View>
-      </View>
-    </TouchableOpacity>
+      <View style={styles.messageInputContainer}>
+        <TouchableOpacity
+          style={styles.InputContainer}
+          onPress={() => setModelChat(true)}>
+          <TextInput
+            style={styles.input}
+            placeholder="Start Typing Here"
+            placeholderTextColor="#888"
+            editable={false}
+          />
+          <View style={styles.iconsContainer}>
+            {/* Attach File Button */}
+            <View style={styles.iconButton}>
+              <Icon name="attach-file" size={24} color="#888" />
+            </View>
+            <View style={styles.iconButton}>
+              <Icon name="send" size={24} color="#888" />
+            </View>
           </View>
-  {
-    modelChat && (
-      <ChatModal chatId={chatId} /> 
-    )
-  }
-    
+        </TouchableOpacity>
+      </View>
+      {modelChat && <ChatModal chatId={reciever_data?.chatId} />}
     </View>
   );
 };
@@ -335,7 +321,7 @@ const styles = StyleSheet.create({
     // flex: 1,
     fontSize: 16,
     color: '#000',
-    width:"auto"
+    width: 'auto',
   },
   iconsContainer: {
     flexDirection: 'row',

@@ -22,8 +22,59 @@ import {SvgXml} from 'react-native-svg';
 import Video from 'react-native-video';
 import {SVG_PDF} from '../../utils/SVGImage.js';
 
-const ChatModal = ({chatId}) => {
+const Message = ({item, user, onLongPress, selectedMessages}) => {
+  return (
+    <TouchableOpacity
+      onLongPress={onLongPress}
+      style={[
+        styles.messageContainer,
+        item.sender === user._id
+          ? styles.currentUserMessage
+          : styles.otherUserMessage,
+        selectedMessages.includes(item._id) > 0 && styles.selectedMessage,
+      ]}>
+      {item.type === 'text' && (
+        <Text style={styles.content}>{item.content}</Text>
+      )}
+      {item.type === 'image' && item.content && (
+        <TouchableOpacity onPress={() => item.openImageModal(item.content)}>
+          <Image source={{uri: item.content}} style={styles.image} />
+        </TouchableOpacity>
+      )}
+      {item.type === 'video' && (
+        <TouchableOpacity
+          onPress={() => item.openVideoModal(item.content)}
+          style={styles.videoContainer}>
+          <Icon
+            name="play-circle-outline"
+            size={40}
+            color="white"
+            style={styles.playIcon}
+          />
+        </TouchableOpacity>
+      )}
+      {item.type === 'file' && (
+        <TouchableOpacity style={styles.backButton}>
+          <SvgXml xml={SVG_PDF} height={'100%'} width={'100%'} />
+        </TouchableOpacity>
+      )}
+      <Text style={styles.timeStamp}>
+        {new Date(item.createdAt).toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+        })}{' '}
+        {new Date(item.createdAt).toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true,
+        })}
+      </Text>
+    </TouchableOpacity>
+  );
+};
 
+const ChatModal = ({chatId}) => {
   const {webSocket} = useWebSocket();
   const {user} = useUserStore();
   const [openMenu, setOpenMenu] = useState(false);
