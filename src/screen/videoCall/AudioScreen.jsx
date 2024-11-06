@@ -7,6 +7,7 @@ import {
   Image,
   Alert,
   TextInput,
+  Modal,
 } from 'react-native';
 import {SvgXml} from 'react-native-svg';
 import {RtcSurfaceView} from 'react-native-agora';
@@ -237,7 +238,8 @@ const AudioScreen = ({route, navigation}) => {
           </View>
         </TouchableOpacity>
       </View>
-      {modelChat && <ChatModal chatId={reciever_data?.chatId} />}
+         <ChatModal chatId={reciever_data?.chatId} isVisible={modelChat} onClose={()=>setModelChat(false)} />
+        
     </View>
   );
 };

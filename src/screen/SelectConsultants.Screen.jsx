@@ -75,7 +75,8 @@ const SelectConsultantsScreen = ({route, navigation}) => {
           <Ionicons name="arrow-back" size={24} color="#000" />
         </TouchableOpacity>
       </View>
-      <View className="flex flex-col justify-between items-center">
+     <ScrollView>
+     <View className="flex flex-col justify-between items-center">
         <View>
           <Text className="text-primary text-2xl font-bold">
             Select Consultant Type
@@ -169,6 +170,7 @@ const SelectConsultantsScreen = ({route, navigation}) => {
           )}
         </View>
       </View>
+     </ScrollView>
     </SafeAreaView>
   );
 };

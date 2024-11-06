@@ -74,7 +74,7 @@ const Message = ({item, user, onLongPress, selectedMessages}) => {
   );
 };
 
-const ChatModal = ({chatId}) => {
+const ChatModal = ({chatId, isVisible, onClose}) => {
   const {webSocket} = useWebSocket();
   const {user} = useUserStore();
   const [openMenu, setOpenMenu] = useState(false);
@@ -83,41 +83,36 @@ const ChatModal = ({chatId}) => {
   const [editingMessage, setEditingMessage] = useState(null);
   const [editContent, setEditContent] = useState('');
   const flatListRef = useRef(null);
-  const [isModalVisible, setModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedVideo, setSelectedVideo] = useState(false);
   const [isVideoModalVisible, setVideoModalVisible] = useState(false);
   const {conversations, setConversations} = useChatStore();
   const showEditButton = selectedMessages.length === 1;
   const chats = user.chats.find(chat => chat._id === chatId);
-  // const officer =
-  //   chats?.participants?.find(
-  //     participant => participant?.officerDetails === undefined,
-  //   ) || {};
 
-      const officer =
+  const officer =
     chats?.participants?.find(participant => participant?.officerDetails) || {};
-    
 
   useEffect(() => {
     if (conversations.length) {
       const currentConversation = conversations.find(
         convo => convo.conversationId === chatId,
       );
-     
+
       if (currentConversation) {
-        setAllMessages(currentConversation.messages.sort((a, b) =>new Date(b.createdAt)-new Date(a.createdAt)));
+        setAllMessages(
+          currentConversation.messages.sort(
+            (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+          ),
+        );
       }
     }
-  }, [conversations, chatId,setConversations]);
+  }, [conversations, chatId, setConversations]);
 
-
-
-
-    const handleUpdateMessage = useCallback(() => {
+  const handleUpdateMessage = useCallback(() => {
     if (editingMessage && editContent.trim()) {
       if (webSocket) {
-          webSocket.emit('updatemessage', {
+        webSocket.emit('updatemessage', {
           messageId: editingMessage,
           newContent: editContent,
           reciever: {id: officer._id, mobile: officer.mobile},
@@ -139,7 +134,6 @@ const ChatModal = ({chatId}) => {
 
   const openImageModal = imageUri => {
     setSelectedImage(imageUri);
-    setModalVisible(true);
   };
 
   const openVideoModal = videoUri => {
@@ -172,18 +166,15 @@ const ChatModal = ({chatId}) => {
     (async () => {
       const getInitial = await getAllConversations(chatId);
 
-      // setConversations([])
       if (conversations.length === 0) {
         setConversations([
           {conversationId: chatId, messages: getInitial.messages},
         ]);
       } else {
-        
         const currentConversation = conversations.find(
           convo => convo.conversationId === chatId,
         );
         if (currentConversation) {
-          
           updateNewMessageStore(getInitial.messages);
         } else {
           setConversations([
@@ -227,7 +218,7 @@ const ChatModal = ({chatId}) => {
     return filterType.type;
   };
 
-    const handleEditMessage = useCallback(
+  const handleEditMessage = useCallback(
     messageId => {
       const messageToEdit = allMessages.find(msg => msg._id === messageId);
       if (messageToEdit) {
@@ -237,88 +228,61 @@ const ChatModal = ({chatId}) => {
     },
     [allMessages],
   );
+
   return (
-    <View>
+    <Modal visible={isVisible} animationType="slide" transparent={true}>
+      <View style={styles.modalContainer}>
+        <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+          <Icon name="close" size={30} color="white" />
+        </TouchableOpacity>
         <View style={styles.container}>
-      {/* <ChatHeader
-        officer={officer}
-        chats={chats}
-        selectedMessages={selectedMessages}
-        filterMessageType={filterMessageType}
-        handleEditMessage={handleEditMessage}
-        deleteMessages={deleteMessages}
-        showEditButton={showEditButton}
-        setOpenMenu={setOpenMenu}
-        openMenu={openMenu}
-        navigation={navigation}
-      /> */}
-
-      <ChatArea
-        flatListRef={flatListRef}
-        allMessages={allMessages.map(message => ({
-          ...message,
-          openImageModal,
-          openVideoModal,
-        }))}
-        renderMessage={({item}) => (
-          <Message
-            item={item}
-            user={user}
-            onLongPress={() => item.sender != officer._id && toggleMessageSelection(item._id)}
-            selectedMessages={selectedMessages}
+          <ChatArea
+            flatListRef={flatListRef}
+            allMessages={allMessages.map(message => ({
+              ...message,
+              openImageModal,
+              openVideoModal,
+            }))}
+            renderMessage={({item}) => (
+              <Message
+                item={item}
+                user={user}
+                onLongPress={() =>
+                  item.sender !== officer._id && toggleMessageSelection(item._id)
+                }
+                selectedMessages={selectedMessages}
+              />
+            )}
+            loading={loading}
+            onLoadMore={onLoadMore}
           />
-        )}
-        loading={loading}
-        onLoadMore={onLoadMore}
-      />
-      
-      <ChatMessageInput
-        user={user}
-        officer={officer}
-        editingMessage={editingMessage}
-        editContent={editContent}
-        setEditContent={setEditContent}
-        handleUpdateMessage={handleUpdateMessage}
-        setEditingMessage={setEditingMessage}
-        setSelectedMessages={setSelectedMessages}
-      />
-
-      <Modal visible={isModalVisible} transparent={true}>
-        <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
-          <View style={styles.modalBackground}>
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setModalVisible(false)}>
-              <Icon name="close" size={30} color="white" />
-            </TouchableOpacity>
-            <Image source={{uri: selectedImage}} style={styles.modalImage} />
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>
-
-      <Modal visible={isVideoModalVisible} transparent={true}>
-        <TouchableWithoutFeedback onPress={() => setVideoModalVisible(false)}>
-          <View style={styles.modalBackground}>
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setVideoModalVisible(false)}>
-              <Icon name="close" size={30} color="white" />
-            </TouchableOpacity>
-            <Video
-              source={{uri: selectedVideo}}
-              style={styles.videoPlayer}
-              controls
-              resizeMode="contain"
-            />
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>
-    </View>
-    </View>
-  )
-}
+          <ChatMessageInput
+            user={user}
+            officer={officer}
+            editingMessage={editingMessage}
+            editContent={editContent}
+            setEditContent={setEditContent}
+            handleUpdateMessage={handleUpdateMessage}
+            setEditingMessage={setEditingMessage}
+            setSelectedMessages={setSelectedMessages}
+          />
+        </View>
+      </View>
+    </Modal>
+  );
+};
 
 const styles = StyleSheet.create({
+  modalContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+  },
+  closeButton: {
+    alignSelf: 'flex-end',
+    padding: 10,
+  },
   container: {
     flex: 1,
   },
