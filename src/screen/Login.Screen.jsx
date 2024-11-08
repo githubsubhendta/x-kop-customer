@@ -15,6 +15,13 @@ const LoginScreen = ({navigation}) => {
   const [mobile, setMobile] = useState(null);
 
   const handleLoginSubmit = async () => {
+   if(mobile==""){
+    return Snackbar.show({
+      text: 'Please Enter Mobile No.',
+      duration: Snackbar.LENGTH_SHORT,
+      backgroundColor: 'red',
+    });
+   }
     if (mobile.length === 10) {
       try {
         const result = await userLogin({mobile,role:"user"});

@@ -1,39 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, FlatList, TouchableOpacity,Image } from 'react-native';
+import { StyleSheet, Text, View, FlatList, TouchableOpacity,Image, Alert, Platform } from 'react-native';
 import AddFundsModal from '../../Components/account/AddFundsModal';
 import userStoreAction from '../../stores/user.store';
 import useHttpRequest from '../../hooks/useHttpRequest';
 import { SvgXml } from 'react-native-svg';
 import { SVG_arrow_back, SVG_download } from '../../utils/SVGImage';
 import { useSnackbar } from '../../shared/SnackbarProvider';
-
+import RNFetchBlob from 'react-native-blob-util';
+import { BASE_URI } from '../../Api/ApiManager';
 
 const WalletScreen = ({navigation}) => {
   const {loading, error, data, fetchData} = useHttpRequest();
     const {user,addLoggedInUserAction} = userStoreAction(
         state => state,
       );
-
+  const [loading1, setLoading1] = React.useState(false); 
   const [isModalVisible, setModalVisible] = useState(false);
   const { showSnackbar } = useSnackbar();
-
-
-  const [transactions, setTransactions] = useState([
-    {
-      id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
-      officer_name: 'Shivaji Narayan',
-      payment_type:"G Pay",
-      pay_fee:"1000",
-      officer_avatar:"https://img.freepik.com/free-photo/young-bearded-man-with-striped-shirt_273609-5677.jpg"
-    },
-    {
-      id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
-      officer_name: 'Shivaji Narayan',
-      payment_type:"G Pay",
-      pay_fee:"500",
-      officer_avatar:"https://img.freepik.com/free-photo/young-bearded-man-with-striped-shirt_273609-5677.jpg"
-    },
-  ]);
+  const { dirs } = RNFetchBlob.fs;
 
 
   const alertMessage = (message,type) => {
@@ -57,29 +41,60 @@ const WalletScreen = ({navigation}) => {
   }
 
 
-  const itemRender = ({item})=>{
-    return (
-    <View className="flex  flex-row justify-between p-2 border-b-2 border-slate-200">
+  const downloadSlip = async (transactionId) => {
+    try {
+      // const hasPermission = await requestStoragePermission();
+      // if (!hasPermission) {
+      //   Alert.alert('Permission Denied', 'You need to give permission to download the file.');
+      //   return;
+      // }
+
+      console.log("Downloading transaction ID:", transactionId);
+      const { dirs } = RNFetchBlob.fs;
+      const path = Platform.OS === 'ios' ? dirs.DocumentDir : dirs.DownloadDir; 
+      const filePath = `${path}/transaction-${transactionId}.pdf`;
+
+      setLoading1(true); 
+      const response = await RNFetchBlob.config({
+        path: filePath, 
+        fileCache: true, 
+      }).fetch('GET', `${BASE_URI}/payment/download/${transactionId}`);
+
+      if (response.respInfo.status === 200) {
+        console.log('File saved successfully at:', filePath);
+        RNFetchBlob.android.actionViewIntent(filePath, 'application/pdf'); 
+      } else {
+        Alert.alert('Download Failed', 'Failed to download PDF. Please try again later.');
+      }
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+      Alert.alert('Error', 'Failed to download PDF. Please try again later.');
+    } finally {
+      setLoading1(false); 
+    }
+  };
+
+  const itemRender = ({ item }) => (
+    <View className="flex flex-row justify-between p-2 border-b-2 border-slate-200 my-2">
       <View className="flex flex-row gap-10">
-         <View className="w-[50px] h-[50px] rounded-full">
-          <Image source={{uri:item.officer_avatar}} className="w-[100%] h-[100%] rounded-full"  />
-         </View>
-      <View>
-        <Text className="text-slate-600">{item.officer_name}</Text>
-        <View className="flex flex-row gap-5">
-          <Text className="text-slate-600">Paid Via: {item.payment_type}</Text>
-          <Text className="text-slate-600">Fee: {item.pay_fee}</Text>
+        <View className="w-[50px] h-[50px] rounded-full">
+          <Image source={{ uri: user.avatar }} className="w-[100%] h-[100%] rounded-full" />
+        </View>
+        <View>
+          <Text className="text-slate-600">{user.name}</Text>
+          <View className="flex flex-row w-52 justify-between">
+            <Text className="text-slate-600">Paid Via: {item.method}</Text>
+            <Text className="text-slate-600">Rs: {item.amount}</Text>
+          </View>
         </View>
       </View>
-         </View>
-        <View className="flex flex-col justify-center">
-        <TouchableOpacity className="w-8 h-8 flex justify-start" onPress={()=>{}}>
-           <SvgXml xml={SVG_download} height={"100%"} width={"100%"} />
-       </TouchableOpacity>
-        </View>
+      <View className="flex flex-col justify-center">
+        <TouchableOpacity className="w-8 h-8 flex justify-start" onPress={() => downloadSlip(item._id)}>
+          <SvgXml xml={SVG_download} height={"100%"} width={"100%"} />
+        </TouchableOpacity>
+      </View>
     </View>
-    )
-  }
+  );
 
   return (
     <View style={styles.container}>
@@ -96,11 +111,14 @@ const WalletScreen = ({navigation}) => {
         <Text className="text-slate-500 text-md">Previous Receipts</Text>
       </View>
       <View className="bg-slate-300 h-[1px] my-3"  />
-        <FlatList
-        data={transactions}
-        renderItem={itemRender}
-        keyExtractor={item => item.id}
-      />
+      {user?.transactions.length > 0 && (
+          <FlatList
+            data={user?.transactions}
+            renderItem={itemRender}
+            keyExtractor={item => item._id}
+            // style={{paddingBottom:100}}
+          />
+        )}
       </View>
       <View style={styles.buttonContainer}>
         <TouchableOpacity style={styles.button} onPress={() => setModalVisible(true)}>

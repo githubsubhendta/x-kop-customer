@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useMemo} from 'react';
+import React, {useState, useEffect, useMemo, useCallback} from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   StatusBar,
   TouchableOpacity,
   ScrollView,
+  RefreshControl,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {SvgXml} from 'react-native-svg';
@@ -40,8 +41,6 @@ const ScheduleScreen = ({navigation}) => {
     }),
     [selected],
   );
-
-
 
   const dateFormate = dateString => {
     const date = new Date(dateString);
@@ -131,8 +130,8 @@ const ScheduleScreen = ({navigation}) => {
     }
 
     let endTime = new Date();
-    endTime.setHours(18, 0, 0, 0); 
-    let interval = 30 * 60 * 1000; 
+    endTime.setHours(18, 0, 0, 0);
+    let interval = 30 * 60 * 1000;
 
     if (startTime) {
       setTimeSlots(generateTimeSlots(startTime, endTime, interval));
@@ -160,27 +159,26 @@ const ScheduleScreen = ({navigation}) => {
                 item?.endCallTime !== undefined && (
                   <Text className="text-secondary text-sm font-light">
                     Duration:{' '}
-                    {Math.ceil(parseFloat(
-                      (new Date(item.endCallTime) -
-                        new Date(item.startCallTime)) /
-                        (1000 * 60),
-                    ).toFixed(2))}{' '}
+                    {Math.ceil(
+                      parseFloat(
+                        (new Date(item.endCallTime) -
+                          new Date(item.startCallTime)) /
+                          (1000 * 60),
+                      ).toFixed(2),
+                    )}{' '}
                     min
                   </Text>
                 )}
               <Text className="text-black text-sm text-medium">
                 {item?.startCallTime !== undefined &&
                   item?.endCallTime !== undefined && (
-                    <>
-                      Fee: ₹
-                      {item?.totalCallPrice | 0}
-                    </>
+                    <>Fee: ₹{item?.totalCallPrice | 0}</>
                   )}
               </Text>
             </View>
             <Text className="text-black text-sm font-medium">
-                  {dateFormate(item.startCallTime)}
-                </Text>
+              {dateFormate(item.startCallTime)}
+            </Text>
             {item.date_time !== undefined && (
               <View className="flex flex-row">
                 <Text className="text-black text-sm font-medium">
@@ -231,11 +229,20 @@ const ScheduleScreen = ({navigation}) => {
     });
   };
 
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    // await fetchSchedules(); // This should be a function that fetches and updates `user.schedules`
+    setRefreshing(false);
+  }, []);
+
   return (
-    <SafeAreaView className="flex-1 bg-white relative">
-      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+    <View className="flex-1 bg-white relative">
+        {/* <RefreshControl refreshing={refreshing} onRefresh={onRefresh} /> */}
       {!scheduleCall ? (
         <>
+      
           <View className="px-5 py-10">
             <Text className="text-primary font-medium text-2xl">
               History & Scheduling
@@ -250,7 +257,7 @@ const ScheduleScreen = ({navigation}) => {
             </View>
             <View className="bg-[#C9C9C9] h-[1px] my-3 mb-4" />
             <View className="px-5 h-44">
-              {user.schedules.length > 0 && (
+              
                 <FlatList
                   data={user.schedules}
                   renderItem={({item}) => (
@@ -312,10 +319,15 @@ const ScheduleScreen = ({navigation}) => {
                     </View>
                   )}
                   keyExtractor={item => item._id}
+                  ListEmptyComponent={
+                    <View className="py-10 items-center">
+                      <Text className="text-gray-500">No schedules available</Text>
+                    </View>
+                  }
                   scrollEnabled
-                  style={{ height: 100, }}
+                  style={{height: 100}}
                 />
-              )}
+             
             </View>
           </View>
 
@@ -330,11 +342,13 @@ const ScheduleScreen = ({navigation}) => {
               } */}
               {user.consultations.length > 0 && (
                 <FlatList
-                  data={user.consultations.sort((a,b)=>new Date(b.endCallTime)-new Date(a.endCallTime))}
+                  data={user.consultations.sort(
+                    (a, b) => new Date(b.endCallTime) - new Date(a.endCallTime),
+                  )}
                   renderItem={itemRender}
                   keyExtractor={item => item._id}
                   scrollEnabled
-                  style={{ marginBottom: 350, }}
+                  style={{marginBottom: 350}}
                 />
               )}
             </View>
@@ -355,16 +369,16 @@ const ScheduleScreen = ({navigation}) => {
       ) : (
         <>
           <View className="px-5 pb-20 pt-2">
-    <View className="flex flex-row items-center">
-    <TouchableOpacity
-        className="w-[10%] h-8 justify-start my-2"
-        onPress={() => setScheduleCall(false)}>
-        <SvgXml xml={SVG_arrow_back} height={'100%'} width={'100%'} />
-      </TouchableOpacity>
-      <Text className="text-[#862A0D] font-medium text-2xl text-center w-[90%]">
-              Schedule Call
-            </Text>
-    </View>
+            <View className="flex flex-row items-center">
+              <TouchableOpacity
+                className="w-[10%] h-8 justify-start my-2"
+                onPress={() => setScheduleCall(false)}>
+                <SvgXml xml={SVG_arrow_back} height={'100%'} width={'100%'} />
+              </TouchableOpacity>
+              <Text className="text-[#862A0D] font-medium text-2xl text-center w-[90%]">
+                Schedule Call
+              </Text>
+            </View>
             <View className="pt-2 mb-10">
               <Calendar
                 disableAllTouchEventsForDisabledDays={true}
@@ -419,7 +433,7 @@ const ScheduleScreen = ({navigation}) => {
           </View>
         </>
       )}
-    </SafeAreaView>
+    </View>
   );
 };
 

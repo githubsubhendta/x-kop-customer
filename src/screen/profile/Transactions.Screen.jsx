@@ -94,7 +94,7 @@ const TransactionsScreen = ({ navigation }) => {
   );
 
   return (
-    <SafeAreaView className="flex-1">
+    <View className="flex-1">
       <View className="p-5">
         <TouchableOpacity className="w-10 h-10 flex justify-start mb-5" onPress={() => navigation.goBack()}>
           <SvgXml xml={SVG_arrow_back} height={"100%"} width={"100%"} />
@@ -123,7 +123,7 @@ const TransactionsScreen = ({ navigation }) => {
           <ActivityIndicator size="large" color="#0000ff" />
         </View>
       )}
-    </SafeAreaView>
+    </View>
   );
 };
 

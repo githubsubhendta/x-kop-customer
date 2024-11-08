@@ -9,8 +9,11 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import useHttpRequest from '../hooks/useHttpRequest.jsx';
 import {currencySymbol} from '../Constant/theme.js';
 import useUserStore from '../stores/user.store.js';
+import { useSnackbar } from '../shared/SnackbarProvider.js';
+
 
 const SelectConsultantsScreen = ({route, navigation}) => {
+  const { showSnackbar } = useSnackbar();
   const {data, fetchData, error, loading} = useHttpRequest();
   const recieve_params = route.params;
   const {user} = useUserStore();
@@ -30,24 +33,33 @@ const SelectConsultantsScreen = ({route, navigation}) => {
   }, []);
 
   useEffect(() => {
+  if(data?.statusCode==201){
+    showSnackbar('Your call is successfully Scheduled!', 'success');
+    navigation.reset({index:0,routes:[{name: 'Schedule'}]})
+  }
     if (data?.data?.length && data.data[0].ConsultationTypeName !== undefined) {
       setArr_type(data.data);
+     
     }
   }, [data]);
 
   const handleScheduleSubmit = async () => {
     if (selected != null) {
-      fetchData('/officer_schedule/schedules', 'POST', {
-        consultationTypeName: arr_type[selected].ConsultationTypeName,
-        startTime: recieve_params.startDateTime.replace(/\"/g, ''),
-        endTime: recieve_params.endDateTime.replace(/\"/g, ''),
-      });
+        fetchData('/officer_schedule/schedules', 'POST', {
+          consultationTypeName: arr_type[selected].ConsultationTypeName,
+          startTime: recieve_params.startDateTime.replace(/\"/g, ''),
+          endTime: recieve_params.endDateTime.replace(/\"/g, ''),
+        }); 
     }
   };
 
   useEffect(() => {
     if (error) {
-      console.log('error===>', error);
+      if(error?.data?.statusCode==400){
+        return  showSnackbar(error?.data?.message, 'error');
+      }
+      showSnackbar("internal Server Problem", 'error');
+      console.log('error===>', error?.data);
     }
   }, [error]);
 
