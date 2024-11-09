@@ -24,6 +24,7 @@ import {useWebSocket} from '../../shared/WebSocketProvider.jsx';
 
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import ChatModal from '../../Components/chat/ChatModal.jsx';
+import useCallBalanceChecker from '../../hooks/CallBalanceChecker.js';
 
 const AudioScreen = ({route, navigation}) => {
   const {config, mobile, reciever_data} = route.params || {};
@@ -36,8 +37,8 @@ const AudioScreen = ({route, navigation}) => {
   let callDurationInterval;
   let callMinUpdate;
   const [modelChat, setModelChat] = useState(false);
-
-  
+  const [callStatus, setCallStatus] = useState(true);
+  useCallBalanceChecker(callStatus, webSocket);
 
   // const startTime = new Date(reciever_data.consultationData.startCallTime);
 
@@ -109,6 +110,7 @@ const AudioScreen = ({route, navigation}) => {
       await engine.current.leaveChannel();
       webSocket.emit('handsup', {otherUserId: mobile});
       clearInterval(callDurationInterval);
+      setCallStatus(false);
       navigation.reset({
         index: 0,
         routes: [{name: 'LayoutScreen'}],
@@ -125,6 +127,7 @@ const AudioScreen = ({route, navigation}) => {
   useEffect(() => {
     const handleHandsup = async () => {
       clearInterval(callDurationInterval);
+      setCallStatus(false);
       navigation.reset({
         index: 0,
         routes: [{name: 'LayoutScreen'}],
@@ -168,6 +171,16 @@ const AudioScreen = ({route, navigation}) => {
       });
     };
   }, [webSocket, engine, createTwoButtonAlert, navigation, config, mobile]);
+
+
+  useEffect(() => {
+    webSocket.on('balanceUpdate', data => {
+      if (!data.isBalanceEnough) {
+        // endCall();
+      }
+    });
+    return () => webSocket.off('balanceUpdate');
+  }, [webSocket, endCall]);
 
   return (
     <View style={styles.container}>
