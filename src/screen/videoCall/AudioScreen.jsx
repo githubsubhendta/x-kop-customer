@@ -24,7 +24,7 @@ import {useWebSocket} from '../../shared/WebSocketProvider.jsx';
 
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import ChatModal from '../../Components/chat/ChatModal.jsx';
-import useCallBalanceChecker from '../../hooks/CallBalanceChecker.js';
+import useUserStore from '../../stores/user.store.js';
 
 const AudioScreen = ({route, navigation}) => {
   const {config, mobile, reciever_data} = route.params || {};
@@ -38,36 +38,46 @@ const AudioScreen = ({route, navigation}) => {
   let callMinUpdate;
   const [modelChat, setModelChat] = useState(false);
   const [callStatus, setCallStatus] = useState(true);
-  useCallBalanceChecker(callStatus, webSocket);
+  const {user} = useUserStore();
+  
 
-  // const startTime = new Date(reciever_data.consultationData.startCallTime);
+  
 
-  // useEffect(() => {
-  //   callDurationInterval = setInterval(() => {
-  //     const currentTime = new Date();
-  //     const timeDifference = currentTime - startTime;
-  //     const seconds = Math.floor((timeDifference / 1000) % 60);
-  //     const minutes = Math.floor((timeDifference / (1000 * 60)) % 60);
-  //     const hours = Math.floor((timeDifference / (1000 * 60 * 60)) % 24);
+  const startTime = new Date(reciever_data.consultationData.startCallTime);
 
-  //     const formattedDuration = `${String(hours).padStart(2, '0')}:${String(
-  //       minutes,
-  //     ).padStart(2, '0')}:${String(seconds).padStart(2, '0')} min`;
-  //     setCallDuration(formattedDuration);
-
-  //     // if(seconds==59){
-  //     // // WebSocket.emit("updateCallWallet",({}));
-
-  //     // }
-  //   }, 1000);
-
-  //   return () => {
-  //     clearInterval(callDurationInterval);
-  //   };
-  // }, []);
+  useEffect(()=>{
+    console.log("check balance===>",reciever_data)
+  },[reciever_data])
 
   useEffect(() => {
-    console.log('reciever_data=====>', reciever_data);
+    callDurationInterval = setInterval(() => {
+      const currentTime = new Date();
+      const timeDifference = currentTime - startTime;
+      const seconds = Math.floor((timeDifference / 1000) % 60);
+      const minutes = Math.floor((timeDifference / (1000 * 60)) % 60);
+      const hours = Math.floor((timeDifference / (1000 * 60 * 60)) % 24);
+
+      const formattedDuration = `${String(hours).padStart(2, '0')}:${String(
+        minutes,
+      ).padStart(2, '0')}:${String(seconds).padStart(2, '0')} min`;
+
+      
+      webSocket.emit('checkBalance', {
+        receiverUser: reciever_data.userInfo.mobile,
+        consultInfo: reciever_data.consultationData,
+        currentTime,
+        balance:user.wallet
+      });
+      // setCallDuration(formattedDuration);
+    }, 1000);
+
+    return () => {
+      clearInterval(callDurationInterval);
+    };
+  }, []);
+
+  useEffect(() => {
+    console.log('reciever_data=====>', reciever_data.consultationData);
     // callMinUpdate = setInterval(() => {
     // webSocket.emit("callmincheck",{})
 
@@ -174,12 +184,20 @@ const AudioScreen = ({route, navigation}) => {
 
 
   useEffect(() => {
-    webSocket.on('balanceUpdate', data => {
+    const handleBalanceUpdate = (data) => {
+      console.log("Balance ===",data);
+      setCallDuration(data.duration);
       if (!data.isBalanceEnough) {
-        // endCall();
+
+        console.log("Balance is insufficient, ending call.",data);
+        // endCall(); 
       }
-    });
-    return () => webSocket.off('balanceUpdate');
+    };
+  
+    webSocket.on('balanceUpdate', handleBalanceUpdate);
+    return () => {
+      webSocket.off('balanceUpdate', handleBalanceUpdate);
+    };
   }, [webSocket, endCall]);
 
   return (
@@ -205,7 +223,7 @@ const AudioScreen = ({route, navigation}) => {
               <Text style={styles.title}>General Offences</Text>
               <Text style={styles.status}>Call in Progress</Text>
               <View style={styles.counterContainer}>
-                <Text style={styles.callDuration}>{callDuration}</Text>
+                <Text style={styles.callDuration}>{callDuration} mins left</Text>
               </View>
             </View>
           </View>
@@ -292,9 +310,11 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 24,
     fontWeight: '500',
+    color: 'gray',
   },
   title: {
     fontSize: 20,
+    color: 'gray',
   },
   status: {
     fontSize: 16,

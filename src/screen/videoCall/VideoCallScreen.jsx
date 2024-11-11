@@ -97,7 +97,11 @@ const VideoCallScreen = ({ route, navigation }) => {
   useEffect(() => {
     if (webSocket) {
       webSocket.on('appyHandsup', data => {
-        navigation.navigate("FindAnOfficerScreen");
+        // navigation.navigate("FindAnOfficerScreen");
+        navigation.reset({
+          index: 0,
+          routes: [{name: 'LayoutScreen'}],
+        });
       });
     }
   }, [webSocket]);
@@ -110,7 +114,11 @@ const VideoCallScreen = ({ route, navigation }) => {
         _engine.current.removeAllListeners();
         _engine.current.release();
         webSocket.emit('handsup', { otherUserId: mobile });
-        navigation.navigate('FindAnOfficerScreen');
+        // navigation.navigate('FindAnOfficerScreen');
+        navigation.reset({
+          index: 0,
+          routes: [{name: 'LayoutScreen'}],
+        });
       }
     } catch (error) {
       console.error('Error ending call:', error);

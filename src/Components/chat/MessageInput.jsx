@@ -81,11 +81,6 @@ console.log("check progress data===>",progess)
     }
   };
 
-
-
-
-
-
   return (
     <View style={styles.InputContainer}>
       <TextInput
@@ -115,6 +110,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     color: '#000',
+    backgroundColor:"#fff"
   },
   iconsContainer: {
     flexDirection: 'row',
@@ -132,6 +128,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5,
     margin: 10,
+    backgroundColor:"#fff"
   },
 });
 
