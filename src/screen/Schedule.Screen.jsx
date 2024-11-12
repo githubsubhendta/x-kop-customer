@@ -249,13 +249,9 @@ const ScheduleScreen = ({navigation}) => {
     });
   };
 
-  const [refreshing, setRefreshing] = useState(false);
+  
 
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    // await fetchSchedules(); // This should be a function that fetches and updates `user.schedules`
-    setRefreshing(false);
-  }, []);
+
 
   return (
     <View className="flex-1 bg-white relative">
