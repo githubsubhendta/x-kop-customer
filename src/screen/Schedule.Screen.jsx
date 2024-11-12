@@ -8,14 +8,16 @@ import {
   TouchableOpacity,
   ScrollView,
   RefreshControl,
+  ActivityIndicator,
 } from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
 import {SvgXml} from 'react-native-svg';
 import {SVG_arrow_back, SVG_calender1} from '../utils/SVGImage.js';
 import {Calendar} from 'react-native-calendars';
 import {RadioButton} from 'react-native-paper';
 import moment from 'moment';
 import useUserStore from '../stores/user.store.js';
+import useCallHistory from '../Api/callHistory.js';
+import { getAllSchedules } from '../Api/scheduleService.js';
 
 const ScheduleScreen = ({navigation}) => {
   const [scheduleCall, setScheduleCall] = useState(false);
@@ -23,6 +25,8 @@ const ScheduleScreen = ({navigation}) => {
   const [slot, setSlot] = useState(0);
   const [timeSlots, setTimeSlots] = useState(null);
   const {user} = useUserStore();
+  const { callHistory, fetchCallHistory, loading, hasMore } = useCallHistory();
+  const [scheduleList,setScheduleList] = useState([]);
 
   useEffect(() => {
     // console.log("hekksfbjfbjfe===>",user.consultations)
@@ -30,6 +34,16 @@ const ScheduleScreen = ({navigation}) => {
     const currentDate = new Date().toISOString().split('T')[0];
     setSelected(currentDate);
   }, []);
+
+
+  useEffect(()=>{
+    (async ()=>{
+      const allHistory = await getAllSchedules();
+      console.log("check history=>",allHistory)
+      setScheduleList(allHistory)
+    })()
+    
+  },[getAllSchedules])
 
   const marked = useMemo(
     () => ({
@@ -139,6 +153,12 @@ const ScheduleScreen = ({navigation}) => {
       setTimeSlots(null);
     }
   }, [selected]);
+
+  const handleLoadMore = () => {
+    if (!loading && hasMore) {
+      fetchCallHistory();
+    }
+  };
 
   const itemRender = ({item}) => {
     return (
@@ -259,7 +279,7 @@ const ScheduleScreen = ({navigation}) => {
             <View className="px-5 h-44">
               
                 <FlatList
-                  data={user.schedules}
+                  data={scheduleList}
                   renderItem={({item}) => (
                     <View className="flex flex-row justify-between py-2 border-b-2 border-slate-200 px-0">
                       <View className="flex flex-row gap-2">
@@ -337,20 +357,29 @@ const ScheduleScreen = ({navigation}) => {
             </View>
             <View className="bg-slate-300 h-[1px] my-3" />
             <View className="px-5">
-              {/* {
-                console.log())
-              } */}
-              {user.consultations.length > 0 && (
-                <FlatList
-                  data={user.consultations.sort(
-                    (a, b) => new Date(b.endCallTime) - new Date(a.endCallTime),
-                  )}
-                  renderItem={itemRender}
-                  keyExtractor={item => item._id}
-                  scrollEnabled
-                  style={{marginBottom: 350}}
-                />
-              )}
+           
+              {/* {user.consultations.length > 0 && (  
+               // <FlatList
+                //   data={user.consultations.sort(
+                //     (a, b) => new Date(b.endCallTime) - new Date(a.endCallTime),
+                //   )}
+                //   renderItem={itemRender}
+                //   keyExtractor={item => item._id}
+                //   scrollEnabled
+                //   style={{marginBottom: 350}}
+                // />  )} */}
+
+                 <FlatList
+                 data={callHistory.length>0?callHistory.sort((a, b) => new Date(b.startCallTime) - new Date(a.startCallTime)):[]}
+                 renderItem={itemRender}
+                 keyExtractor={(item) => item._id.toString()}
+                 onEndReached={handleLoadMore}
+                 onEndReachedThreshold={0.5}
+                 ListFooterComponent={
+                   loading ? <ActivityIndicator size="large" color="#0000ff" /> : null
+                 }
+                //  inverted
+               />
             </View>
           </View>
           <TouchableOpacity

@@ -25,67 +25,61 @@ import {useWebSocket} from '../../shared/WebSocketProvider.jsx';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import ChatModal from '../../Components/chat/ChatModal.jsx';
 import useUserStore from '../../stores/user.store.js';
+import { useCallDuration } from '../../shared/CallDurationContext.js';
 
 const AudioScreen = ({route, navigation}) => {
-  const {config, mobile, reciever_data} = route.params || {};
+  const {config, mobile, reciever_data, consultType} = route.params || {};
   const {webSocket} = useWebSocket();
   const [isMuted, setIsMuted] = useState(false);
   const [isSpeakerEnabled, setIsSpeakerEnabled] = useState(true);
   const [connectionStatus, setConnectionStatus] = useState('Not Connected');
   const [peerIds, setPeerIds] = useState([]);
-  const [callDuration, setCallDuration] = useState('00:00:00');
+  // const [callDuration, setCallDuration] = useState('00:00:00');
   let callDurationInterval;
   let callMinUpdate;
   const [modelChat, setModelChat] = useState(false);
   const [callStatus, setCallStatus] = useState(true);
-  const {user} = useUserStore();
-  
-
-  
+  const { callDuration, startCall, stopCall,isBalanceEnough,isBalanceZero } = useCallDuration();
 
   const startTime = new Date(reciever_data.consultationData.startCallTime);
 
-  useEffect(()=>{
-    console.log("check balance===>",reciever_data)
-  },[reciever_data])
+ 
 
   useEffect(() => {
-    callDurationInterval = setInterval(() => {
-      const currentTime = new Date();
-      const timeDifference = currentTime - startTime;
-      const seconds = Math.floor((timeDifference / 1000) % 60);
-      const minutes = Math.floor((timeDifference / (1000 * 60)) % 60);
-      const hours = Math.floor((timeDifference / (1000 * 60 * 60)) % 24);
-
-      const formattedDuration = `${String(hours).padStart(2, '0')}:${String(
-        minutes,
-      ).padStart(2, '0')}:${String(seconds).padStart(2, '0')} min`;
-
-      
-      webSocket.emit('checkBalance', {
-        receiverUser: reciever_data.userInfo.mobile,
-        consultInfo: reciever_data.consultationData,
-        currentTime,
-        balance:user.wallet
-      });
-      // setCallDuration(formattedDuration);
-    }, 1000);
-
+    startCall(startTime, consultType);
     return () => {
-      clearInterval(callDurationInterval);
+      stopCall(); 
     };
   }, []);
 
-  useEffect(() => {
-    console.log('reciever_data=====>', reciever_data.consultationData);
-    // callMinUpdate = setInterval(() => {
-    // webSocket.emit("callmincheck",{})
+  // useEffect(() => {
+  //   callDurationInterval = setInterval(() => {
+  //     const currentTime = new Date();
+  //     const timeDifference = currentTime - startTime;
+  //     const seconds = Math.floor((timeDifference / 1000) % 60);
+  //     const minutes = Math.floor((timeDifference / (1000 * 60)) % 60);
+  //     const hours = Math.floor((timeDifference / (1000 * 60 * 60)) % 24);
 
-    // },60000);
-    // return () => {
-    //   clearInterval(callMinUpdate);
-    // };
-  }, []);
+  //     const formattedDuration = `${String(hours).padStart(2, '0')}:${String(
+  //       minutes,
+  //     ).padStart(2, '0')}:${String(seconds).padStart(2, '0')} min`;
+
+      
+  //     // webSocket.emit('checkBalance', {
+  //     //   receiverUser: reciever_data.userInfo.mobile,
+  //     //   consultInfo: reciever_data.consultationData,
+  //     //   currentTime,
+  //     //   balance:user.wallet
+  //     // });
+  //     // setCallDuration(formattedDuration);
+  //   }, 1000);
+
+  //   return () => {
+  //     clearInterval(callDurationInterval);
+  //   };
+  // }, []);
+
+ 
 
   const {engine, isJoined} = useAgoraEngine(
     config,
@@ -116,11 +110,13 @@ const AudioScreen = ({route, navigation}) => {
   }, [isSpeakerEnabled, engine]);
 
   const endCall = useCallback(async () => {
+    console.log("end call hit")
     if (engine.current) {
       await engine.current.leaveChannel();
       webSocket.emit('handsup', {otherUserId: mobile});
       clearInterval(callDurationInterval);
       setCallStatus(false);
+      stopCall()
       navigation.reset({
         index: 0,
         routes: [{name: 'LayoutScreen'}],
@@ -138,6 +134,7 @@ const AudioScreen = ({route, navigation}) => {
     const handleHandsup = async () => {
       clearInterval(callDurationInterval);
       setCallStatus(false);
+      stopCall()
       navigation.reset({
         index: 0,
         routes: [{name: 'LayoutScreen'}],
@@ -185,11 +182,11 @@ const AudioScreen = ({route, navigation}) => {
 
   useEffect(() => {
     const handleBalanceUpdate = (data) => {
-      console.log("Balance ===",data);
-      setCallDuration(data.duration);
+      // console.log("Balance ===",data);
+      // setCallDuration(data.duration);
       if (!data.isBalanceEnough) {
 
-        console.log("Balance is insufficient, ending call.",data);
+        // console.log("Balance is insufficient, ending call.",data);
         // endCall(); 
       }
     };
@@ -199,6 +196,18 @@ const AudioScreen = ({route, navigation}) => {
       webSocket.off('balanceUpdate', handleBalanceUpdate);
     };
   }, [webSocket, endCall]);
+
+  useEffect(() => {
+    if(isBalanceZero){
+      endCall();
+    }
+   }, [isBalanceZero]);
+
+  useEffect(() => {
+    if(isBalanceEnough){
+     Alert.alert("your balance is not enough")
+    }
+   }, [isBalanceEnough]);
 
   return (
     <View style={styles.container}>

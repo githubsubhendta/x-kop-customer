@@ -159,8 +159,8 @@ export const WebSocketProvider = ({ children }) => {
     return () => {
       closeWebSocket();
     };
-  }, [isConnected, user, localTokens]); 
-
+  }, [isConnected, localTokens]); 
+  // [isConnected, user, localTokens]
   return (
     <WebSocketContext.Provider value={{ webSocket }}>
       {children}

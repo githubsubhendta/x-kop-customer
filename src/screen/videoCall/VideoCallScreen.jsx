@@ -5,6 +5,7 @@ import requestCameraAndAudioPermission from '../../Components/permissions.js';
 import { SvgXml } from 'react-native-svg';
 import { SVG_hangout_red, SVG_mute_mic, SVG_speaker, SVG_speakeroff, SVG_stop_camera, SVG_switch_camera, SVG_unmute_mic } from '../../utils/SVGImage.js';
 import { useWebSocket } from '../../shared/WebSocketProvider.jsx';
+import { useCallDuration } from '../../shared/CallDurationContext.js';
 
 const { width, height } = Dimensions.get('window');
 const appId = '1be639d040da4a42be10d134055a2abd';
@@ -19,6 +20,18 @@ const VideoCallScreen = ({ route, navigation }) => {
   const [isCameraOn, setCameraOn] = useState(true);
   const [isSpeakerOn, setSpeakerOn] = useState(true);
   const { webSocket } = useWebSocket();
+
+  const { callDuration, startCall, stopCall, isCallActive,isBalanceEnough,isBalanceZero} = useCallDuration();
+
+  // useEffect(() => {
+  //   if (isCallActive) {
+  //     const startTime = new Date();
+  //     startCall(startTime);
+  //   }
+  //   return () => {
+  //     if (isCallActive) stopCall();
+  //   };
+  // }, [isCallActive, startCall, stopCall]);
 
   useEffect(() => {
     if (Platform.OS === 'android') {
@@ -71,14 +84,14 @@ const VideoCallScreen = ({ route, navigation }) => {
 
       _engine.current.enableVideo();
       _engine.current.startPreview();
-      startCall();
+      startCallFun();
     } catch (error) {
       console.error('Error initializing Agora Engine:', error);
       showMessage('Error initializing Agora Engine: ' + error);
     }
   };
 
-  const startCall = async () => {
+  const startCallFun = async () => {
     try {
       await _engine.current?.joinChannel(
         config.token,
@@ -98,6 +111,8 @@ const VideoCallScreen = ({ route, navigation }) => {
     if (webSocket) {
       webSocket.on('appyHandsup', data => {
         // navigation.navigate("FindAnOfficerScreen");
+      stopCall()
+
         navigation.reset({
           index: 0,
           routes: [{name: 'LayoutScreen'}],
@@ -115,6 +130,8 @@ const VideoCallScreen = ({ route, navigation }) => {
         _engine.current.release();
         webSocket.emit('handsup', { otherUserId: mobile });
         // navigation.navigate('FindAnOfficerScreen');
+      stopCall()
+
         navigation.reset({
           index: 0,
           routes: [{name: 'LayoutScreen'}],
@@ -153,6 +170,18 @@ const VideoCallScreen = ({ route, navigation }) => {
     console.log(message);
   };
 
+  useEffect(() => {
+    if(isBalanceZero){
+      endCall();
+    }
+   }, [isBalanceZero]);
+
+  useEffect(() => {
+    if(isBalanceEnough){
+     Alert.alert("your balance is not enough")
+    }
+   }, [isBalanceEnough]);
+
   const _renderRemoteVideos = () => {
     if (peerIds.length > 0) {
       const id = peerIds[0];
@@ -167,6 +196,7 @@ const VideoCallScreen = ({ route, navigation }) => {
       <View style={styles.remoteContainer}>
         {_renderRemoteVideos()}
       </View>
+      <Text className="text-black">{callDuration}</Text>
       {isCameraOn && (
         <View style={styles.localContainer}>
           <RtcSurfaceView style={styles.local} canvas={{ uid: 0 }} />

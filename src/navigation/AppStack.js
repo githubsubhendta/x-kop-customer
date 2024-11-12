@@ -14,6 +14,7 @@ import FirebaseProvider from '../shared/FirebaseProvider.jsx';
 import {WebSocketProvider} from '../shared/WebSocketProvider.jsx';
 import ParantWrapperProvider from '../shared/ParantWrapperProvider.jsx';
 import ChatScreen from '../screen/Chat.Screen.jsx';
+import { CallDurationProvider } from '../shared/CallDurationContext.js';
 
 
 const Stack = createStackNavigator();
@@ -25,6 +26,7 @@ const AppStack = () => {
     <FirebaseProvider>
       <WebSocketProvider>
         <ParantWrapperProvider>
+        <CallDurationProvider>
           <Stack.Navigator
             initialRouteName={
               !whatwedoStatus ? 'WhatWeDoScreen' : 'LayoutScreen'
@@ -45,6 +47,7 @@ const AppStack = () => {
               component={FindAnOfficerScreen}
               options={{headerShown: false}}
             />
+           
             <Stack.Screen
               name="AudioScreen"
               component={AudioScreen}
@@ -55,6 +58,7 @@ const AppStack = () => {
               component={VideoCallScreen}
               options={{headerShown: false}}
             />
+            
             <Stack.Screen
               name="TransactionsScreen"
               component={TransactionsScreen}
@@ -70,6 +74,7 @@ const AppStack = () => {
               component={EditProfile}
               options={{headerShown: false}}
             />
+           
             <Stack.Screen
               name="WalletScreen"
               component={WalletScreen}
@@ -81,7 +86,9 @@ const AppStack = () => {
               component={ChatScreen}
               options={{headerShown: false}}
             />
+           
           </Stack.Navigator>
+          </CallDurationProvider>
         </ParantWrapperProvider>
       </WebSocketProvider>
     </FirebaseProvider>
