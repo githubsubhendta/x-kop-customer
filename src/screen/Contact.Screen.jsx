@@ -70,7 +70,7 @@ const ContactScreen = () => {
                       <TouchableOpacity
                         key={index}
                         style={{ marginHorizontal: 4 }}
-                        onPress={() => navigate("ChatScreen", { chatId: chat._id })}
+                        onPress={() => navigate("ChatScreen", { chatId: chat._id,chats:chat })}
                       >
                         <Card.Title
                           title={officer?.name || 'Unknown Officer'}

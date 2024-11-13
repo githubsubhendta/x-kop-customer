@@ -1,49 +1,53 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, FlatList, TouchableOpacity,Image, Alert, Platform } from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  FlatList,
+  TouchableOpacity,
+  Image,
+  Alert,
+  Platform,
+} from 'react-native';
 import AddFundsModal from '../../Components/account/AddFundsModal';
 import userStoreAction from '../../stores/user.store';
 import useHttpRequest from '../../hooks/useHttpRequest';
-import { SvgXml } from 'react-native-svg';
-import { SVG_arrow_back, SVG_download } from '../../utils/SVGImage';
-import { useSnackbar } from '../../shared/SnackbarProvider';
+import {SvgXml} from 'react-native-svg';
+import {SVG_arrow_back, SVG_download} from '../../utils/SVGImage';
+import {useSnackbar} from '../../shared/SnackbarProvider';
 import RNFetchBlob from 'react-native-blob-util';
-import { BASE_URI } from '../../Api/ApiManager';
-import { useBankPaymentList } from '../../Api/backPaymentService';
+import {BASE_URI} from '../../Api/ApiManager';
+import {useBankPaymentList} from '../../Api/backPaymentService';
 
 const WalletScreen = ({navigation}) => {
   const {loading, data} = useHttpRequest();
   // { loading, error, paymentList, loadMore, hasMore }
   const bankHistory = useBankPaymentList();
-    const {user,addLoggedInUserAction} = userStoreAction(
-        state => state,
-      );
-  const [loading1, setLoading1] = React.useState(false); 
+  const {user, addLoggedInUserAction} = userStoreAction(state => state);
+  const [loading1, setLoading1] = React.useState(false);
   const [isModalVisible, setModalVisible] = useState(false);
-  const { showSnackbar } = useSnackbar();
-  const { dirs } = RNFetchBlob.fs;
+  const {showSnackbar} = useSnackbar();
+  const {dirs} = RNFetchBlob.fs;
 
-
-  const alertMessage = (message,type) => {
-    showSnackbar(message,type)
+  const alertMessage = (message, type) => {
+    showSnackbar(message, type);
   };
 
-  useEffect(()=>{
-  if(data != null){
-    addLoggedInUserAction({...data.data.user}, true);
-  }
-  },[data])
+  useEffect(() => {
+    if (data != null) {
+      addLoggedInUserAction({...data.data.user}, true);
+    }
+  }, [data]);
 
-
-  if(loading){
+  if (loading) {
     return (
       <View className="flex-1 justify-center items-center">
         <Text className="text-slate-900">Loading...</Text>
       </View>
-    )
+    );
   }
 
-
-  const downloadSlip = async (transactionId) => {
+  const downloadSlip = async transactionId => {
     try {
       // const hasPermission = await requestStoragePermission();
       // if (!hasPermission) {
@@ -51,36 +55,42 @@ const WalletScreen = ({navigation}) => {
       //   return;
       // }
 
-      console.log("Downloading transaction ID:", transactionId);
-      const { dirs } = RNFetchBlob.fs;
-      const path = Platform.OS === 'ios' ? dirs.DocumentDir : dirs.DownloadDir; 
+      console.log('Downloading transaction ID:', transactionId);
+      const {dirs} = RNFetchBlob.fs;
+      const path = Platform.OS === 'ios' ? dirs.DocumentDir : dirs.DownloadDir;
       const filePath = `${path}/transaction-${transactionId}.pdf`;
 
-      setLoading1(true); 
+      setLoading1(true);
       const response = await RNFetchBlob.config({
-        path: filePath, 
-        fileCache: true, 
+        path: filePath,
+        fileCache: true,
       }).fetch('GET', `${BASE_URI}/payment/download/${transactionId}`);
 
       if (response.respInfo.status === 200) {
         console.log('File saved successfully at:', filePath);
-        RNFetchBlob.android.actionViewIntent(filePath, 'application/pdf'); 
+        RNFetchBlob.android.actionViewIntent(filePath, 'application/pdf');
       } else {
-        Alert.alert('Download Failed', 'Failed to download PDF. Please try again later.');
+        Alert.alert(
+          'Download Failed',
+          'Failed to download PDF. Please try again later.',
+        );
       }
     } catch (error) {
       console.error('Error downloading PDF:', error);
       Alert.alert('Error', 'Failed to download PDF. Please try again later.');
     } finally {
-      setLoading1(false); 
+      setLoading1(false);
     }
   };
 
-  const itemRender = ({ item }) => (
+  const itemRender = ({item}) => (
     <View className="flex flex-row justify-between p-2 border-b-2 border-slate-200 my-2">
       <View className="flex flex-row gap-10">
         <View className="w-[50px] h-[50px] rounded-full">
-          <Image source={{ uri: user.avatar }} className="w-[100%] h-[100%] rounded-full" />
+          <Image
+            source={{uri: user.avatar}}
+            className="w-[100%] h-[100%] rounded-full"
+          />
         </View>
         <View>
           <Text className="text-slate-600">{user.name}</Text>
@@ -91,8 +101,10 @@ const WalletScreen = ({navigation}) => {
         </View>
       </View>
       <View className="flex flex-col justify-center">
-        <TouchableOpacity className="w-8 h-8 flex justify-start" onPress={() => downloadSlip(item._id)}>
-          <SvgXml xml={SVG_download} height={"100%"} width={"100%"} />
+        <TouchableOpacity
+          className="w-8 h-8 flex justify-start"
+          onPress={() => downloadSlip(item._id)}>
+          <SvgXml xml={SVG_download} height={'100%'} width={'100%'} />
         </TouchableOpacity>
       </View>
     </View>
@@ -100,31 +112,39 @@ const WalletScreen = ({navigation}) => {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity className="w-8 h-8 flex justify-start" onPress={()=>navigation.goBack()}>
-       <SvgXml xml={SVG_arrow_back} height={"100%"} width={"100%"} />
-       </TouchableOpacity>
+      <TouchableOpacity
+        className="w-8 h-8 flex justify-start"
+        onPress={() => navigation.goBack()}>
+        <SvgXml xml={SVG_arrow_back} height={'100%'} width={'100%'} />
+      </TouchableOpacity>
       <View style={styles.balanceContainer}>
-        <Text className="text-orange-900 font-bold text-3xl">Wallet Balance</Text>
-        <Text style={styles.balanceAmount}>₹{user?.wallet == undefined ? "0" : user?.wallet}</Text>
+        <Text className="text-orange-900 font-bold text-3xl">
+          Wallet Balance
+        </Text>
+        <Text style={styles.balanceAmount}>
+          ₹{user?.wallet == undefined ? '0' : user?.wallet}
+        </Text>
       </View>
       <View style={styles.transactionContainer}>
-        <Text style={styles.transactionHeader} >Transaction History</Text>
+        <Text style={styles.transactionHeader}>Transaction History</Text>
         <View className="px-7">
-        <Text className="text-slate-500 text-md">Previous Receipts</Text>
-      </View>
-      <View className="bg-slate-300 h-[1px] my-3"  />
-      {user?.transactions.length > 0 && (
-        // bankHistory
-        // { loading, error, paymentList, loadMore, hasMore }
-        <FlatList
-        data={bankHistory.paymentList}
-        renderItem={itemRender}
-        keyExtractor={(item, index) => `${item._id}-${index}`}  // Combine _id and index
-        onEndReached={bankHistory.hasMore ? bankHistory.loadMore : null}
-        onEndReachedThreshold={0.5}
-        // ListFooterComponent={loading && <ActivityIndicator size="large" color="#0000ff" />}
-        style={{ marginBottom: 50 }}
-      />
+          <Text className="text-slate-500 text-md">Previous Receipts</Text>
+        </View>
+        <View className="bg-slate-300 h-[1px] my-3" />
+        {user?.transactions.length > 0 && (
+          // bankHistory
+          // { loading, error, paymentList, loadMore, hasMore }
+          <FlatList
+            data={bankHistory.paymentList}
+            renderItem={itemRender}
+            keyExtractor={(item, index) => `${item._id}-${index}`}
+            onEndReached={bankHistory.hasMore ? bankHistory.loadMore : null}
+            onEndReachedThreshold={0.5}
+            ListFooterComponent={
+              loading && <ActivityIndicator size="large" color="#0000ff" />
+            }
+            style={{marginBottom: 50}}
+          />
           // <FlatList
           //   data={user?.transactions}
           //   renderItem={itemRender}
@@ -134,19 +154,21 @@ const WalletScreen = ({navigation}) => {
         )}
       </View>
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={() => setModalVisible(true)}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => setModalVisible(true)}>
           <Text style={styles.buttonText}>Add Money</Text>
         </TouchableOpacity>
         {/* onPress={()=>navigation.push("PaymentScreen")} */}
-        <TouchableOpacity style={styles.button}  >
+        <TouchableOpacity style={styles.button}>
           <Text style={styles.buttonText}>Withdraw</Text>
         </TouchableOpacity>
 
         <AddFundsModal
-        modalVisible={isModalVisible}
-        setModalVisible={setModalVisible}
-        alertMessage={alertMessage}
-      />
+          modalVisible={isModalVisible}
+          setModalVisible={setModalVisible}
+          alertMessage={alertMessage}
+        />
       </View>
     </View>
   );
@@ -165,7 +187,7 @@ const styles = StyleSheet.create({
   balanceText: {
     fontSize: 18,
     fontWeight: 'bold',
-    color:"#862A0D",
+    color: '#862A0D',
   },
   balanceAmount: {
     fontSize: 32,
@@ -179,7 +201,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
-    color:"#862A0D"
+    color: '#862A0D',
   },
   transactionItem: {
     padding: 10,
@@ -192,7 +214,7 @@ const styles = StyleSheet.create({
   },
   transactionDate: {
     fontSize: 14,
-    color: '#666', 
+    color: '#666',
   },
   buttonContainer: {
     flexDirection: 'row',

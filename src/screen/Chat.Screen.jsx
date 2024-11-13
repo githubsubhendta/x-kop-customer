@@ -77,7 +77,7 @@ const Message = ({item, user, onLongPress, selectedMessages}) => {
 const ChatScreen = ({route, navigation}) => {
   const {webSocket} = useWebSocket();
   const {user} = useUserStore();
-  const {chatId} = route.params;
+  const {chatId, chats} = route.params;
   const [openMenu, setOpenMenu] = useState(false);
   const [allMessages, setAllMessages] = useState([]);
   const [selectedMessages, setSelectedMessages] = useState([]);
@@ -90,35 +90,35 @@ const ChatScreen = ({route, navigation}) => {
   const [isVideoModalVisible, setVideoModalVisible] = useState(false);
   const {conversations, setConversations} = useChatStore();
   const showEditButton = selectedMessages.length === 1;
-  const chats = user.chats.find(chat => chat._id === chatId);
+
   // const officer =
   //   chats?.participants?.find(
   //     participant => participant?.officerDetails === undefined,
   //   ) || {};
 
-      const officer =
+  const officer =
     chats?.participants?.find(participant => participant?.officerDetails) || {};
-    
 
   useEffect(() => {
     if (conversations.length) {
       const currentConversation = conversations.find(
         convo => convo.conversationId === chatId,
       );
-     
+
       if (currentConversation) {
-        setAllMessages(currentConversation.messages.sort((a, b) =>new Date(b.createdAt)-new Date(a.createdAt)));
+        setAllMessages(
+          currentConversation.messages.sort(
+            (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+          ),
+        );
       }
     }
-  }, [conversations, chatId,setConversations]);
+  }, [conversations, chatId, setConversations]);
 
-
-
-
-    const handleUpdateMessage = useCallback(() => {
+  const handleUpdateMessage = useCallback(() => {
     if (editingMessage && editContent.trim()) {
       if (webSocket) {
-          webSocket.emit('updatemessage', {
+        webSocket.emit('updatemessage', {
           messageId: editingMessage,
           newContent: editContent,
           reciever: {id: officer._id, mobile: officer.mobile},
@@ -179,12 +179,10 @@ const ChatScreen = ({route, navigation}) => {
           {conversationId: chatId, messages: getInitial.messages},
         ]);
       } else {
-        
         const currentConversation = conversations.find(
           convo => convo.conversationId === chatId,
         );
         if (currentConversation) {
-          
           updateNewMessageStore(getInitial.messages);
         } else {
           setConversations([
@@ -228,7 +226,7 @@ const ChatScreen = ({route, navigation}) => {
     return filterType.type;
   };
 
-    const handleEditMessage = useCallback(
+  const handleEditMessage = useCallback(
     messageId => {
       const messageToEdit = allMessages.find(msg => msg._id === messageId);
       if (messageToEdit) {
@@ -265,14 +263,16 @@ const ChatScreen = ({route, navigation}) => {
           <Message
             item={item}
             user={user}
-            onLongPress={() => item.sender != officer._id && toggleMessageSelection(item._id)}
+            onLongPress={() =>
+              item.sender != officer._id && toggleMessageSelection(item._id)
+            }
             selectedMessages={selectedMessages}
           />
         )}
         loading={loading}
         onLoadMore={onLoadMore}
       />
-      
+
       <ChatMessageInput
         user={user}
         officer={officer}
@@ -391,7 +391,6 @@ export default ChatScreen;
 
 
 
-
 // import {
 //   View,
 //   Text,
@@ -407,7 +406,7 @@ export default ChatScreen;
 // } from 'react-native';
 // import React, {useEffect, useRef, useState, useCallback} from 'react';
 // import Icon2 from 'react-native-vector-icons/Entypo';
-// import Icon from 'react-native-vector-icons/MaterialIcons'; 
+// import Icon from 'react-native-vector-icons/MaterialIcons';
 // import {SvgXml} from 'react-native-svg';
 // import {SVG_arrow_back, SVG_PDF} from '../utils/SVGImage';
 // import MessageInput from '../Components/MessageInput';
@@ -484,7 +483,6 @@ export default ChatScreen;
 //       setEditContent('');
 //     }
 //   }, [webSocket, editingMessage, editContent]);
-
 
 //   const openImageModal = (imageUrl) => {
 //     setSelectedImage(imageUrl);
@@ -667,7 +665,7 @@ export default ChatScreen;
 
 //           {selectedMessages.length > 0 && (
 //             <View style={styles.headerButtons}>
-          
+
 //               {showEditButton && filterMessageType(selectedMessages[0])=="text" && (
 //                 <TouchableOpacity onPress={() => handleEditMessage(selectedMessages[0])}>
 //                   <Icon name="edit" size={24} color="blue" />
@@ -713,20 +711,19 @@ export default ChatScreen;
 //          {/* Modal for zooming images */}
 //          <Modal visible={isModalVisible} transparent={true} onRequestClose={closeImageModal}>
 //           <View style={styles.modalContainer}>
-            
+
 //               <Text>{console.log(selectedImage)}</Text>
-          
+
 //             <TouchableOpacity style={styles.closeModalButton} onPress={closeImageModal}>
 //               <Text style={styles.closeModalText}>Close</Text>
 //             </TouchableOpacity>
 //             {
 //               selectedImage && <Image source={{uri: selectedImage}} style={styles.modalImage} />
 //             }
-          
+
 //           </View>
 //         </Modal>
 
-       
 //         <Modal visible={isVideoModalVisible} transparent={true} onRequestClose={closeVideoModal}>
 //           <View style={styles.modalContainer}>
 //             <TouchableOpacity style={styles.closeModalButton} onPress={closeVideoModal}>
@@ -764,7 +761,7 @@ export default ChatScreen;
 //                   setSelectedMessages([]);
 //                   setEditingMessage(null);
 //                   setEditContent('');
-                  
+
 //                 }}
 //               />
 //             </View>
@@ -935,7 +932,3 @@ export default ChatScreen;
 // });
 
 // export default ChatScreen;
-
-
-
-
