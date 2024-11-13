@@ -1,23 +1,35 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, Image, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, ScrollView, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Searchbar, Card } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import useUserStore from '../stores/user.store';
 import { navigate } from '../navigation/NavigationService';
+import { useConversationList } from '../Api/conversationService';
 
 const ContactScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLetter, setSelectedLetter] = useState('');
-  const { user } = useUserStore();
+  const { loading, error, conversationList, getAllConversationList } = useConversationList();
+
+  useEffect(() => {
+    if (conversationList.length === 0) {
+      getAllConversationList();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (error) {
+      console.log("Error:", error);
+    }
+  }, [error]);
 
   const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
-  const matchedChats = user?.chats?.filter(chat => {
+  const matchedChats = conversationList?.filter(chat => {
     const officerName = chat.participants.find(user => user.officerDetails)?.name || '';
     return officerName[0]?.toUpperCase() === selectedLetter;
   });
 
-  const otherChats = user?.chats?.filter(chat => {
+  const otherChats = conversationList?.filter(chat => {
     const officerName = chat.participants.find(user => user.officerDetails)?.name || '';
     return officerName[0]?.toUpperCase() !== selectedLetter && officerName.toLowerCase().includes(searchQuery.toLowerCase());
   });
@@ -25,71 +37,74 @@ const ContactScreen = () => {
   const displayedChats = [...(matchedChats || []), ...(otherChats || [])];
 
   return (
-    <View className="flex-1 bg-white">
-      <View className="w-full">
-        <Text className="font-medium pl-6 pr-6 pt-6 pb-4 text-primary text-2xl">Consultations</Text>
-        <View className="flex flex-row items-center m-6 mt-0 relative rounded-lg border-[1px] border-[#F6F6F6] bg-[#F6F6F6]">
+    <View style={{ flex: 1, backgroundColor: 'white' }}>
+      <View style={{ width: '100%' }}>
+        <Text style={{ fontSize: 24, fontWeight: '500', paddingHorizontal: 16, paddingVertical: 8, color: '#1A202C' }}>
+          Consultations
+        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', margin: 16, marginTop: 0, borderRadius: 8, borderWidth: 1, borderColor: '#F6F6F6', backgroundColor: '#F6F6F6' }}>
           <Searchbar
-            className="rounded-none bg-transparent pr-4"
+            style={{ flex: 1, backgroundColor: 'transparent', paddingRight: 4 }}
             placeholder="Search"
-            onChangeText={setSearchQuery}
+            onChangeText={(text) => {
+              setSearchQuery(text);
+              setSelectedLetter(''); // Clear selected letter on search
+            }}
             value={searchQuery}
           />
-          <View className="absolute right-1">
+          <View style={{ position: 'absolute', right: 8 }}>
             <Icon name="filter-variant-plus" size={25} color="black" />
           </View>
         </View>
 
-        <View className="flex-row justify-end w-full">
-          <View className="flex-1">
-            <ScrollView>
-              {displayedChats?.length > 0 ? (
-                displayedChats.map((chat, index) => {
-                  const officer = chat.participants.find(user => user.officerDetails);
-                  return (
-                    <TouchableOpacity
-                      key={index}
-                      className="ml-4 mr-1"
-                      onPress={() => navigate("ChatScreen", { chatId: chat._id })}
-                    >
-                      <Card.Title
-                        title={officer?.name || 'Unknown Officer'}
-                        subtitle={
-                          officer?.officerDetails?.ConsultationTypeID?.ConsultationTypeName || 'General Offences'
-                        }
-                        left={() => (
-                          <View className="pr-4">
+        <View style={{ flexDirection: 'row', width: '100%' }}>
+          <View style={{ flex: 1 }}>
+            {loading ? (
+              <ActivityIndicator size="large" />
+            ) : (
+              <ScrollView>
+                {displayedChats.length > 0 ? (
+                  displayedChats.map((chat, index) => {
+                    const officer = chat.participants.find(user => user.officerDetails);
+                    return (
+                      <TouchableOpacity
+                        key={index}
+                        style={{ marginHorizontal: 4 }}
+                        onPress={() => navigate("ChatScreen", { chatId: chat._id })}
+                      >
+                        <Card.Title
+                          title={officer?.name || 'Unknown Officer'}
+                          subtitle={officer?.officerDetails?.ConsultationTypeID?.ConsultationTypeName || 'General Offences'}
+                          left={() => (
                             <Image
-                              source={{
-                                uri: officer?.avatar || 'https://via.placeholder.com/50',
-                              }}
-                              className="w-[50px] h-[50px] rounded-full"
+                              source={{ uri: officer?.avatar || 'https://via.placeholder.com/50' }}
+                              style={{ width: 50, height: 50, borderRadius: 25 }}
                             />
-                          </View>
-                        )}
-                        className="border-b-2 border-[#F6F6F6]"
-                      />
-                    </TouchableOpacity>
-                  );
-                })
-              ) : (
-                <View className="ml-4 mr-4">
-                  <Text>No chats available</Text>
-                </View>
-              )}
+                          )}
+                          style={{ borderBottomWidth: 1, borderBottomColor: '#F6F6F6' }}
+                        />
+                      </TouchableOpacity>
+                    );
+                  })
+                ) : (
+                  <View style={{ margin: 16 }}>
+                    <Text>No chats available</Text>
+                  </View>
+                )}
+              </ScrollView>
+            )}
+          </View>
+          <View style={{ paddingVertical: 8, backgroundColor: '#F6F6F6', marginHorizontal: 8, borderRadius: 50 }}>
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {alphabet.map((letter, index) => (
+                <TouchableOpacity key={index} onPress={() => setSelectedLetter(letter)}>
+                  <Text style={{ paddingHorizontal: 10, paddingVertical: 4, textAlign: 'center', color: selectedLetter === letter ? '#4299E1' : '#A0AEC0' }}>
+                    {letter}
+                  </Text>
+                </TouchableOpacity>
+              ))}
             </ScrollView>
           </View>
-         <View className="py-2 bg-[#F6F6F6] mx-3 rounded-full">
-         <ScrollView showsVerticalScrollIndicator={false} >
-            {alphabet.map((letter, index) => (
-              <TouchableOpacity key={index} onPress={() => setSelectedLetter(letter)}>
-                <Text className={`px-[10px] py-[2px] ${selectedLetter === letter ? 'text-blue-500' : 'text-gray-500'} text-center`}>
-                  {letter}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-         </View>
         </View>
       </View>
     </View>

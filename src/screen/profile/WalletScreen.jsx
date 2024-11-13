@@ -8,9 +8,12 @@ import { SVG_arrow_back, SVG_download } from '../../utils/SVGImage';
 import { useSnackbar } from '../../shared/SnackbarProvider';
 import RNFetchBlob from 'react-native-blob-util';
 import { BASE_URI } from '../../Api/ApiManager';
+import { useBankPaymentList } from '../../Api/backPaymentService';
 
 const WalletScreen = ({navigation}) => {
-  const {loading, error, data, fetchData} = useHttpRequest();
+  const {loading, data} = useHttpRequest();
+  // { loading, error, paymentList, loadMore, hasMore }
+  const bankHistory = useBankPaymentList();
     const {user,addLoggedInUserAction} = userStoreAction(
         state => state,
       );
@@ -25,7 +28,6 @@ const WalletScreen = ({navigation}) => {
   };
 
   useEffect(()=>{
-    
   if(data != null){
     addLoggedInUserAction({...data.data.user}, true);
   }
@@ -112,12 +114,23 @@ const WalletScreen = ({navigation}) => {
       </View>
       <View className="bg-slate-300 h-[1px] my-3"  />
       {user?.transactions.length > 0 && (
-          <FlatList
-            data={user?.transactions}
-            renderItem={itemRender}
-            keyExtractor={item => item._id}
-            // style={{paddingBottom:100}}
-          />
+        // bankHistory
+        // { loading, error, paymentList, loadMore, hasMore }
+        <FlatList
+        data={bankHistory.paymentList}
+        renderItem={itemRender}
+        keyExtractor={(item, index) => `${item._id}-${index}`}  // Combine _id and index
+        onEndReached={bankHistory.hasMore ? bankHistory.loadMore : null}
+        onEndReachedThreshold={0.5}
+        // ListFooterComponent={loading && <ActivityIndicator size="large" color="#0000ff" />}
+        style={{ marginBottom: 50 }}
+      />
+          // <FlatList
+          //   data={user?.transactions}
+          //   renderItem={itemRender}
+          //   keyExtractor={item => item._id}
+          //   // style={{paddingBottom:100}}
+          // />
         )}
       </View>
       <View style={styles.buttonContainer}>
