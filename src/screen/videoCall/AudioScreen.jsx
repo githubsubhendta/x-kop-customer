@@ -34,7 +34,7 @@ const AudioScreen = ({route, navigation}) => {
   const [isSpeakerEnabled, setIsSpeakerEnabled] = useState(true);
   const [connectionStatus, setConnectionStatus] = useState('Not Connected');
   const [peerIds, setPeerIds] = useState([]);
-  // const [callDuration, setCallDuration] = useState('00:00:00');
+
   let callDurationInterval;
   let callMinUpdate;
   const [modelChat, setModelChat] = useState(false);
@@ -46,11 +46,11 @@ const AudioScreen = ({route, navigation}) => {
  
 
   useEffect(() => {
-    startCall(startTime, consultType);
+    startCall(startTime, consultType,reciever_data.userInfo.mobile,webSocket);
     return () => {
       stopCall(); 
     };
-  }, []);
+  }, [webSocket]);
 
   // useEffect(() => {
   //   callDurationInterval = setInterval(() => {
@@ -180,22 +180,16 @@ const AudioScreen = ({route, navigation}) => {
   }, [webSocket, engine, createTwoButtonAlert, navigation, config, mobile]);
 
 
-  useEffect(() => {
-    const handleBalanceUpdate = (data) => {
-      // console.log("Balance ===",data);
-      // setCallDuration(data.duration);
-      if (!data.isBalanceEnough) {
-
-        // console.log("Balance is insufficient, ending call.",data);
-        // endCall(); 
-      }
-    };
+  // useEffect(() => {
+  //   const handleCallDurationUpdate = (data) => {
+  //     console.log("check callDuration==>",data.callDuration)
+  //   };
   
-    webSocket.on('balanceUpdate', handleBalanceUpdate);
-    return () => {
-      webSocket.off('balanceUpdate', handleBalanceUpdate);
-    };
-  }, [webSocket, endCall]);
+  //   webSocket.on('updateCallDuration', handleCallDurationUpdate);
+  //   return () => {
+  //     webSocket.off('updateCallDuration', handleCallDurationUpdate);
+  //   };
+  // }, [webSocket, endCall]);
 
   useEffect(() => {
     if(isBalanceZero){

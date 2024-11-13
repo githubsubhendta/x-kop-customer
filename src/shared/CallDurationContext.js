@@ -21,7 +21,7 @@ export const CallDurationProvider = ({ children }) => {
   useEffect(()=>{
     userUpdate = user.wallet;
   },[user])
-  const startCall = useCallback((startTime, consultType) => {
+  const startCall = useCallback((startTime, consultType,receiverUser,webSocket) => {
     setIsCallActive(true);
     callDurationInterval.current = setInterval(() => {
       const currentTime = new Date();
@@ -31,6 +31,13 @@ export const CallDurationProvider = ({ children }) => {
       const hours = Math.floor((timeDifference / (1000 * 60 * 60)) % 24);
       const formattedDuration = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
       setCallDuration(formattedDuration);
+
+      
+      webSocket.emit('syncCallDuration', {
+        receiverUser,
+        duration:formattedDuration
+      });
+
       if (seconds === 59) {
         userUpdate = userUpdate-consultType.FeePerMinute;
         if(userUpdate<=consultType.FeePerMinute*5){
@@ -56,6 +63,8 @@ export const CallDurationProvider = ({ children }) => {
     setIsCallActive(false);
     setCallDuration('00:00:00');
   }, []);
+
+  
 
   return (
     <CallDurationContext.Provider value={{ callDuration, startCall, stopCall, isCallActive, isBalanceEnough, isBalanceZero }}>
