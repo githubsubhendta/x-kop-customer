@@ -39,7 +39,7 @@ const ScheduleScreen = ({navigation}) => {
   useEffect(()=>{
     (async ()=>{
       const allHistory = await getAllSchedules();
-      console.log("check history=>",allHistory)
+      // console.log("check history=>",allHistory)
       setScheduleList(allHistory)
     })()
     
