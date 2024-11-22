@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {
   View,
   Text,
@@ -203,6 +203,16 @@ const AudioScreen = ({route, navigation}) => {
     }
    }, [isBalanceEnough]);
 
+   const handleClose = useCallback(() => setModelChat(false), []);
+
+   const chatModal = useMemo(() => (
+     <ChatModal 
+       chatId={reciever_data?.chatId} 
+       isVisible={modelChat} 
+       onClose={handleClose} 
+     />
+   ), [chatId, modelChat, handleClose]);
+
   return (
     <View style={styles.container}>
       {connectionStatus !== 'Connected' ? (
@@ -272,8 +282,8 @@ const AudioScreen = ({route, navigation}) => {
           </View>
         </TouchableOpacity>
       </View>
-         <ChatModal chatId={reciever_data?.chatId} isVisible={modelChat} onClose={()=>setModelChat(false)} />
-        
+         {/* <ChatModal chatId={reciever_data?.chatId} isVisible={modelChat} onClose={()=>setModelChat(false)} /> */}
+         {chatModal}
     </View>
   );
 };

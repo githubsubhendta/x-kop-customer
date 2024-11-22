@@ -21,6 +21,7 @@ import useChatStore from '../../stores/chat.store.js';
 import {SvgXml} from 'react-native-svg';
 import Video from 'react-native-video';
 import {SVG_PDF} from '../../utils/SVGImage.js';
+import { useConversationList } from '../../Api/conversationService.js';
 
 const Message = ({item, user, onLongPress, selectedMessages}) => {
   return (
@@ -89,9 +90,23 @@ const ChatModal = ({chatId, isVisible, onClose}) => {
   const {conversations, setConversations} = useChatStore();
   const showEditButton = selectedMessages.length === 1;
   const chats = user.chats.find(chat => chat._id === chatId);
+  const {conversationList, getAllConversationList } = useConversationList();
 
-  const officer =
-    chats?.participants?.find(participant => participant?.officerDetails) || {};
+  // const officer =
+  //   chats?.participants?.find(participant => participant?.officerDetails) || {};
+
+  const [officer,setOfficer] = useState({});
+
+  useEffect(() => {
+    getAllConversationList();
+}, []);
+
+useEffect(()=>{
+  if(conversationList.length){
+    const chats = conversationList?.filter(chat => chat._id==chatId);
+    chats.length && setOfficer(chats[0]?.participants?.find(participant => participant?.officerDetails) || {})
+  }
+},[conversationList])
 
   useEffect(() => {
     if (conversations.length) {
