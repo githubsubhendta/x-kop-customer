@@ -6,8 +6,7 @@ import {
   StyleSheet,
   Image,
   Alert,
-  TextInput,
-  Modal,
+  TextInput
 } from 'react-native';
 import {SvgXml} from 'react-native-svg';
 import {RtcSurfaceView} from 'react-native-agora';
@@ -24,12 +23,14 @@ import {useWebSocket} from '../../shared/WebSocketProvider.jsx';
 
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import ChatModal from '../../Components/chat/ChatModal.jsx';
-import useUserStore from '../../stores/user.store.js';
 import { useCallDuration } from '../../shared/CallDurationContext.js';
 
 const AudioScreen = ({route, navigation}) => {
   const {config, mobile, reciever_data, consultType} = route.params || {};
-  const {webSocket} = useWebSocket();
+
+  console.log("consultType====>",consultType)
+
+  const {webSocket,leave} = useWebSocket();
   const [isMuted, setIsMuted] = useState(false);
   const [isSpeakerEnabled, setIsSpeakerEnabled] = useState(true);
   const [connectionStatus, setConnectionStatus] = useState('Not Connected');
@@ -51,35 +52,6 @@ const AudioScreen = ({route, navigation}) => {
       stopCall(); 
     };
   }, [webSocket]);
-
-  // useEffect(() => {
-  //   callDurationInterval = setInterval(() => {
-  //     const currentTime = new Date();
-  //     const timeDifference = currentTime - startTime;
-  //     const seconds = Math.floor((timeDifference / 1000) % 60);
-  //     const minutes = Math.floor((timeDifference / (1000 * 60)) % 60);
-  //     const hours = Math.floor((timeDifference / (1000 * 60 * 60)) % 24);
-
-  //     const formattedDuration = `${String(hours).padStart(2, '0')}:${String(
-  //       minutes,
-  //     ).padStart(2, '0')}:${String(seconds).padStart(2, '0')} min`;
-
-      
-  //     // webSocket.emit('checkBalance', {
-  //     //   receiverUser: reciever_data.userInfo.mobile,
-  //     //   consultInfo: reciever_data.consultationData,
-  //     //   currentTime,
-  //     //   balance:user.wallet
-  //     // });
-  //     // setCallDuration(formattedDuration);
-  //   }, 1000);
-
-  //   return () => {
-  //     clearInterval(callDurationInterval);
-  //   };
-  // }, []);
-
- 
 
   const {engine, isJoined} = useAgoraEngine(
     config,
@@ -110,17 +82,13 @@ const AudioScreen = ({route, navigation}) => {
   }, [isSpeakerEnabled, engine]);
 
   const endCall = useCallback(async () => {
-    console.log("end call hit")
     if (engine.current) {
       await engine.current.leaveChannel();
       webSocket.emit('handsup', {otherUserId: mobile});
       clearInterval(callDurationInterval);
       setCallStatus(false);
       stopCall()
-      navigation.reset({
-        index: 0,
-        routes: [{name: 'LayoutScreen'}],
-      });
+    
     }
   }, [engine, webSocket, mobile, navigation]);
 
@@ -211,7 +179,7 @@ const AudioScreen = ({route, navigation}) => {
        isVisible={modelChat} 
        onClose={handleClose} 
      />
-   ), [chatId, modelChat, handleClose]);
+   ), [reciever_data, modelChat, handleClose]); 
 
   return (
     <View style={styles.container}>

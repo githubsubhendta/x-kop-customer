@@ -15,7 +15,7 @@ import {useWebSocket} from '../shared/WebSocketProvider';
 const FindAnOfficerScreen = ({route, navigation}) => {
   const recieve_params = route.params;
   const {user} = userStoreAction(state => state);
-  const {webSocket} = useWebSocket();
+  const {webSocket,callRedirect} = useWebSocket();
   const [mobile, setMobile] = useState('');
   const {loading, error, data, fetchData} = useHttpRequest();
   const tokenData = useRef(null);
@@ -49,7 +49,6 @@ const FindAnOfficerScreen = ({route, navigation}) => {
       setMobile(data?.data?.mobile);
     } else{
       if (data) {
-        
         webSocket.emit('call', {
           calleeId: mobile,
           rtcMessage: data.data,
@@ -70,15 +69,8 @@ const FindAnOfficerScreen = ({route, navigation}) => {
   useEffect(() => {
     if (webSocket) {
       const handleAudioScreen = dataSet => {
-
-        navigation.navigate('AudioScreen', {
-          config: tokenData.current?.data,
-          mobile: tokenData.current?.mobile,
-          reciever_data: dataSet,
-          consultType:recieve_params
-        });
+        callRedirect(dataSet,tokenData,recieve_params)
       };
-
       webSocket.on('callAnswered', handleAudioScreen);
       return () => {
         webSocket.off('callAnswered', handleAudioScreen);

@@ -1,9 +1,10 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { io as SocketIOClient } from 'socket.io-client';
 import { BASE_URI_websocket } from '../Api/ApiManager.js';
 import userStoreAction from './../stores/user.store.js';
 import { useNetwork } from './NetworkProvider'; 
 import { getCurrentUser } from '../Api/user.api.js';
+import {navigate, reset} from '../navigation/NavigationService.js';
 
 const WebSocketContext = createContext();
 
@@ -12,6 +13,8 @@ export const WebSocketProvider = ({ children }) => {
   const { user, localTokens, handleUpdateUser } = userStoreAction(state => state);
   const { isConnected } = useNetwork(); 
   const [callReceiver, setCallReceiver] = useState(false);
+  const otherUserId = useRef(null);
+  const userInfo = useRef(null);
 
   const createWebSocket = async () => {
     if (!isConnected) {
@@ -63,6 +66,10 @@ export const WebSocketProvider = ({ children }) => {
       });
 
       setWebSocket(socket);
+
+
+     
+
     } catch (error) {
       // console.error('Error creating WebSocket:', error);
     }
@@ -87,8 +94,34 @@ export const WebSocketProvider = ({ children }) => {
     };
   }, [isConnected, localTokens]); 
   // [isConnected, user, localTokens]
+
+
+  const leave = (type = 'any') => {
+    webSocket.emit('handsup', {
+      otherUserId: otherUserId.current,
+      type: type,
+    });
+    
+    // navigation.reset({
+    //   index: 0,
+    //   routes: [{name: 'LayoutScreen'}],
+    // });
+
+  };
+
+  const callRedirect = (dataSet,tokenData,recieve_params) => {
+        userInfo.current = dataSet.userInfo;
+       navigate('AudioScreen', {
+          config: tokenData.current?.data,
+          mobile: tokenData.current?.mobile,
+          reciever_data: dataSet,
+          consultType:recieve_params
+        }); 
+  }
+
+
   return (
-    <WebSocketContext.Provider value={{ webSocket }}>
+    <WebSocketContext.Provider value={{ webSocket, leave, callRedirect }}>
       {children}
     </WebSocketContext.Provider>
   );
