@@ -38,7 +38,6 @@ const ParantWrapperProvider = ({children}) => {
   useEffect(() => {
     const handleMessage = data => {
       const currentConversation = conversations.find(convo => convo.conversationId === data.message.chat);
-
       if (currentConversation) {
           const updatedConversations = conversations.map((convo) => {
               if (convo.conversationId === data.message.chat) {
@@ -51,6 +50,7 @@ const ParantWrapperProvider = ({children}) => {
               }
               return convo;
           });
+        
           setConversations(updatedConversations);
       }
        else {

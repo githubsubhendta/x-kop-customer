@@ -24,11 +24,10 @@ import {useWebSocket} from '../../shared/WebSocketProvider.jsx';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import ChatModal from '../../Components/chat/ChatModal.jsx';
 import { useCallDuration } from '../../shared/CallDurationContext.js';
+import useChatStore from '../../stores/chat.store.js';
 
 const AudioScreen = ({route, navigation}) => {
   const {config, mobile, reciever_data, consultType} = route.params || {};
-
-  console.log("consultType====>",consultType)
 
   const {webSocket,leave} = useWebSocket();
   const [isMuted, setIsMuted] = useState(false);
@@ -44,7 +43,7 @@ const AudioScreen = ({route, navigation}) => {
 
   const startTime = new Date(reciever_data.consultationData.startCallTime);
 
- 
+  const {conversations} = useChatStore();
 
   useEffect(() => {
     startCall(startTime, consultType,reciever_data.userInfo.mobile,webSocket);
@@ -179,7 +178,7 @@ const AudioScreen = ({route, navigation}) => {
        isVisible={modelChat} 
        onClose={handleClose} 
      />
-   ), [reciever_data, modelChat, handleClose]); 
+   ), [reciever_data, modelChat, handleClose,conversations]); 
 
   return (
     <View style={styles.container}>

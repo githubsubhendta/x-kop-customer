@@ -122,7 +122,7 @@ useEffect(()=>{
         );
       }
     }
-  }, [conversations, chatId, setConversations]);
+  }, [conversations,conversationList, chatId, setConversations]);
 
   const handleUpdateMessage = useCallback(() => {
     if (editingMessage && editContent.trim()) {
