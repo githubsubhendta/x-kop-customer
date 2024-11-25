@@ -17,6 +17,11 @@ const ParantWrapperProvider = ({children}) => {
       status: true,
       fcmToken,
     });
+  } 
+  else{
+    webSocket && webSocket.emit('onLive', {
+      status: true
+    });
   }
   },[webSocket,fcmToken]);
 
@@ -37,6 +42,7 @@ const ParantWrapperProvider = ({children}) => {
 
   useEffect(() => {
     const handleMessage = data => {
+      console.log("check message data===>",data)
       const currentConversation = conversations.find(convo => convo.conversationId === data.message.chat);
       if (currentConversation) {
           const updatedConversations = conversations.map((convo) => {

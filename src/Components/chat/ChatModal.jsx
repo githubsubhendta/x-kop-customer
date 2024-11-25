@@ -271,6 +271,7 @@ useEffect(()=>{
             loading={loading}
             onLoadMore={onLoadMore}
           />
+         
           <ChatMessageInput
             user={user}
             officer={officer}
