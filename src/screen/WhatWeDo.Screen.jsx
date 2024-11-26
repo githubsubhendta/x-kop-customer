@@ -81,18 +81,18 @@ const WhatWeDoScreen = ({navigation}) => {
         ))}
       </View>
       <View className="px-10 bg-white">
-      <View className="flex justify-start gap-2 flex-row items-center">
+      <TouchableOpacity className="flex justify-start gap-2 flex-row items-center" onPress={()=>setToggleCheckBox(!toggleCheckBox)}>
         <CheckBox
           // disabled={false}
           tintColors={{true: '#862A0D'}}
-          onCheckColor={'#RRGGBB'}
+          onCheckColor={'#862A0D'}
           value={toggleCheckBox}
           onValueChange={newValue => setToggleCheckBox(newValue)}
         />
         <Text className="text-[#8B8C9F]">
          I have understood and ready to proceed.
         </Text>
-      </View>
+      </TouchableOpacity>
       <View className="w-[100%] px-5 my-10">
         <TouchableOpacity className={`${!toggleCheckBox?"bg-slate-200":"bg-orange-900"} m-auto py-4 w-[100%] rounded-xl`} disabled={!toggleCheckBox}  onPress={()=>handleLetsGo()}>
           <Text className="text-white text-center">Let s Go</Text>
