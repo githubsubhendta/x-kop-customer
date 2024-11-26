@@ -55,17 +55,14 @@
 	<false/>
 	<key>UIAppFonts</key>
 	<array>
-		<string>Rubik-Black.ttf</string>
-		<string>Rubik-Bold.ttf</string>
-		<string>Rubik-ExtraBold.ttf</string>
-		<string>Rubik-Italic.ttf</string>
-		<string>Rubik-Light.ttf</string>
-		<string>Rubik-Medium.ttf</string>
-		<string>Rubik-Regular.ttf</string>
-		<string>Rubik-SemiBold.ttf</string>
-		<string>Sevillana-Regular.ttf</string>
+		<string>Titillium-Black.otf</string>
+		<string>Titillium-Light.otf</string>
+		<string>Titillium-Regular.otf</string>
+		<string>Titillium-Semibold.otf</string>
+		<string>Ubuntu-B.ttf</string>
+		<string>Ubuntu-L.ttf</string>
+		<string>Ubuntu-R.ttf</string>
 	</array>
-
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>ppemerchantsdkv1</string>
