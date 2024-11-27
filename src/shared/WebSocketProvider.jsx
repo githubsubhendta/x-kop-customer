@@ -15,6 +15,7 @@ export const WebSocketProvider = ({ children }) => {
   const [callReceiver, setCallReceiver] = useState(false);
   const otherUserId = useRef(null);
   const userInfo = useRef(null);
+  const [meetReceiver,setMeetReceiver] = useState(null);
 
   const createWebSocket = async () => {
     if (!isConnected) {
@@ -119,9 +120,17 @@ export const WebSocketProvider = ({ children }) => {
         }); 
   }
 
+  useEffect(()=>{
+    if(webSocket){
+  webSocket.on("meeting_receiver",data=>{
+   setMeetReceiver(data);
+  })
+    }
+  },[webSocket])
+
 
   return (
-    <WebSocketContext.Provider value={{ webSocket, leave, callRedirect }}>
+    <WebSocketContext.Provider value={{ webSocket, leave, callRedirect,meetReceiver }}>
       {children}
     </WebSocketContext.Provider>
   );

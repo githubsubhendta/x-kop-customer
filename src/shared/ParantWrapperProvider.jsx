@@ -5,7 +5,7 @@ import useUserStore from '../stores/user.store.js';
 import useChatStore from '../stores/chat.store.js';
 
 const ParantWrapperProvider = ({children}) => {
-    const {webSocket} = useWebSocket();
+    const {webSocket,meetReceiver} = useWebSocket();
     const {fcmToken} = useFirebase();
     const { user, handleUpdateUser } = useUserStore();
     const { conversations,setConversations } = useChatStore();
@@ -24,6 +24,14 @@ const ParantWrapperProvider = ({children}) => {
     });
   }
   },[webSocket,fcmToken]);
+
+
+useEffect(()=>{
+if(meetReceiver){
+  console.log("meetReceiver=====>",meetReceiver)
+}
+},[meetReceiver])
+  
 
 
   const updateNewMessageStore = (newMessage,chatId) => {
