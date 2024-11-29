@@ -122,6 +122,7 @@ export const WebSocketProvider = ({children}) => {
   useEffect(() => {
     if (webSocket) {
       webSocket.on('meeting_receiver', data => {
+       
         setMeetReceiver(data);
       });
     }
