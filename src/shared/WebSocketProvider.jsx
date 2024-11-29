@@ -1,21 +1,27 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
-import { io as SocketIOClient } from 'socket.io-client';
-import { BASE_URI_websocket } from '../Api/ApiManager.js';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useRef,
+} from 'react';
+import {io as SocketIOClient} from 'socket.io-client';
+import {BASE_URI_websocket} from '../Api/ApiManager.js';
 import userStoreAction from './../stores/user.store.js';
-import { useNetwork } from './NetworkProvider'; 
-import { getCurrentUser } from '../Api/user.api.js';
+import {useNetwork} from './NetworkProvider';
+import {getCurrentUser} from '../Api/user.api.js';
 import {navigate, reset} from '../navigation/NavigationService.js';
 
 const WebSocketContext = createContext();
 
-export const WebSocketProvider = ({ children }) => {
+export const WebSocketProvider = ({children}) => {
   const [webSocket, setWebSocket] = useState(null);
-  const { user, localTokens, handleUpdateUser } = userStoreAction(state => state);
-  const { isConnected } = useNetwork(); 
+  const {user, localTokens, handleUpdateUser} = userStoreAction(state => state);
+  const {isConnected} = useNetwork();
   const [callReceiver, setCallReceiver] = useState(false);
   const otherUserId = useRef(null);
   const userInfo = useRef(null);
-  const [meetReceiver,setMeetReceiver] = useState(null);
+  const [meetReceiver, setMeetReceiver] = useState(null);
 
   const createWebSocket = async () => {
     if (!isConnected) {
@@ -31,10 +37,9 @@ export const WebSocketProvider = ({ children }) => {
 
     try {
       const callerId = user.mobile;
-
       const socket = SocketIOClient(BASE_URI_websocket, {
         transports: ['websocket'],
-        query: { callerId },
+        query: {callerId},
         extraHeaders: {
           Authorization: `Bearer ${token}`,
         },
@@ -44,14 +49,14 @@ export const WebSocketProvider = ({ children }) => {
         console.log(user.mobile + ' WebSocket connected ' + user.name);
       });
 
-      socket.on("updateUser",async()=>{
+      socket.on('updateUser', async () => {
         try {
           const data = await getCurrentUser(localTokens);
-          handleUpdateUser(data.data.data.user); 
+          handleUpdateUser(data.data.data.user);
         } catch (error) {
-          console.log("error",error)
+          console.log('error', error);
         }
-      })
+      });
 
       socket.on('disconnect', () => {
         console.log('WebSocket disconnected');
@@ -67,10 +72,6 @@ export const WebSocketProvider = ({ children }) => {
       });
 
       setWebSocket(socket);
-
-
-     
-
     } catch (error) {
       // console.error('Error creating WebSocket:', error);
     }
@@ -93,44 +94,42 @@ export const WebSocketProvider = ({ children }) => {
     return () => {
       closeWebSocket();
     };
-  }, [isConnected, localTokens]); 
+  }, [isConnected, localTokens]);
   // [isConnected, user, localTokens]
-
 
   const leave = (type = 'any') => {
     webSocket.emit('handsup', {
       otherUserId: otherUserId.current,
       type: type,
     });
-    
+
     // navigation.reset({
     //   index: 0,
     //   routes: [{name: 'LayoutScreen'}],
     // });
-
   };
 
-  const callRedirect = (dataSet,tokenData,recieve_params) => {
-        userInfo.current = dataSet.userInfo;
-       navigate('AudioScreen', {
-          config: tokenData.current?.data,
-          mobile: tokenData.current?.mobile,
-          reciever_data: dataSet,
-          consultType:recieve_params
-        }); 
-  }
+  const callRedirect = (dataSet, tokenData, recieve_params) => {
+    userInfo.current = dataSet.userInfo;
+    navigate('AudioScreen', {
+      config: tokenData.current?.data,
+      mobile: tokenData.current?.mobile,
+      reciever_data: dataSet,
+      consultType: recieve_params,
+    });
+  };
 
-  useEffect(()=>{
-    if(webSocket){
-  webSocket.on("meeting_receiver",data=>{
-   setMeetReceiver(data);
-  })
+  useEffect(() => {
+    if (webSocket) {
+      webSocket.on('meeting_receiver', data => {
+        setMeetReceiver(data);
+      });
     }
-  },[webSocket])
-
+  }, [webSocket]);
 
   return (
-    <WebSocketContext.Provider value={{ webSocket, leave, callRedirect,meetReceiver }}>
+    <WebSocketContext.Provider
+      value={{webSocket, leave, callRedirect, meetReceiver}}>
       {children}
     </WebSocketContext.Provider>
   );
