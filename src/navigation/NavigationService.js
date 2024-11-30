@@ -94,3 +94,11 @@ export function handleNavigation(operation, name, params, count) {
       console.warn(`Unknown navigation operation: ${operation}`);
   }
 }
+
+
+export function getCurrentRoute() {
+  if (navigationRef.isReady() && navigationRef.current) {
+    return navigationRef.current.getCurrentRoute();
+  }
+  return null; 
+}

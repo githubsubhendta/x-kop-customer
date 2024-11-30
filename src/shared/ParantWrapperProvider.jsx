@@ -5,6 +5,7 @@ import useUserStore from '../stores/user.store.js';
 import useChatStore from '../stores/chat.store.js';
 import CallPopup from '../Components/CallPopup.jsx';
 import { createAgoraToken } from '../Api/agora.api.js';
+import { getCurrentRoute } from '../navigation/NavigationService.js';
 
 const ParantWrapperProvider = ({children}) => {
     const {webSocket,meetReceiver,callRedirect} = useWebSocket();
@@ -13,6 +14,7 @@ const ParantWrapperProvider = ({children}) => {
     const { conversations,setConversations } = useChatStore();
     const [meetingData,setMeetingData] = useState({status:false,data:null})
     const [agoraToken,setAgoraToken] = useState(null);
+    const currentRoute = getCurrentRoute();
 
 
   useEffect(()=>{
@@ -137,17 +139,22 @@ if(meetReceiver){
     // setMeetingData({status:false,data:null}) 
   }
 
+  
+
   useEffect(() => {
     if (webSocket) {
-      const handleAudioScreen = dataSet => {
 
-        // recieve_params?????????????
-        callRedirect(dataSet,agoraToken,recieve_params)
-      };
-      webSocket.on('callAnswered', handleAudioScreen);
-      return () => {
-        webSocket.off('callAnswered', handleAudioScreen);
-      };
+
+      // const handleAudioScreen = dataSet => {
+      //   // recieve_params?????????????
+      //   callRedirect(dataSet,agoraToken,recieve_params)
+      // }; 
+      // // 9821536060
+      // console.log("currentRoute?=====",currentRoute?.name)
+      // webSocket.on('callAnswered', handleAudioScreen);
+      // return () => {
+      //   webSocket.off('callAnswered', handleAudioScreen);
+      // };
     }
   }, [webSocket]);
 
