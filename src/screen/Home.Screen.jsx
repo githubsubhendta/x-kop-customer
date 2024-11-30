@@ -200,7 +200,7 @@ const HomeScreen = ({handleTabPress}) => {
           <View className="w-full mx-auto">
             {/* ./../images/home2.png */}
             <Image
-              source={require('./../images/xkop-home1.jpg')}
+              source={require('./../images/img_home1.jpg')}
               className="w-full h-40 object-cover rounded-lg"
               resizeMode="cover"
             />
@@ -220,7 +220,7 @@ const HomeScreen = ({handleTabPress}) => {
           <View className="w-full mx-auto">
             {/* ./../images/home1.png */}
             <Image
-              source={require('./../images/xkop-home2.jpg')}
+              source={require('./../images/img_home2.jpg')}
               className="w-full h-40 object-cover rounded-lg"
               resizeMode="cover"
             />
@@ -238,7 +238,7 @@ const HomeScreen = ({handleTabPress}) => {
         <View className="flex-1 justify-center mt-10 mx-5 mb-20">
           <View className="w-full mx-auto">
             <Image
-              source={require('./../images/xkop-home3.jpg')}
+              source={require('./../images/img_home3.jpg')}
               className="w-full h-40 object-cover rounded-lg"
               resizeMode="cover"
             />
