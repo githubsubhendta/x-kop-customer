@@ -140,6 +140,8 @@ if(meetReceiver){
   useEffect(() => {
     if (webSocket) {
       const handleAudioScreen = dataSet => {
+
+        // recieve_params?????????????
         callRedirect(dataSet,agoraToken,recieve_params)
       };
       webSocket.on('callAnswered', handleAudioScreen);
