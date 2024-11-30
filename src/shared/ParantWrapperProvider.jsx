@@ -1,14 +1,18 @@
 import { useWebSocket } from './WebSocketProvider';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useFirebase } from './FirebaseProvider.jsx';
 import useUserStore from '../stores/user.store.js';
 import useChatStore from '../stores/chat.store.js';
+import CallPopup from '../Components/CallPopup.jsx';
+import { createAgoraToken } from '../Api/agora.api.js';
 
 const ParantWrapperProvider = ({children}) => {
-    const {webSocket,meetReceiver} = useWebSocket();
+    const {webSocket,meetReceiver,callRedirect} = useWebSocket();
     const {fcmToken} = useFirebase();
     const { user, handleUpdateUser } = useUserStore();
     const { conversations,setConversations } = useChatStore();
+    const [meetingData,setMeetingData] = useState({status:false,data:null})
+    const [agoraToken,setAgoraToken] = useState(null);
 
 
   useEffect(()=>{
@@ -29,6 +33,7 @@ const ParantWrapperProvider = ({children}) => {
 useEffect(()=>{
 if(meetReceiver){
   console.log("meetReceiver=====>",meetReceiver)
+  setMeetingData({status:true,data:meetReceiver})
 }
 },[meetReceiver])
   
@@ -114,8 +119,49 @@ if(meetReceiver){
     };
   }, [webSocket, user, handleUpdateUser,conversations]);
 
+
+  const meetingAccept = async()=>{
+    console.log("Meeting Accepted");
+  
+      const getTokenData = await createAgoraToken({
+        channelName: `${meetingData.data.to_user}-${meetingData.data.officer.mobile}`,
+        uid: 0,
+      })
+      setAgoraToken({data: getTokenData, mobile:meetingData.data.officer.mobile})
+    webSocket.emit('call', {
+      calleeId: meetingData.data.officer.mobile,
+      rtcMessage: getTokenData,
+      consultationTypeName: meetingData.data.ConsultationTypeName
+    });
+
+    // setMeetingData({status:false,data:null}) 
+  }
+
+  useEffect(() => {
+    if (webSocket) {
+      const handleAudioScreen = dataSet => {
+        callRedirect(dataSet,agoraToken,recieve_params)
+      };
+      webSocket.on('callAnswered', handleAudioScreen);
+      return () => {
+        webSocket.off('callAnswered', handleAudioScreen);
+      };
+    }
+  }, [webSocket]);
+
+  const meetingReject = ()=>{
+    console.log("Meeting meetingReject");
+  }
+
   return (
     <>
+    {
+      console.log("meetingData==",meetingData)
+    }
+    {
+      meetingData.status && <CallPopup isVisible={meetingData.status} onAccept={meetingAccept} onReject={meetingReject} userInfo={meetingData.data}  />
+    }
+     
     {children}
     </>
   )

@@ -3,11 +3,12 @@ import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import Modal from "react-native-modal";
 import { SvgXml } from "react-native-svg";
 import book from '../images/book2.jpg';
-import { SVG_hangout_white, SVG_phone } from "../Utils/SVGImage";
+import { SVG_hangout_white, SVG_phone } from "../utils/SVGImage";
 import useUserStore from "../stores/user.store";
 
 const CallPopup = ({ isVisible, onAccept, onReject, userInfo }) => {
-  const { user } = useUserStore();
+  // const { user } = useUserStore();
+
 
   return (
     <Modal
@@ -20,20 +21,21 @@ const CallPopup = ({ isVisible, onAccept, onReject, userInfo }) => {
     >
       <View style={styles.popupContainer}>
         <Image
-          source={userInfo.current?.avatar ? { uri: userInfo.current?.avatar } : book}
+          source={userInfo?.officer?.avatar ? { uri: userInfo?.officer?.avatar } : book}
           style={styles.avatar}
         />
-        <Text style={styles.name}>{userInfo.current?.name || "Unknown Caller"}</Text>
+        <Text style={styles.name}>{userInfo.officer?.name || "Unknown Caller"}</Text>
         <Text style={styles.details}>
-          {user?.officerDetails?.ConsultationTypeID?.ConsultationTypeName || "Consultation Type"}
+          {userInfo.ConsultationTypeName || "Consultation Type"}
         </Text>
         <View style={styles.actions}>
           <TouchableOpacity onPress={onAccept} style={styles.acceptButton}>
-            <SvgXml xml={SVG_phone} height="40px" width="40px" />
+            {/* <SvgXml xml={SVG_phone} height="40px" width="40px" /> */}
+            <Text>Join call</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={onReject} style={styles.rejectButton}>
+          {/* <TouchableOpacity onPress={onReject} style={styles.rejectButton}>
             <SvgXml xml={SVG_hangout_white} height="40px" width="40px" />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
       </View>
     </Modal>
