@@ -9,16 +9,12 @@
 //   }
 //   });
 
-
 // const usecallStore = create(set => ({
 // ...handleRemoteUser(set),
 // ...handleAgoraTokenSlice(set),
 // }));
 
-
-
 // export default usecallStore;
-
 
 // import { create } from 'zustand';
 
@@ -34,7 +30,7 @@
 
 import create from 'zustand';
 
-const useCallStore = create((set) => ({
+const useCallStore = create(set => ({
   isMuted: false,
   isSpeakerEnabled: true,
   connectionStatus: 'Not Connected',
@@ -43,13 +39,13 @@ const useCallStore = create((set) => ({
   callStatus: true, // Whether the call is active or not
 
   // Actions to update state
-  toggleMute: () => set((state) => ({ isMuted: !state.isMuted })),
-  toggleSpeaker: () => set((state) => ({ isSpeakerEnabled: !state.isSpeakerEnabled })),
-  setConnectionStatus: (status) => set({ connectionStatus: status }),
-  setCallDuration: (duration) => set({ callDuration: duration }),
-  setPeerIds: (peerIds) => set({ peerIds }),
-  setCallStatus: (status) => set({ callStatus: status }),
+  toggleMute: () => set(state => ({isMuted: !state.isMuted})),
+  toggleSpeaker: () =>
+    set(state => ({isSpeakerEnabled: !state.isSpeakerEnabled})),
+  setConnectionStatus: status => set({connectionStatus: status}),
+  setCallDuration: duration => set({callDuration: duration}),
+  setPeerIds: peerIds => set({peerIds}),
+  setCallStatus: status => set({callStatus: status}),
 }));
 
 export default useCallStore;
- 
