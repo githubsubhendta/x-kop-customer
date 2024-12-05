@@ -17,7 +17,7 @@ import {RadioButton} from 'react-native-paper';
 import moment from 'moment';
 import useUserStore from '../stores/user.store.js';
 import useCallHistory from '../Api/callHistory.js';
-import { getAllSchedules } from '../Api/scheduleService.js';
+import {getAllSchedules} from '../Api/scheduleService.js';
 
 const ScheduleScreen = ({navigation}) => {
   const [scheduleCall, setScheduleCall] = useState(false);
@@ -25,8 +25,8 @@ const ScheduleScreen = ({navigation}) => {
   const [slot, setSlot] = useState(0);
   const [timeSlots, setTimeSlots] = useState(null);
   const {user} = useUserStore();
-  const { callHistory, fetchCallHistory, loading, hasMore } = useCallHistory();
-  const [scheduleList,setScheduleList] = useState([]);
+  const {callHistory, fetchCallHistory, loading, hasMore} = useCallHistory();
+  const [scheduleList, setScheduleList] = useState([]);
 
   useEffect(() => {
     // console.log("hekksfbjfbjfe===>",user.consultations)
@@ -35,15 +35,13 @@ const ScheduleScreen = ({navigation}) => {
     setSelected(currentDate);
   }, []);
 
-
-  useEffect(()=>{
-    (async ()=>{
+  useEffect(() => {
+    (async () => {
       const allHistory = await getAllSchedules();
       // console.log("check history=>",allHistory)
-      setScheduleList(allHistory)
-    })()
-    
-  },[getAllSchedules])
+      setScheduleList(allHistory);
+    })();
+  }, [getAllSchedules]);
 
   const marked = useMemo(
     () => ({
@@ -249,16 +247,11 @@ const ScheduleScreen = ({navigation}) => {
     });
   };
 
-  
-
-
-
   return (
     <View className="flex-1 bg-white relative">
-        {/* <RefreshControl refreshing={refreshing} onRefresh={onRefresh} /> */}
+      {/* <RefreshControl refreshing={refreshing} onRefresh={onRefresh} /> */}
       {!scheduleCall ? (
         <>
-      
           <View className="px-5 py-10">
             <Text className="text-primary font-medium text-2xl">
               History & Scheduling
@@ -273,77 +266,77 @@ const ScheduleScreen = ({navigation}) => {
             </View>
             <View className="bg-[#C9C9C9] h-[1px] my-3 mb-4" />
             <View className="px-5 h-44">
-              
-                <FlatList
-                  data={scheduleList}
-                  renderItem={({item}) => (
-                    <View className="flex flex-row justify-between py-2 border-b-2 border-slate-200 px-0">
-                      <View className="flex flex-row gap-2">
-                        <View className="w-[50px] h-[50px] rounded-full">
-                          <Image
-                            source={{uri: item.officer.avatar}}
-                            className="w-[100%] h-[100%] rounded-full"
-                          />
-                        </View>
-                        <View>
-                          <Text className="text-black font-medium text-base">
-                            {item.officer.name}
-                          </Text>
-                          <View className="flex flex-row gap-5">
-                            <Text className="text-secondary text-sm font-light">
-                              Duration:{' '}
-                              {(new Date(item.endTime) -
-                                new Date(item.startTime)) /
-                                (1000 * 60)}{' '}
-                              min
-                              {/* {parseInt(item.duration) <= 30000
+              <FlatList
+                data={scheduleList}
+                renderItem={({item}) => (
+                  <View className="flex flex-row justify-between py-2 border-b-2 border-slate-200 px-0">
+                    <View className="flex flex-row gap-2">
+                      <View className="w-[50px] h-[50px] rounded-full">
+                        <Image
+                          source={{uri: item.officer.avatar}}
+                          className="w-[100%] h-[100%] rounded-full"
+                        />
+                      </View>
+                      <View>
+                        <Text className="text-black font-medium text-base">
+                          {item.officer.name}
+                        </Text>
+                        <View className="flex flex-row gap-5">
+                          <Text className="text-secondary text-sm font-light">
+                            Duration:{' '}
+                            {(new Date(item.endTime) -
+                              new Date(item.startTime)) /
+                              (1000 * 60)}{' '}
+                            min
+                            {/* {parseInt(item.duration) <= 30000
                   ? parseInt(item.duration) / 1000 + ' min'
                   : parseInt(item.duration) / 60000 + ' hr'} */}
+                          </Text>
+                          <Text className="text-black text-sm text-medium">
+                            Fee: ₹{' '}
+                            {parseInt(
+                              (new Date(item.endTime) -
+                                new Date(item.startTime)) /
+                                (1000 * 60),
+                            ) *
+                              parseFloat(
+                                item.officer.officerDetails.ConsultationTypeID
+                                  .FeePerMinute,
+                              )}
+                          </Text>
+                        </View>
+                        {item.startTime !== undefined && (
+                          <View className="flex flex-row">
+                            <Text className="text-black text-sm font-medium">
+                              {dateFormate(item.startTime)}
                             </Text>
-                            <Text className="text-black text-sm text-medium">
-                              Fee: ₹{' '}
-                              {parseInt(
-                                (new Date(item.endTime) -
-                                  new Date(item.startTime)) /
-                                  (1000 * 60),
-                              ) *
-                                parseFloat(
-                                  item.officer.officerDetails.ConsultationTypeID
-                                    .FeePerMinute,
-                                )}
+                            <Text className="text-[#36D158] text-sm font-medium text-left pl-9">
+                              Unpaid
                             </Text>
                           </View>
-                          {item.startTime !== undefined && (
-                            <View className="flex flex-row">
-                              <Text className="text-black text-sm font-medium">
-                                {dateFormate(item.startTime)}
-                              </Text>
-                              <Text className="text-[#36D158] text-sm font-medium text-left pl-9">
-                                Unpaid
-                              </Text>
-                            </View>
-                          )}
-                        </View>
+                        )}
                       </View>
-                      {item.startTime !== undefined && (
-                        <TouchableOpacity>
-                          <Text className="text-black text-base underline">
-                            Reschedule
-                          </Text>
-                        </TouchableOpacity>
-                      )}
                     </View>
-                  )}
-                  keyExtractor={item => item._id}
-                  ListEmptyComponent={
-                    <View className="py-10 items-center">
-                      <Text className="text-gray-500">No schedules available</Text>
-                    </View>
-                  }
-                  scrollEnabled
-                  style={{height: 100}}
-                />
-             
+                    {item.startTime !== undefined && (
+                      <TouchableOpacity>
+                        <Text className="text-black text-base underline">
+                          Reschedule
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                )}
+                keyExtractor={item => item._id}
+                ListEmptyComponent={
+                  <View className="py-10 items-center">
+                    <Text className="text-gray-500">
+                      No schedules available
+                    </Text>
+                  </View>
+                }
+                scrollEnabled
+                style={{height: 100}}
+              />
             </View>
           </View>
 
@@ -353,7 +346,6 @@ const ScheduleScreen = ({navigation}) => {
             </View>
             <View className="bg-slate-300 h-[1px] my-3" />
             <View className="px-5">
-           
               {/* {user.consultations.length > 0 && (  
                // <FlatList
                 //   data={user.consultations.sort(
@@ -365,21 +357,30 @@ const ScheduleScreen = ({navigation}) => {
                 //   style={{marginBottom: 350}}
                 // />  )} */}
 
-                 <FlatList
-                 data={callHistory.length>0?callHistory.sort((a, b) => new Date(b.startCallTime) - new Date(a.startCallTime)):[]}
-                 renderItem={itemRender}
-                 keyExtractor={(item) => item._id.toString()}
-                 onEndReached={handleLoadMore}
-                 onEndReachedThreshold={0.5}
-                 ListFooterComponent={
-                   loading ? <ActivityIndicator size="large" color="#0000ff" /> : null
-                 }
+              <FlatList
+                data={
+                  callHistory.length > 0
+                    ? callHistory.sort(
+                        (a, b) =>
+                          new Date(b.startCallTime) - new Date(a.startCallTime),
+                      )
+                    : []
+                }
+                renderItem={itemRender}
+                keyExtractor={item => item._id.toString()}
+                onEndReached={handleLoadMore}
+                onEndReachedThreshold={0.5}
+                ListFooterComponent={
+                  loading ? (
+                    <ActivityIndicator size="large" color="#0000ff" />
+                  ) : null
+                }
                 //  inverted
-               />
+              />
             </View>
           </View>
           <TouchableOpacity
-            className="absolute bottom-4 right-10 bg-primary px-6 py-4 rounded-xl"
+            className="absolute bottom-4 right-6 bg-primary px-3 py-3 rounded-xl"
             onPress={() => {
               setScheduleCall(true);
             }}>
@@ -387,7 +388,7 @@ const ScheduleScreen = ({navigation}) => {
               <View className="w-[30px] h-[30px]">
                 <SvgXml xml={SVG_calender1} height="100%" width="100%" />
               </View>
-              <Text className="text-white text-xl">Schedule a Call</Text>
+              <Text className="text-white text-lg">Schedule a Call</Text>
             </View>
           </TouchableOpacity>
         </>
@@ -396,7 +397,7 @@ const ScheduleScreen = ({navigation}) => {
           <View className="px-5 pb-20 pt-2">
             <View className="flex flex-row items-center">
               <TouchableOpacity
-                className="w-[10%] h-8 justify-start my-2"
+                className="w-8 h-8 justify-start my-2 -ml-1"
                 onPress={() => setScheduleCall(false)}>
                 <SvgXml xml={SVG_arrow_back} height={'100%'} width={'100%'} />
               </TouchableOpacity>
@@ -416,10 +417,10 @@ const ScheduleScreen = ({navigation}) => {
             </View>
             {selected && (
               <View className="px-5 flex flex-row gap-2 mb-4">
-                <Text className="text-[#202020] text-sm">
+                <Text className="text-[#202020] text-sm ">
                   Preferred Slot for
                 </Text>
-                <Text className="text-slate-700 text-[18px] font-bold">
+                <Text className="text-slate-700 text-[16px] font-bold">
                   {handleDateShowFormate(selected)}
                 </Text>
               </View>
@@ -447,9 +448,9 @@ const ScheduleScreen = ({navigation}) => {
                 ))}
             </ScrollView>
           </View>
-          <View className="px-10">
+          <View className="px-6">
             <TouchableOpacity
-              className="bg-primary py-4 rounded-xl"
+              className="bg-primary py-3 rounded-md"
               onPress={handleScheduleSubmit}>
               <Text className="text-white text-center text-[20px] font-bold">
                 Proceed

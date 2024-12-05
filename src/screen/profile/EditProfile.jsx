@@ -36,11 +36,11 @@ const EditProfile = ({navigation}) => {
 
   const handleUpdate = async () => {
     await fetchData('/users/update-account', 'PATCH', {
-     userData:{
-      name: userData.name,
-      mobile: userData.mobile,
-      email: userData.email,
-     }
+      userData: {
+        name: userData.name,
+        mobile: userData.mobile,
+        email: userData.email,
+      },
     });
   };
   useEffect(() => {
@@ -70,7 +70,7 @@ const EditProfile = ({navigation}) => {
     <ScrollView
       className={`w-[${windowWidth}px] h-[${windowHeight}px] bg-white`}>
       <TouchableOpacity
-        className="w-10 h-10 flex justify-start mx-5 mt-5"
+        className="w-8 h-8 flex justify-start mx-3 mt-5"
         onPress={() => navigation.goBack()}>
         <SvgXml xml={SVG_arrow_back} height={'100%'} width={'100%'} />
       </TouchableOpacity>
@@ -117,10 +117,10 @@ const EditProfile = ({navigation}) => {
           />
         </View>
       </View>
-      <View className="border border-slate-200 my-5" />
-      <View className="flex p-10">
+      <View className=" my-5" />
+      <View className="flex px-5">
         <TouchableOpacity
-          className="bg-orange-900 py-4 rounded-2xl"
+          className="bg-orange-900 py-4 rounded-md"
           onPress={handleUpdate}>
           {loading ? (
             <ActivityIndicator color={'#fff'} size="small" />

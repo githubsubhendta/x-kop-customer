@@ -141,6 +141,7 @@ import {
   ActivityIndicator,
   Image,
   Platform,
+  ScrollView,
 } from 'react-native';
 import {SvgXml} from 'react-native-svg';
 import RNFetchBlob from 'react-native-blob-util';
@@ -195,23 +196,27 @@ const TransactionsScreen = ({navigation}) => {
   };
 
   const renderItem = ({item}) => (
-    <View className="flex flex-row justify-between p-2 border-b-2 border-slate-200 my-2">
-      <View className="flex flex-row gap-10">
+    <View className="flex flex-row justify-between p-2 border-b-2 border-slate-300">
+      <View className="flex flex-row gap-3">
         <View className="w-[50px] h-[50px] rounded-full">
           <Image
             source={{uri: item.userId.avatar}}
             className="w-[100%] h-[100%] rounded-full"
           />
         </View>
-        <View>
-          <Text className="text-slate-600">{item.userId.name}</Text>
-          <View className="flex flex-row w-52 justify-between">
-            <Text className="text-slate-600">Paid Via: {item.method}</Text>
-            <Text className="text-slate-600">Rs: {item.amount}</Text>
+        <View className="space-y-2">
+          <Text className="text-gray-800 font-bold">{item.userId.name}</Text>
+          <View className="flex flex-row w-48 justify-between">
+            <Text className="text-slate-600 text-[12px]">
+              Paid Via: {item.method}
+            </Text>
+            <Text className="text-slate-600 text-[12px]">
+              Fee: {item.amount}
+            </Text>
           </View>
         </View>
       </View>
-      <View className="flex flex-col justify-center">
+      <View className="flex flex-col justify-center items-center -mb-[12px]">
         <TouchableOpacity
           className="w-8 h-8 flex justify-start"
           onPress={() => downloadSlip(item._id)}>
@@ -222,35 +227,84 @@ const TransactionsScreen = ({navigation}) => {
   );
 
   return (
+    // <View className="flex-1 ">
+    //   <View>
+    //     <TouchableOpacity
+    //       className="w-8 h-8 flex justify-start mx-1 my-4"
+    //       onPress={() => navigation.goBack()}>
+    //       <SvgXml xml={SVG_arrow_back} height={'100%'} width={'100%'} />
+    //     </TouchableOpacity>
+    //     <View className="mx-5 mb-3">
+    //       <Text className="text-orange-900 font-bold text-3xl">
+    //         Transactions
+    //       </Text>
+    //     </View>
+    //     <View className="px-5 border-b-2 border-slate-300">
+    //       <Text className="text-red-500 text-lg px-1 ">Previous Receipts</Text>
+    //     </View>
+    //   </View>
+
+    //   {/* <View className="bg-slate-300 h-[1px] my-3" /> */}
+
+    //   <View className="px-3">
+    //     <FlatList
+    //       data={paymentList}
+    //       renderItem={renderItem}
+    //       keyExtractor={(item, index) => `${item._id}-${index}`}
+    //       onEndReached={hasMore ? loadMore : null}
+    //       onEndReachedThreshold={0.5}
+    //       // ListFooterComponent={loading && <ActivityIndicator size="large" color="#0000ff" />}
+    //       style={{
+    //         marginBottom: 143,
+    //         overflow: 'scroll',
+    //       }}
+    //     />
+    //   </View>
+
+    //   {loading && (
+    //     <View
+    //       style={{
+    //         position: 'absolute',
+    //         top: '50%',
+    //         left: '50%',
+    //         transform: [{translateX: -50}, {translateY: -50}],
+    //       }}>
+    //       <ActivityIndicator size="large" color="#0000ff" />
+    //     </View>
+    //   )}
+    // </View>
+
     <View className="flex-1">
-      <View className="p-5">
+      <View>
         <TouchableOpacity
-          className="w-10 h-10 flex justify-start mb-5"
+          className="w-8 h-8 flex justify-start mx-1 my-4"
           onPress={() => navigation.goBack()}>
           <SvgXml xml={SVG_arrow_back} height={'100%'} width={'100%'} />
         </TouchableOpacity>
-        <View className="p-2">
+        <View className="mx-5 mb-3">
           <Text className="text-orange-900 font-bold text-3xl">
             Transactions
           </Text>
         </View>
+        <View className="px-5 border-b-2 border-slate-300">
+          <Text className="text-red-500 text-lg px-1 ">Previous Receipts</Text>
+        </View>
       </View>
-      <View className="px-7">
-        <Text className="text-slate-500 text-xl">Previous Receipts</Text>
-      </View>
-      <View className="bg-slate-300 h-[1px] my-3" />
 
-      <View className="py-10 px-5">
+      <View className="px-3">
         <FlatList
           data={paymentList}
           renderItem={renderItem}
-          keyExtractor={(item, index) => `${item._id}-${index}`} // Combine _id and index
+          keyExtractor={(item, index) => `${item._id}-${index}`}
           onEndReached={hasMore ? loadMore : null}
           onEndReachedThreshold={0.5}
-          // ListFooterComponent={loading && <ActivityIndicator size="large" color="#0000ff" />}
-          style={{marginBottom: 200}}
+          showsVerticalScrollIndicator={false}
+          style={{
+            marginBottom: 143,
+          }}
         />
       </View>
+
       {loading && (
         <View
           style={{

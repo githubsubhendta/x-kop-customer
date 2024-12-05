@@ -20,57 +20,94 @@ import {getAllConversations, usePaginatedChats} from '../Api/chatService.js';
 import useChatStore from '../stores/chat.store.js';
 import {SvgXml} from 'react-native-svg';
 import Video from 'react-native-video';
-import {SVG_PDF} from '../utils/SVGImage.js';
+import {SVG_download, SVG_PDF} from '../utils/SVGImage.js';
 
-const Message = ({item, user, onLongPress, selectedMessages}) => {
+const Message = ({item, user, onLongPress, onPress, selectedMessages}) => {
+  const downloadFiles = item => {
+    console.log(item);
+  };
   return (
-    <TouchableOpacity
-      onLongPress={onLongPress}
-      style={[
-        styles.messageContainer,
-        item.sender === user._id
-          ? styles.currentUserMessage
-          : styles.otherUserMessage,
-        selectedMessages.includes(item._id) > 0 && styles.selectedMessage,
-      ]}>
-      {item.type === 'text' && (
-        <Text style={styles.content}>{item.content}</Text>
-      )}
-      {item.type === 'image' && item.content && (
-        <TouchableOpacity onPress={() => item.openImageModal(item.content)}>
-          <Image source={{uri: item.content}} style={styles.image} />
-        </TouchableOpacity>
-      )}
-      {item.type === 'video' && (
-        <TouchableOpacity
-          onPress={() => item.openVideoModal(item.content)}
-          style={styles.videoContainer}>
-          <Icon
-            name="play-circle-outline"
-            size={40}
-            color="white"
-            style={styles.playIcon}
-          />
-        </TouchableOpacity>
-      )}
-      {item.type === 'file' && (
-        <TouchableOpacity style={styles.backButton}>
-          <SvgXml xml={SVG_PDF} height={'100%'} width={'100%'} />
-        </TouchableOpacity>
-      )}
-      <Text style={styles.timeStamp}>
-        {new Date(item.createdAt).toLocaleDateString('en-GB', {
-          day: '2-digit',
-          month: 'short',
-          year: 'numeric',
-        })}{' '}
-        {new Date(item.createdAt).toLocaleTimeString([], {
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: true,
-        })}
-      </Text>
-    </TouchableOpacity>
+    <View>
+      <TouchableOpacity
+        onLongPress={onLongPress}
+        onPress={onPress}
+        style={[
+          styles.messageContainer,
+          item.sender === user._id
+            ? styles.currentUserMessage
+            : styles.otherUserMessage,
+          selectedMessages.includes(item._id) > 0 && styles.selectedMessage,
+        ]}>
+        {item.type === 'text' && (
+          <Text style={styles.content}>{item.content}</Text>
+        )}
+        {item.type === 'image' && item.content && (
+          <View>
+            <TouchableOpacity onPress={() => item.openImageModal(item.content)}>
+              <Image source={{uri: item.content}} style={styles.image} />
+            </TouchableOpacity>
+            <View className="absolute right-0 -bottom-8 w-8 h-7">
+              <SvgXml
+                onPress={() => downloadFiles(item)}
+                xml={SVG_download}
+                height={'100%'}
+                width={'100%'}
+              />
+            </View>
+          </View>
+        )}
+        {item.type === 'video' && (
+          <View>
+            <TouchableOpacity
+              onPress={() => item.openVideoModal(item.content)}
+              style={styles.videoContainer}>
+              <Icon
+                name="play-circle-outline"
+                size={40}
+                color="white"
+                style={styles.playIcon}
+              />
+            </TouchableOpacity>
+            <View className="absolute right-0 -bottom-8 w-8 h-7">
+              <SvgXml
+                onPress={() => downloadFiles(item)}
+                xml={SVG_download}
+                height={'100%'}
+                width={'100%'}
+              />
+            </View>
+          </View>
+        )}
+        {item.type === 'file' && (
+          <View className="relative">
+            <TouchableOpacity style={styles.backButton}>
+              <SvgXml xml={SVG_PDF} height={'100%'} width={'100%'} />
+            </TouchableOpacity>
+            <View className="absolute right-0 mt-1 w-8 h-7">
+              <SvgXml
+                onPress={() => downloadFiles(item)}
+                xml={SVG_download}
+                height={'100%'}
+                width={'100%'}
+                color="#ff0000"
+              />
+            </View>
+          </View>
+        )}
+        <Text style={styles.timeStamp}>
+          {new Date(item.createdAt).toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+          })}{' '}
+          {new Date(item.createdAt).toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true,
+          })}
+        </Text>
+      </TouchableOpacity>
+    </View>
   );
 };
 
@@ -266,6 +303,13 @@ const ChatScreen = ({route, navigation}) => {
             onLongPress={() =>
               item.sender != officer._id && toggleMessageSelection(item._id)
             }
+            onPress={() => {
+              return (
+                item.sender != officer._id &&
+                selectedMessages.length > 0 &&
+                toggleMessageSelection(item._id)
+              );
+            }}
             selectedMessages={selectedMessages}
           />
         )}
@@ -388,8 +432,6 @@ const styles = StyleSheet.create({
 });
 
 export default ChatScreen;
-
-
 
 // import {
 //   View,

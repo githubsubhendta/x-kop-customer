@@ -3,8 +3,7 @@ import {View, Text, TouchableOpacity, Image, StyleSheet} from 'react-native';
 import {SvgXml} from 'react-native-svg';
 import Icon2 from 'react-native-vector-icons/Entypo';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { SVG_arrow_back } from '../../utils/SVGImage';
-
+import {SVG_arrow_back} from '../../utils/SVGImage';
 
 const ChatHeader = ({
   officer,
@@ -34,7 +33,9 @@ const ChatHeader = ({
           />
         </View>
         <View>
-          <Text style={styles.userName}>{officer?.name || 'Officer'}</Text>
+          <Text style={styles.userName} numberOfLines={1} ellipsizeMode="tail">
+            {officer?.name || 'Officer'}
+          </Text>
           <Text style={styles.userPosition}>
             {chats?.participants?.filter(user => user.officerDetails)[0]
               ?.officerDetails?.ConsultationTypeID?.ConsultationTypeName ||
@@ -45,18 +46,25 @@ const ChatHeader = ({
 
       {selectedMessages.length > 0 ? (
         <View style={styles.headerButtons}>
-          {showEditButton && filterMessageType(selectedMessages[0]) === "text" && (
-            <TouchableOpacity onPress={() => handleEditMessage(selectedMessages[0])}>
-              <Icon name="edit" size={24} color="blue" />
-            </TouchableOpacity>
-          )}
+          {showEditButton &&
+            filterMessageType(selectedMessages[0]) === 'text' && (
+              <TouchableOpacity
+                onPress={() => handleEditMessage(selectedMessages[0])}>
+                <Icon name="edit" size={24} color="blue" />
+              </TouchableOpacity>
+            )}
           <TouchableOpacity onPress={deleteMessages}>
             <Icon name="delete" size={24} color="red" />
           </TouchableOpacity>
         </View>
       ) : (
         <TouchableOpacity onPress={() => setOpenMenu(!openMenu)}>
-          <Icon2 name="dots-three-vertical" color="#000" size={20} style={styles.menuIcon} />
+          <Icon2
+            name="dots-three-vertical"
+            color="#000"
+            size={20}
+            style={styles.menuIcon}
+          />
         </TouchableOpacity>
       )}
 
@@ -72,9 +80,9 @@ const ChatHeader = ({
 
 const styles = StyleSheet.create({
   header: {
-    padding: 16,
+    padding: 12,
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'start',
     justifyContent: 'space-between',
     backgroundColor: '#fff',
   },
@@ -84,13 +92,13 @@ const styles = StyleSheet.create({
   },
   userInfo: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'start',
     gap: 8,
   },
   avatarWrapper: {
-    height: 32,
-    width: 32,
-    borderRadius: 16,
+    height: 42,
+    width: 42,
+    borderRadius: 60,
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: '#ccc',
@@ -103,6 +111,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#000',
+    maxWidth: '62%',
   },
   userPosition: {
     fontSize: 14,

@@ -1,7 +1,7 @@
 import React from 'react';
 import {View, Button, TextInput, StyleSheet} from 'react-native';
 import MessageInput from './MessageInput';
-import { useWebSocket } from '../../shared/WebSocketProvider';
+import {useWebSocket} from '../../shared/WebSocketProvider';
 
 const ChatMessageInput = ({
   user,
@@ -13,7 +13,7 @@ const ChatMessageInput = ({
   setEditingMessage,
   setSelectedMessages,
 }) => {
-    const {webSocket} = useWebSocket();
+  const {webSocket} = useWebSocket();
   return (
     <View style={styles.messageInput}>
       {user?._id && officer?._id && !editingMessage && (
@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     width: '100%',
     padding: 16,
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff',
   },
   editContainer: {
     flexDirection: 'row',

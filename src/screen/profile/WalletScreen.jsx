@@ -84,9 +84,9 @@ const WalletScreen = ({navigation}) => {
   };
 
   const itemRender = ({item}) => (
-    <View className="flex flex-row justify-between p-2 border-b-2 border-slate-200 my-2">
-      <View className="flex flex-row gap-10">
-        <View className="w-[50px] h-[50px] rounded-full">
+    <View className="flex flex-row  items-center justify-between py-2 border-b-2 border-slate-200 my-2">
+      <View className="flex flex-row space-x-5">
+        <View className="w-[50px] h-[50px] rounded-full -mt-[8px]">
           <Image
             source={{uri: user.avatar}}
             className="w-[100%] h-[100%] rounded-full"
@@ -102,7 +102,7 @@ const WalletScreen = ({navigation}) => {
       </View>
       <View className="flex flex-col justify-center">
         <TouchableOpacity
-          className="w-8 h-8 flex justify-start"
+          className="w-7 h-7 flex justify-start"
           onPress={() => downloadSlip(item._id)}>
           <SvgXml xml={SVG_download} height={'100%'} width={'100%'} />
         </TouchableOpacity>
@@ -113,7 +113,7 @@ const WalletScreen = ({navigation}) => {
   return (
     <View style={styles.container}>
       <TouchableOpacity
-        className="w-8 h-8 flex justify-start"
+        className="w-8 h-8 flex justify-start -ml-[15px]"
         onPress={() => navigation.goBack()}>
         <SvgXml xml={SVG_arrow_back} height={'100%'} width={'100%'} />
       </TouchableOpacity>
@@ -127,23 +127,27 @@ const WalletScreen = ({navigation}) => {
       </View>
       <View style={styles.transactionContainer}>
         <Text style={styles.transactionHeader}>Transaction History</Text>
-        <View className="px-7">
-          <Text className="text-slate-500 text-md">Previous Receipts</Text>
+        <View className="border-b-2 border-slate-300">
+          <Text className="text-slate-500 text-md px-1 mb-3">
+            Previous Receipts
+          </Text>
         </View>
-        <View className="bg-slate-300 h-[1px] my-3" />
+        {/* <View className="bg-slate-300 h-[1px] my-3" /> */}
         {user?.transactions.length > 0 && (
           // bankHistory
           // { loading, error, paymentList, loadMore, hasMore }
+
           <FlatList
             data={bankHistory.paymentList}
             renderItem={itemRender}
             keyExtractor={(item, index) => `${item._id}-${index}`}
             onEndReached={bankHistory.hasMore ? bankHistory.loadMore : null}
             onEndReachedThreshold={0.5}
+            showsVerticalScrollIndicator={false}
             ListFooterComponent={
               loading && <ActivityIndicator size="large" color="#0000ff" />
             }
-            style={{marginBottom: 50}}
+            style={{marginBottom: 20}}
           />
           // <FlatList
           //   data={user?.transactions}
@@ -153,7 +157,10 @@ const WalletScreen = ({navigation}) => {
           // />
         )}
       </View>
-      <View style={styles.buttonContainer}>
+      <View
+        className="flex flex-row justify-between"
+        // style={styles.buttonContainer}
+      >
         <TouchableOpacity
           style={styles.button}
           onPress={() => setModalVisible(true)}>
@@ -181,7 +188,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8f8f8',
   },
   balanceContainer: {
-    alignItems: 'center',
+    alignItems: 'start',
     marginVertical: 20,
   },
   balanceText: {
@@ -192,7 +199,7 @@ const styles = StyleSheet.create({
   balanceAmount: {
     fontSize: 32,
     color: '#4CAF50',
-    marginTop: 10,
+    marginTop: 8,
   },
   transactionContainer: {
     flex: 1,
@@ -219,7 +226,6 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginVertical: 20,
   },
   button: {
     backgroundColor: '#862A0D',

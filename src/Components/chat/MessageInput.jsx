@@ -1,29 +1,34 @@
-import React, { useState } from 'react';
-import { View, TouchableOpacity, StyleSheet, TextInput, Alert } from 'react-native';
+import React, {useState} from 'react';
+import {
+  View,
+  TouchableOpacity,
+  StyleSheet,
+  TextInput,
+  Alert,
+} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import DocumentPicker from 'react-native-document-picker';
 // import { uploadFileForChat } from '../Api/chat.api';
-import { useSnackbar } from '../../shared/SnackbarProvider';
-import { uploadFileForChatUser } from '../../Api/user.api';
+import {useSnackbar} from '../../shared/SnackbarProvider';
+import {uploadFileForChatUser} from '../../Api/user.api';
 import userStoreAction from '../../stores/user.store.js';
-import { getMessageTypeFromFile } from '../../utils/fileChecker.js';
+import {getMessageTypeFromFile} from '../../utils/fileChecker.js';
 
-
-function MessageInput({ sender, receiver, webSocket }) {
+function MessageInput({sender, receiver, webSocket}) {
   const [message, setMessage] = useState('');
-  const { showSnackbar } = useSnackbar();
+  const {showSnackbar} = useSnackbar();
   const {localTokens} = userStoreAction();
 
   const sendMessage = async (message, type = 'text') => {
-    if (message.trim() !== "") {
-      webSocket.emit('sendmessage', { sender, receiver, type, content: message });
-      setMessage(""); 
+    if (message.trim() !== '') {
+      webSocket.emit('sendmessage', {sender, receiver, type, content: message});
+      setMessage('');
     } else {
-      Alert.alert("Please enter a message first.");
+      Alert.alert('Please enter a message first.');
     }
   };
 
-  const handleChat = (value) => {
+  const handleChat = value => {
     setMessage(value);
   };
 
@@ -33,7 +38,7 @@ function MessageInput({ sender, receiver, webSocket }) {
         type: [DocumentPicker.types.allFiles],
         allowMultiSelection: true,
       });
-      uploadFiles(res); 
+      uploadFiles(res);
     } catch (err) {
       if (DocumentPicker.isCancel(err)) {
         console.log('User canceled the picker');
@@ -43,14 +48,11 @@ function MessageInput({ sender, receiver, webSocket }) {
     }
   };
 
+  const onUploadProgress = progess => {
+    console.log('check progress data===>', progess);
+  };
 
-  const onUploadProgress = (progess)=>{
-console.log("check progress data===>",progess)
-  }
-
-
-  
-  const uploadFiles = async (files) => {
+  const uploadFiles = async files => {
     if (files.length === 0) {
       Alert.alert('Please select at least one file!');
       return;
@@ -63,32 +65,38 @@ console.log("check progress data===>",progess)
         type: file.type,
         name: file.name,
       };
-      formData.append('files', fileData); 
+      formData.append('files', fileData);
     }
-  
-    try {
 
-  const response = await uploadFileForChatUser(localTokens.accessToken,formData,onUploadProgress);
- 
-        if(response?.data?.data?.length){
-          response.data.data.forEach(item=>{
-            sendMessage(item,getMessageTypeFromFile(item))
-          })
-        }
+    try {
+      const response = await uploadFileForChatUser(
+        localTokens.accessToken,
+        formData,
+        onUploadProgress,
+      );
+
+      if (response?.data?.data?.length) {
+        response.data.data.forEach(item => {
+          sendMessage(item, getMessageTypeFromFile(item));
+        });
+      }
     } catch (error) {
       console.log(error);
-      showSnackbar('File upload failed!'+error.message, 'error');
+      showSnackbar('File upload failed!' + error.message, 'error');
     }
   };
 
   return (
-    <View style={styles.InputContainer}>
+    <View
+      className="flex flex-row bg-[#f8f8f8] bg-opacity-50 items-center border-2 px-3 border-[#ccc] rounded-lg -my-[4]"
+      // style={styles.InputContainer}
+    >
       <TextInput
         style={styles.input}
-        placeholder="Start Typing Here"
+        placeholder="Start Typing Here..."
         placeholderTextColor="#888"
-        value={message} 
-        onChangeText={handleChat} 
+        value={message}
+        onChangeText={handleChat}
       />
       <View style={styles.iconsContainer}>
         <TouchableOpacity style={styles.iconButton} onPress={selectFiles}>
@@ -97,7 +105,9 @@ console.log("check progress data===>",progess)
         {/* <TouchableOpacity style={styles.iconButton}>
         <Icon name="image" size={24} color="#888"  />
         </TouchableOpacity> */}
-        <TouchableOpacity style={styles.iconButton} onPress={() => sendMessage(message)}>
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={() => sendMessage(message)}>
           <Icon name="send" size={24} color="#888" />
         </TouchableOpacity>
       </View>
@@ -110,7 +120,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     color: '#000',
-    backgroundColor:"#fff"
+    // backgroundColor: '#fff',
   },
   iconsContainer: {
     flexDirection: 'row',
@@ -119,17 +129,17 @@ const styles = StyleSheet.create({
     padding: 5,
     marginLeft: 5,
   },
-  InputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    margin: 10,
-    backgroundColor:"#fff"
-  },
+  // InputContainer: {
+  //   flexDirection: 'row',
+  //   alignItems: 'center',
+  //   borderColor: '#ccc',
+  //   borderWidth: 2,
+  //   borderRadius: 90,
+  //   paddingHorizontal: 10,
+  //   paddingVertical: 2,
+  //   margin: 10,
+  //   backgroundColor: '#fff',
+  // },
 });
 
 export default MessageInput;
