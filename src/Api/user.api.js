@@ -87,7 +87,7 @@ export const userLogin = (data) => axiosInstance.post('/users/signin', data);
 export const userSignup = (data) => axiosInstance.post('/users/signup', data);
 export const verifyOTP = (data) => axiosInstance.post('/users/verify', data);
 
-export const getCurrentUser = (Auth_data) => appAxios.get('/users/current-user');
+export const getCurrentUser = () => appAxios.get('/users/current-user');
 //   , {
 //   headers: { Authorization: `Bearer ${Auth_data.accessToken}` },
 // }
@@ -95,9 +95,7 @@ export const getCurrentUser = (Auth_data) => appAxios.get('/users/current-user')
 
 export const refreshToken = (data) => axiosInstance.post('/users/refresh-token', data);
 
-export const logoutUser = (Auth_data) => axiosInstance.post('/users/logout', {}, {
-  headers: { Authorization: `Bearer ${JSON.parse(Auth_data).accessToken}` },
-});
+export const logoutUser = (Auth_data) => axiosInstance.post('/users/logout', {});
 
 export const updateAvatar = (Auth_data, data) => {
   return axiosInstance.patch('/users/avatar', data, {

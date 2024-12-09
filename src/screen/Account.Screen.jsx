@@ -39,7 +39,7 @@ const AccountScreen = ({navigation}) => {
         });
       }
     } catch (error) {
-      console.error('error:', error.response.data);
+      console.error('error:', error);
     }
   };
 

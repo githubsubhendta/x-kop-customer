@@ -5,19 +5,16 @@ import { getCurrentUser, refreshToken } from '../Api/user.api';
 import { useNetwork } from '../shared/NetworkProvider';
 
 const useCheckUser = () => {
-  const { localTokens, isLoggedIn, user, addLoggedInUserAction, addLocalTokens } = useUserStore();
+  const {  isLoggedIn, user, addLoggedInUserAction, addLocalTokens } = useUserStore();
   const [loading, setLoading] = useState(true);
   const { isConnected } = useNetwork();
 
 
   useEffect(() => {
     const checkUser = async () => {
-      
-      if (localTokens) {
         try {
-          // console.log("token===>",localTokens)
           setLoading(true);
-          const result = await getCurrentUser(localTokens);
+          const result = await getCurrentUser();
           addLoggedInUserAction(result.data.data.user, true);
         } catch (error) {
           addLocalTokens(null);
@@ -44,14 +41,12 @@ const useCheckUser = () => {
         } finally {
           setLoading(false);
         }
-      } else {
-        setLoading(false);
-      }
+     
     };
 
     isConnected && checkUser();
     // console.log("token===>",user)
-  }, [localTokens]);
+  }, []);
 
 
 

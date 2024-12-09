@@ -1,5 +1,5 @@
 import { useWebSocket } from './WebSocketProvider';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useFirebase } from './FirebaseProvider.jsx';
 import useUserStore from '../stores/user.store.js';
 import useChatStore from '../stores/chat.store.js';
@@ -13,8 +13,9 @@ const ParantWrapperProvider = ({children}) => {
     const { user, handleUpdateUser } = useUserStore();
     const { conversations,setConversations } = useChatStore();
     const [meetingData,setMeetingData] = useState({status:false,data:null})
-    const [agoraToken,setAgoraToken] = useState(null);
+    // const [agoraToken,setAgoraToken] = useState(null);
     const currentRoute = getCurrentRoute();
+    const agoraToken = useRef(null);
 
 
   useEffect(()=>{
@@ -34,12 +35,10 @@ const ParantWrapperProvider = ({children}) => {
 
 useEffect(()=>{
 if(meetReceiver){
-  console.log("meetReceiver=====>",meetReceiver)
   setMeetingData({status:true,data:meetReceiver})
 }
 },[meetReceiver])
   
-
 
   const updateNewMessageStore = (newMessage,chatId) => {
     const updatedConversations = conversations.map(convo => {
@@ -57,7 +56,7 @@ if(meetReceiver){
 
   useEffect(() => {
     const handleMessage = data => {
-      console.log("check message data===>",data)
+      // console.log("check message data===>",data)
       const currentConversation = conversations.find(convo => convo.conversationId === data.message.chat);
       if (currentConversation) {
           const updatedConversations = conversations.map((convo) => {
@@ -123,13 +122,12 @@ if(meetReceiver){
 
 
   const meetingAccept = async()=>{
-    console.log("Meeting Accepted");
-  
       const getTokenData = await createAgoraToken({
         channelName: `${meetingData.data.to_user}-${meetingData.data.officer.mobile}`,
         uid: 0,
       })
-      setAgoraToken({data: getTokenData, mobile:meetingData.data.officer.mobile})
+      // setAgoraToken({data: getTokenData, mobile:meetingData.data.officer.mobile})
+      agoraToken.current = {data: getTokenData, mobile:meetingData.data.officer.mobile}
     webSocket.emit('call', {
       calleeId: meetingData.data.officer.mobile,
       rtcMessage: getTokenData,
@@ -143,18 +141,18 @@ if(meetReceiver){
 
   useEffect(() => {
     if (webSocket) {
-
-
-      // const handleAudioScreen = dataSet => {
-      //   // recieve_params?????????????
-      //   callRedirect(dataSet,agoraToken,recieve_params)
-      // }; 
+   if(currentRoute?.name != "FindAnOfficerScreen" || currentRoute?.name != "AudioScreen" && currentRoute?.name != "VideoScreen"){
+      const handleAudioScreen = dataSet => {
+        setMeetingData({status:false,data:null}) 
+        callRedirect(dataSet,agoraToken,dataSet.userInfo.officerDetails.ConsultationTypeID)
+      }; 
       // // 9821536060
-      // console.log("currentRoute?=====",currentRoute?.name)
-      // webSocket.on('callAnswered', handleAudioScreen); 
-      // return () => {
-      //   webSocket.off('callAnswered', handleAudioScreen);
-      // };
+      webSocket.on('callAnswered', handleAudioScreen); 
+     
+      return () => {
+        webSocket.off('callAnswered', handleAudioScreen);
+      };
+    }
     }
   }, [webSocket]);
 
@@ -164,9 +162,6 @@ if(meetReceiver){
 
   return (
     <>
-    {
-      console.log("meetingData==",meetingData)
-    }
     {
       meetingData.status && <CallPopup isVisible={meetingData.status} onAccept={meetingAccept} onReject={meetingReject} userInfo={meetingData.data}  />
     }

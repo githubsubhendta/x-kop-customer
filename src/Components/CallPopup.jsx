@@ -6,12 +6,12 @@ import book from '../images/book2.jpg';
 import { SVG_hangout_white, SVG_phone } from "../utils/SVGImage";
 import useUserStore from "../stores/user.store";
 
-const CallPopup = ({ isVisible, onAccept, onReject, userInfo }) => {
+const  CallPopup = ({ isVisible, onAccept, onReject, userInfo }) => {
   // const { user } = useUserStore();
 
 
   return (
-    <Modal
+    <Modal 
       isVisible={isVisible}
       animationIn="slideInDown" 
       animationOut="slideOutUp" 

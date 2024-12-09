@@ -137,7 +137,7 @@ import {
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {SvgXml} from 'react-native-svg';
-import {SVG_Scroll_Swipe} from '../utils/SVGImage.js';
+import {SVG_Scroll_Swipe, SVG_X_KOP_LOGO} from '../utils/SVGImage.js';
 import requestCameraAndAudioPermission from '../Components/permissions';
 import {navigate} from '../navigation/NavigationService.js';
 
@@ -151,15 +151,16 @@ const HomeScreen = ({handleTabPress}) => {
   }, []);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container}> 
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
       <ScrollView className="flex-1">
-        <View className="flex justify-center items-center h-[800px] px-5 mt-24">
-          <Text
-            className="text-primary text-2xl font-bold text-center"
-            style={{fontFamily: 'Ubuntu-R'}}>
+        <View className="flex justify-center items-center h-[800px] px-5">
+        <View>
+            <SvgXml xml={SVG_X_KOP_LOGO} width={200} height={200} />
+        </View>
+          <Text className="text-primary text-xl font-medium mt-10 text-center" style={{fontFamily:"Ubuntu-R"}}>
             {/* Welcome to ExKop */}
-            Empowering Your Success with Expert Legal Insights
+            Empowering Your Success with Expert Legal Insights 
           </Text>
           <Text
             className="text-secondary w-full text-center px-2 text-smfont-medium mt-4"

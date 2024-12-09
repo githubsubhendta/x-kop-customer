@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useMemo, useCallback} from 'react';
+import React, {useState, useEffect, useMemo} from 'react';
 import {
   View,
   Text,
@@ -177,20 +177,40 @@ const ScheduleScreen = ({navigation}) => {
                 item?.endCallTime !== undefined && (
                   <Text className="text-secondary text-sm font-light">
                     Duration:{' '}
-                    {Math.ceil(
-                      parseFloat(
-                        (new Date(item.endCallTime) -
-                          new Date(item.startCallTime)) /
-                          (1000 * 60),
-                      ).toFixed(2),
-                    )}{' '}
-                    min
+                    {(() => {
+                      const durationInMs =
+                        new Date(item.endCallTime) -
+                        new Date(item.startCallTime);
+                      const hours = Math.floor(durationInMs / (1000 * 60 * 60));
+                      const minutes = Math.floor(
+                        (durationInMs % (1000 * 60 * 60)) / (1000 * 60),
+                      );
+                      const seconds = Math.floor(
+                        (durationInMs % (1000 * 60)) / 1000,
+                      );
+
+                      const pad = num => String(num).padStart(2, '0');
+
+                      return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+                    })()}
                   </Text>
+                  // <Text className="text-secondary text-sm font-light">
+                  //   Duration:{' '}
+                  //   {Math.ceil(
+                  //     parseFloat(
+                  //       (new Date(item.endCallTime) -
+                  //         new Date(item.startCallTime)) /
+                  //         (1000 * 60),
+                  //     ).toFixed(2),
+                  //   )}{' '}
+                  //   min
+                  // </Text>
                 )}
+                
               <Text className="text-black text-sm text-medium">
                 {item?.startCallTime !== undefined &&
                   item?.endCallTime !== undefined && (
-                    <>Fee: ₹{item?.totalCallPrice | 0}</>
+                    <>Fee:₹{parseFloat(item?.totalCallPrice)}</>
                   )}
               </Text>
             </View>
@@ -284,13 +304,26 @@ const ScheduleScreen = ({navigation}) => {
                         <View className="flex flex-row gap-5">
                           <Text className="text-secondary text-sm font-light">
                             Duration:{' '}
-                            {(new Date(item.endTime) -
+                            {/* {(new Date(item.endTime) -
                               new Date(item.startTime)) /
                               (1000 * 60)}{' '}
-                            min
-                            {/* {parseInt(item.duration) <= 30000
-                  ? parseInt(item.duration) / 1000 + ' min'
-                  : parseInt(item.duration) / 60000 + ' hr'} */}
+                            min */}
+                            {(() => {
+                              const durationInMs =
+                                new Date(item.endTime) -
+                                new Date(item.startTime);
+                              const hours = Math.floor(
+                                durationInMs / (1000 * 60 * 60),
+                              );
+                              const minutes = Math.floor(
+                                (durationInMs % (1000 * 60 * 60)) / (1000 * 60),
+                              );
+                              const seconds = Math.floor(
+                                (durationInMs % (1000 * 60)) / 1000,
+                              );
+                              const pad = num => String(num).padStart(2, '0');
+                              return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+                            })()}
                           </Text>
                           <Text className="text-black text-sm text-medium">
                             Fee: ₹{' '}
@@ -375,7 +408,6 @@ const ScheduleScreen = ({navigation}) => {
                     <ActivityIndicator size="large" color="#0000ff" />
                   ) : null
                 }
-                //  inverted
               />
             </View>
           </View>
