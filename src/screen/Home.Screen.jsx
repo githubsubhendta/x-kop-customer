@@ -151,16 +151,18 @@ const HomeScreen = ({handleTabPress}) => {
   }, []);
 
   return (
-    <SafeAreaView style={styles.container}> 
+    <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
       <ScrollView className="flex-1">
-        <View className="flex justify-center items-center h-[800px] px-5">
-        <View>
+        <View className="flex justify-center items-center h-[750px] px-5">
+          <View>
             <SvgXml xml={SVG_X_KOP_LOGO} width={200} height={200} />
-        </View>
-          <Text className="text-primary text-xl font-medium mt-10 text-center" style={{fontFamily:"Ubuntu-R"}}>
+          </View>
+          <Text
+            className="text-primary text-xl font-medium mt-7 text-center"
+            style={{fontFamily: 'Ubuntu-R'}}>
             {/* Welcome to ExKop */}
-            Empowering Your Success with Expert Legal Insights 
+            Empowering Your Success with Expert Legal Insights
           </Text>
           <Text
             className="text-secondary w-full text-center px-2 text-smfont-medium mt-4"

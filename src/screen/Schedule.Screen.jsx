@@ -206,7 +206,7 @@ const ScheduleScreen = ({navigation}) => {
                   //   min
                   // </Text>
                 )}
-                
+
               <Text className="text-black text-sm text-medium">
                 {item?.startCallTime !== undefined &&
                   item?.endCallTime !== undefined && (
@@ -322,7 +322,9 @@ const ScheduleScreen = ({navigation}) => {
                                 (durationInMs % (1000 * 60)) / 1000,
                               );
                               const pad = num => String(num).padStart(2, '0');
-                              return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+                              return `${pad(hours)}:${pad(minutes)}:${pad(
+                                seconds,
+                              )}`;
                             })()}
                           </Text>
                           <Text className="text-black text-sm text-medium">
@@ -351,8 +353,8 @@ const ScheduleScreen = ({navigation}) => {
                       </View>
                     </View>
                     {item.startTime !== undefined && (
-                      <TouchableOpacity>
-                        <Text className="text-black text-base underline">
+                      <TouchableOpacity onPress={() => {}}>
+                        <Text className="text-black text-xs font-bold pr-5 underline">
                           Reschedule
                         </Text>
                       </TouchableOpacity>

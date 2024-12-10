@@ -136,10 +136,15 @@ const ContactScreen = () => {
                               }}
                             />
                           )}
+                          titleStyle={{
+                            fontWeight: 'bold',
+                            paddingTop: 3,
+                          }}
                           style={{
-                            // marginLeft: 4,
+                            fontWeight: 600,
                             borderBottomWidth: 1,
                             borderBottomColor: '#D3D3D3',
+                            marginLeft: 4,
                           }}
                         />
                       </TouchableOpacity>

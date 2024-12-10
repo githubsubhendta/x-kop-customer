@@ -53,6 +53,7 @@
     "react-native-vector-icons": "^10.2.0",
     "react-native-video": "^6.7.0",
     "react-native-webrtc": "^118.0.7",
+    "rn-fetch-blob": "^0.12.0",
     "sha256": "^0.2.0",
     "socket.io-client": "^4.7.5",
     "zustand": "^4.5.2"

@@ -24,9 +24,9 @@
 //         if(selectedTab != "Home"){
 //           navigation.navigate('Home');
 //           handleTabPress('Home');
-         
-//         } 
-      
+
+//         }
+
 //       }
 //       if (selectedTab==="Home") {
 //         Alert.alert(
@@ -58,7 +58,7 @@
 //             // navigation.navigate('Home');
 //             handleTabPress('Home');
 //            return false;
-//           } 
+//           }
 //         }
 //         if (currentRoute != 'LayoutScreen'){
 //             navigation.goBack();
@@ -71,9 +71,6 @@
 //     return () => backHandler.remove();
 //   }, [navigation, selectedTab]);
 
-
- 
-  
 //   const handleTabPress = (tabName) => {
 //     setSelectedTab(tabName);
 //   };
@@ -153,7 +150,7 @@
 // };
 
 // const TabBarWithBorder = ({ state, descriptors, navigation, selectedTab }) => {
-//   const { isConnected } = useNetwork(); 
+//   const { isConnected } = useNetwork();
 //   return (
 //     <>
 //     <View style={{ flexDirection: 'row' }}>
@@ -207,21 +204,25 @@
 
 // export default LayoutScreen;
 
-
-import React, { useEffect, useState } from 'react';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import React, {useEffect, useState} from 'react';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import HomeScreen from './Home.Screen';
 import ScheduleScreen from './Schedule.Screen';
 import AccountScreen from './Account.Screen';
-import { SVG_Home, SVG_calender, SVG_person, SVG_chat } from '../utils/SVGImage.js';
-import { SvgXml } from 'react-native-svg';
-import { View, BackHandler, Alert, TouchableOpacity, Text } from 'react-native';
+import {
+  SVG_Home,
+  SVG_calender,
+  SVG_person,
+  SVG_chat,
+} from '../utils/SVGImage.js';
+import {SvgXml} from 'react-native-svg';
+import {View, BackHandler, Alert, TouchableOpacity, Text} from 'react-native';
 import ContactScreen from './Contact.Screen.jsx';
-import { useNetwork } from '../shared/NetworkProvider.js';
+import {useNetwork} from '../shared/NetworkProvider.js';
 
 const Tab = createBottomTabNavigator();
 
-const LayoutScreen = ({ navigation }) => {
+const LayoutScreen = ({navigation}) => {
   const [selectedTab, setSelectedTab] = useState('Home');
   useEffect(() => {
     const backAction = () => {
@@ -251,18 +252,21 @@ const LayoutScreen = ({ navigation }) => {
       return true;
     };
 
-    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction,
+    );
     return () => backHandler.remove();
   }, [navigation, selectedTab]);
 
-  const handleTabPress = (tabName) => {
+  const handleTabPress = tabName => {
     setSelectedTab(tabName);
   };
 
   return (
     <Tab.Navigator
       initialRouteName="Home"
-      screenOptions={({ route }) => ({
+      screenOptions={({route}) => ({
         tabBarActiveTintColor: 'red',
         headerShown: false,
         tabBarStyle: {
@@ -270,12 +274,12 @@ const LayoutScreen = ({ navigation }) => {
           paddingHorizontal: 5,
           paddingTop: 0,
           position: 'absolute',
+          backgroundColor: 'transparent',
         },
       })}
-      tabBar={(props) => (
+      tabBar={props => (
         <TabBarWithBorder {...props} selectedTab={selectedTab} />
-      )}
-    >
+      )}>
       <Tab.Screen
         name="Home"
         children={() => <HomeScreen handleTabPress={handleTabPress} />}
@@ -284,7 +288,7 @@ const LayoutScreen = ({ navigation }) => {
         }}
         options={{
           headerShown: false,
-          tabBarIcon: ({ color }) => (
+          tabBarIcon: ({color}) => (
             <View>
               <SvgXml xml={SVG_Home} width="100px" height="30px" />
             </View>
@@ -300,7 +304,7 @@ const LayoutScreen = ({ navigation }) => {
         }}
         options={{
           headerShown: false,
-          tabBarIcon: ({ color }) => (
+          tabBarIcon: ({color}) => (
             <View>
               <SvgXml xml={SVG_chat} width="100px" height="30px" />
             </View>
@@ -317,7 +321,7 @@ const LayoutScreen = ({ navigation }) => {
         options={{
           headerShown: false,
           unmountOnBlur: true,
-          tabBarIcon: ({ color }) => (
+          tabBarIcon: ({color}) => (
             <View>
               <SvgXml xml={SVG_calender} width="100px" height="30px" />
             </View>
@@ -333,7 +337,7 @@ const LayoutScreen = ({ navigation }) => {
         }}
         options={{
           headerShown: false,
-          tabBarIcon: ({ color }) => (
+          tabBarIcon: ({color}) => (
             <View>
               <SvgXml xml={SVG_person} width="100px" height="30px" />
             </View>
@@ -345,14 +349,14 @@ const LayoutScreen = ({ navigation }) => {
   );
 };
 
-const TabBarWithBorder = ({ state, descriptors, navigation, selectedTab }) => {
-  const { isConnected } = useNetwork();
-  
+const TabBarWithBorder = ({state, descriptors, navigation, selectedTab}) => {
+  const {isConnected} = useNetwork();
+
   return (
     <>
-      <View style={{ flexDirection: 'row' }}>
+      <View style={{flexDirection: 'row'}}>
         {state.routes.map((route, index) => {
-          const { options } = descriptors[route.key];
+          const {options} = descriptors[route.key];
           const isFocused = state.index === index;
 
           const onPress = () => {
@@ -371,13 +375,32 @@ const TabBarWithBorder = ({ state, descriptors, navigation, selectedTab }) => {
             <TouchableOpacity
               key={index}
               onPress={onPress}
-              style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingTop: 8 }}
-            >
-              <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+              style={{
+                flex: 1,
+                alignItems: 'center',
+                justifyContent: 'center',
+                paddingTop: 8,
+              }}>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}>
                 <View>
-                  {options.tabBarIcon({ color: isFocused ? 'red' : 'black' })}
+                  {options.tabBarIcon({color: isFocused ? 'red' : 'black'})}
                   {route.name === selectedTab && (
-                    <View style={{ backgroundColor: 'red', height: 2, borderRadius: 2, marginTop: 4 }} />
+                    <View
+                      style={{
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: '#862A0D',
+                        height: 10,
+                        width: 90,
+                        borderRadius: 2,
+                        marginTop: 4,
+                      }}
+                    />
                   )}
                 </View>
               </View>
@@ -386,7 +409,14 @@ const TabBarWithBorder = ({ state, descriptors, navigation, selectedTab }) => {
         })}
       </View>
       {!isConnected && (
-        <Text style={{ paddingVertical: 8, color: 'white', marginTop: 4, textAlign: 'center', backgroundColor: 'red' }}>
+        <Text
+          style={{
+            paddingVertical: 8,
+            color: 'white',
+            marginTop: 4,
+            textAlign: 'center',
+            backgroundColor: 'red',
+          }}>
           No Internet Connection
         </Text>
       )}
@@ -395,6 +425,3 @@ const TabBarWithBorder = ({ state, descriptors, navigation, selectedTab }) => {
 };
 
 export default LayoutScreen;
-
-
-

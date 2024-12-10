@@ -9,6 +9,7 @@ import {
   Image,
   ActivityIndicator,
   Alert,
+  Platform,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import ChatHeader from '../Components/chat/ChatHeader';
@@ -21,10 +22,89 @@ import useChatStore from '../stores/chat.store.js';
 import {SvgXml} from 'react-native-svg';
 import Video from 'react-native-video';
 import {SVG_download, SVG_PDF} from '../utils/SVGImage.js';
+import RNFS from 'rn-fetch-blob';
 
 const Message = ({item, user, onLongPress, onPress, selectedMessages}) => {
-  const downloadFiles = item => {
-    console.log(item);
+  const [downloading, setDownloading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [fileExists, setFileExists] = useState(false);
+
+  const isFileExist = async fileUrl => {
+    const {fs} = RNFS;
+    const downloadDir =
+      Platform.OS === 'android' && fs.dirs.DownloadDir
+        ? fs.dirs.DownloadDir
+        : fs.dirs.DocumentDir;
+    const fileName = fileUrl.split('/').pop();
+    const filePath = `${downloadDir}/${fileName}`;
+    const exists = await fs.exists(filePath);
+    return exists;
+  };
+
+  useEffect(() => {
+    const checkFileExistence = async () => {
+      const exists = await isFileExist(item.content);
+      setFileExists(exists);
+    };
+    checkFileExistence();
+  }, [item.content]);
+
+  const downloadFiles = async fileUrl => {
+    try {
+      setDownloading(true);
+      setProgress(0);
+      const {config, fs} = RNFS;
+
+      const downloadDir =
+        Platform.OS === 'android' && fs.dirs.DownloadDir
+          ? fs.dirs.DownloadDir
+          : fs.dirs.DocumentDir;
+      const fileName = fileUrl.split('/').pop();
+      const filePath = `${downloadDir}/${fileName}`;
+
+      const dirExists = await fs.exists(downloadDir);
+      if (!dirExists) {
+        Alert.alert(
+          'Error',
+          `The download directory ${downloadDir} does not exist.`,
+        );
+        return;
+      }
+
+      const fileExists = await fs.exists(filePath);
+      if (fileExists) {
+        Alert.alert('File Exists', `The file "${fileName}" already exists.`);
+        return;
+      }
+
+      const task = config({path: filePath, fileCache: true}).fetch(
+        'GET',
+        fileUrl,
+      );
+      task.progress(({bytesWritten, contentLength}) => {
+        const progressPercentage = (bytesWritten / contentLength) * 100;
+        setProgress(progressPercentage);
+        console.log(`Download progress: ${progressPercentage.toFixed(2)}%`);
+      });
+
+      const result = await task;
+
+      if (result?.respInfo?.status === 200) {
+        Alert.alert('Download Complete', `File downloaded to: ${filePath}`);
+        console.log('Download successful:', filePath);
+      } else {
+        Alert.alert(
+          'Download Failed',
+          `Failed with status code: ${result?.respInfo?.status || 'unknown'}`,
+        );
+        console.error('Download failed with status:', result?.respInfo?.status);
+      }
+    } catch (error) {
+      console.error('Download error:', error);
+      Alert.alert('Download Error', 'An error occurred while downloading.');
+    } finally {
+      setDownloading(false);
+    }
   };
   return (
     <View>
@@ -42,22 +122,24 @@ const Message = ({item, user, onLongPress, onPress, selectedMessages}) => {
           <Text style={styles.content}>{item.content}</Text>
         )}
         {item.type === 'image' && item.content && (
-          <View>
+          <View style={styles.image}>
             <TouchableOpacity onPress={() => item.openImageModal(item.content)}>
               <Image source={{uri: item.content}} style={styles.image} />
             </TouchableOpacity>
-            <View className="absolute right-0 -bottom-8 w-8 h-7">
-              <SvgXml
-                onPress={() => downloadFiles(item)}
-                xml={SVG_download}
-                height={'100%'}
-                width={'100%'}
-              />
-            </View>
+            {!fileExists && item.sender !== user._id && (
+              <View className="absolute right-0 -bottom-7 w-8 h-7">
+                <SvgXml
+                  onPress={() => downloadFiles(item.content)}
+                  xml={SVG_download}
+                  height={'100%'}
+                  width={'100%'}
+                />
+              </View>
+            )}
           </View>
         )}
         {item.type === 'video' && (
-          <View>
+          <View style={styles.videoContainer}>
             <TouchableOpacity
               onPress={() => item.openVideoModal(item.content)}
               style={styles.videoContainer}>
@@ -68,30 +150,33 @@ const Message = ({item, user, onLongPress, onPress, selectedMessages}) => {
                 style={styles.playIcon}
               />
             </TouchableOpacity>
-            <View className="absolute right-0 -bottom-8 w-8 h-7">
-              <SvgXml
-                onPress={() => downloadFiles(item)}
-                xml={SVG_download}
-                height={'100%'}
-                width={'100%'}
-              />
-            </View>
+            {!fileExists && item.sender !== user._id && (
+              <View className="absolute right-0 -bottom-7  w-8 h-7">
+                <SvgXml
+                  onPress={() => downloadFiles(item.content)}
+                  xml={SVG_download}
+                  height={'100%'}
+                  width={'100%'}
+                />
+              </View>
+            )}
           </View>
         )}
         {item.type === 'file' && (
-          <View className="relative">
+          <View style={styles.backButton}>
             <TouchableOpacity style={styles.backButton}>
               <SvgXml xml={SVG_PDF} height={'100%'} width={'100%'} />
             </TouchableOpacity>
-            <View className="absolute right-0 mt-1 w-8 h-7">
-              <SvgXml
-                onPress={() => downloadFiles(item)}
-                xml={SVG_download}
-                height={'100%'}
-                width={'100%'}
-                color="#ff0000"
-              />
-            </View>
+            {!fileExists && item.sender !== user._id && (
+              <View className="absolute -right-14 mt-1  w-8 h-8">
+                <SvgXml
+                  onPress={() => downloadFiles(item.content)}
+                  xml={SVG_download}
+                  height={'100%'}
+                  width={'100%'}
+                />
+              </View>
+            )}
           </View>
         )}
         <Text style={styles.timeStamp}>
@@ -390,11 +475,13 @@ const styles = StyleSheet.create({
     color: 'black',
   },
   image: {
+    position: 'relative',
     width: 200,
     height: 200,
     borderRadius: 10,
   },
   videoContainer: {
+    position: 'relative',
     width: 200,
     height: 200,
     backgroundColor: 'black',
@@ -426,6 +513,7 @@ const styles = StyleSheet.create({
     height: '90%',
   },
   backButton: {
+    position: 'relative',
     width: 32,
     height: 32,
   },

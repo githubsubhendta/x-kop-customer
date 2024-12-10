@@ -19,28 +19,36 @@ const ChatHeader = ({
 }) => {
   return (
     <View style={styles.header}>
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={() => navigation.goBack()}>
-        <SvgXml xml={SVG_arrow_back} height={'100%'} width={'100%'} />
-      </TouchableOpacity>
+      <View className="flex flex-row space-x-3 justify-center items-center">
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}>
+          <SvgXml xml={SVG_arrow_back} height="100%" width="100%" />
+        </TouchableOpacity>
 
-      <View style={styles.userInfo}>
-        <View style={styles.avatarWrapper}>
-          <Image
-            source={{uri: officer?.avatar || 'default_avatar_url'}}
-            style={styles.avatar}
-          />
-        </View>
-        <View>
-          <Text style={styles.userName} numberOfLines={1} ellipsizeMode="tail">
-            {officer?.name || 'Officer'}
-          </Text>
-          <Text style={styles.userPosition}>
-            {chats?.participants?.filter(user => user.officerDetails)[0]
-              ?.officerDetails?.ConsultationTypeID?.ConsultationTypeName ||
-              'General Offences'}
-          </Text>
+        <View style={styles.userInfo}>
+          <View style={styles.avatarWrapper}>
+            <Image
+              source={{
+                uri: officer?.avatar || 'default_avatar_url', // Provide a valid default URL
+              }}
+              style={styles.avatar}
+            />
+          </View>
+          <View>
+            <Text
+              style={styles.userName}
+              numberOfLines={1}
+              ellipsizeMode="tail">
+              {officer?.name || 'Officer'}
+            </Text>
+            <Text style={styles.userPosition}>
+              {chats?.participants?.find(user => user.officerDetails)
+                ?.officerDetails?.ConsultationTypeID?.ConsultationTypeName ||
+                'General Offences'}{' '}
+              {/* Fallback for position */}
+            </Text>
+          </View>
         </View>
       </View>
 
@@ -80,9 +88,9 @@ const ChatHeader = ({
 
 const styles = StyleSheet.create({
   header: {
-    padding: 12,
+    padding: 10,
     flexDirection: 'row',
-    alignItems: 'start',
+    alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: '#fff',
   },
@@ -92,13 +100,13 @@ const styles = StyleSheet.create({
   },
   userInfo: {
     flexDirection: 'row',
-    alignItems: 'start',
+    alignItems: 'center',
     gap: 8,
   },
   avatarWrapper: {
     height: 42,
     width: 42,
-    borderRadius: 60,
+    borderRadius: 100,
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: '#ccc',
@@ -111,7 +119,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#000',
-    maxWidth: '62%',
+    maxWidth: 200,
+    flexShrink: 1,
   },
   userPosition: {
     fontSize: 14,
