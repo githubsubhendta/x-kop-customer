@@ -27,6 +27,7 @@ const ScheduleScreen = ({navigation}) => {
   const {user} = useUserStore();
   const {callHistory, fetchCallHistory, loading, hasMore} = useCallHistory();
   const [scheduleList, setScheduleList] = useState([]);
+  const [selectedSchedule, setSelectedSchedule] = useState(null);
 
   useEffect(() => {
     // console.log("hekksfbjfbjfe===>",user.consultations)
@@ -158,6 +159,12 @@ const ScheduleScreen = ({navigation}) => {
     }
   };
 
+  const handleReschedule = (item) => {  
+    navigation.navigate('Reschedule', {
+      selectedSchedule: item, 
+    });
+  }
+
   const itemRender = ({item}) => {
     return (
       <View className="flex flex-row justify-between py-2 border-b-2 border-slate-200 px-0">
@@ -288,6 +295,7 @@ const ScheduleScreen = ({navigation}) => {
             <View className="px-5 h-44">
               <FlatList
                 data={scheduleList}
+                handleReschedule={handleReschedule}
                 renderItem={({item}) => (
                   <View className="flex flex-row justify-between py-2 border-b-2 border-slate-200 px-0">
                     <View className="flex flex-row gap-2">
@@ -353,7 +361,8 @@ const ScheduleScreen = ({navigation}) => {
                       </View>
                     </View>
                     {item.startTime !== undefined && (
-                      <TouchableOpacity onPress={() => {}}>
+                      <TouchableOpacity
+                        onPress={() => handleReschedule(item)}>
                         <Text className="text-black text-xs font-bold pr-5 underline">
                           Reschedule
                         </Text>
