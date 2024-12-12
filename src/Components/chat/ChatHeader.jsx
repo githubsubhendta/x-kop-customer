@@ -18,7 +18,8 @@ const ChatHeader = ({
   navigation,
 }) => {
   return (
-    <View style={styles.header}>
+    <View >
+      <TouchableOpacity style={styles.header} onPress={{}}>
       <View className="flex flex-row space-x-3 justify-center items-center">
         <TouchableOpacity
           style={styles.backButton}
@@ -30,7 +31,7 @@ const ChatHeader = ({
           <View style={styles.avatarWrapper}>
             <Image
               source={{
-                uri: officer?.avatar || 'default_avatar_url', // Provide a valid default URL
+                uri: officer?.avatar || 'default_avatar_url', 
               }}
               style={styles.avatar}
             />
@@ -82,6 +83,7 @@ const ChatHeader = ({
           <Text style={styles.menuItem}>Menu Item 2</Text>
         </View>
       )}
+      </TouchableOpacity>
     </View>
   );
 };

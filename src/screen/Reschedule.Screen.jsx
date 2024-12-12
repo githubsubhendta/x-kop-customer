@@ -11,14 +11,13 @@ const Reschedule = ({route, navigation}) => {
   const [selectedDate, setSelectedDate] = useState(
     new Date(selectedSchedule.startCallTime),
   );
-
   const [timeSlots, setTimeSlots] = useState([]);
   const [selectedSlot, setSelectedSlot] = useState(null);
 
   const generateTimeSlots = (startTime, endTime, interval) => {
     let slots = [];
     let currentTime = new Date(startTime);
-  
+
     while (currentTime < endTime) {
       let endTimeSlot = new Date(currentTime.getTime() + interval);
       if (endTimeSlot > endTime) {
@@ -27,11 +26,9 @@ const Reschedule = ({route, navigation}) => {
       slots.push(formatTime(currentTime) + ' - ' + formatTime(endTimeSlot));
       currentTime = endTimeSlot;
     }
-  
-    // console.log(slots); 
+
     return slots;
   };
-  
 
   const roundUpTo30Minutes = date => {
     let minutes = date.getMinutes();
@@ -55,11 +52,10 @@ const Reschedule = ({route, navigation}) => {
     startTime = roundUpTo30Minutes(startTime);
     let endTime = new Date(selectedDate);
     endTime.setHours(18, 0, 0, 0);
-    let interval = 30 * 60 * 1000; 
-  
+    let interval = 30 * 60 * 1000;
+
     setTimeSlots(generateTimeSlots(startTime, endTime, interval));
   }, [selectedDate]);
-  
 
   const handleRescheduleSubmit = () => {
     if (selectedSlot !== null) {
@@ -68,15 +64,15 @@ const Reschedule = ({route, navigation}) => {
         startTime: selectedDate,
         selectedSlot: timeSlots[selectedSlot],
       };
-     
-      console.log("Rescheduled Schedule: ", newSchedule);
-      navigation.goBack(); 
+
+      console.log('Rescheduled Schedule: ', newSchedule);
+      navigation.goBack();
     }
   };
 
   return (
     <View className="flex-1 px-5 py-10">
-      <View className="flex flex-row  space-x-4 my-2">
+      <View className="flex flex-row space-x-4 my-2">
         <TouchableOpacity
           className="w-8 h-8 justify-center -ml-1"
           onPress={() => navigation.goBack()}>
@@ -88,11 +84,11 @@ const Reschedule = ({route, navigation}) => {
         </Text>
       </View>
 
-      <View className="pt-2 mb-10">
+      <View className="pt-2 mb-10 bg-transparent">
         <Calendar
           disableAllTouchEventsForDisabledDays={true}
           markedDates={{
-            [moment(selectedSchedule.startCallTime).format('YYYY-MM-DD')]: {
+            [moment(selectedDate).format('YYYY-MM-DD')]: {
               selected: true,
               selectedColor: '#222222',
               selectedTextColor: 'yellow',
@@ -100,47 +96,42 @@ const Reschedule = ({route, navigation}) => {
           }}
           minDate={new Date().toISOString().split('T')[0]}
           onDayPress={day => {
-            setSelectedDate(new Date(day.dateString));
+            setSelectedDate(new Date(day.dateString)); // Update selectedDate properly
           }}
         />
       </View>
 
       {selectedDate && (
         <View className="px-5 flex flex-row gap-2 mb-4">
-          <Text className="text-[#202020] text-sm">
-            Preferred Slot for
-          </Text>
+          <Text className="text-[#202020] text-sm">Preferred Slot for</Text>
           <Text className="text-slate-700 text-[16px] font-bold">
             {moment(selectedDate).format('MMMM Do YYYY')}
           </Text>
         </View>
       )}
 
-<ScrollView horizontal={true} className="gap-3">
-  {timeSlots.length > 0 ? (
-    timeSlots.map((item, index) => (
-      <TouchableOpacity
-        key={'slot_key' + index}
-        className={`flex flex-row items-center px-2 border ${
-          selectedSlot === index ? 'border-primary' : 'border-secondary'
-        } rounded-lg`}
-        onPress={() => setSelectedSlot(index)}>
-          
-        <RadioButton
-          color="#997654"
-          status={selectedSlot === index ? 'checked' : 'unchecked'}
-          value="option1"
-          onPress={() => setSelectedSlot(index)}
-        />
-        <Text className="text-primary">{item}</Text>
-       
-      </TouchableOpacity>
-    ))
-  ) : (
-    <Text>No available time slots</Text>
-  )}
-</ScrollView>
-
+      <ScrollView horizontal={true} className="gap-3">
+        {timeSlots.length > 0 ? (
+          timeSlots.map((item, index) => (
+            <TouchableOpacity
+              key={'slot_key' + index}
+              className={`flex flex-row items-center px-2 py-1 border ${
+                selectedSlot === index ? 'border-primary' : 'border-secondary'
+              } rounded-lg`}
+              onPress={() => setSelectedSlot(index)}>
+              <RadioButton
+                color="#997654"
+                status={selectedSlot === index ? 'checked' : 'unchecked'}
+                value="option1"
+                onPress={() => setSelectedSlot(index)}
+              />
+              <Text className="text-primary">{item}</Text>
+            </TouchableOpacity>
+          ))
+        ) : (
+          <Text>No available time slots</Text>
+        )}
+      </ScrollView>
 
       <View className="px-6 mt-5">
         <TouchableOpacity
@@ -156,3 +147,5 @@ const Reschedule = ({route, navigation}) => {
 };
 
 export default Reschedule;
+
+
