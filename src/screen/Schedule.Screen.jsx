@@ -137,7 +137,7 @@ const ScheduleScreen = ({navigation}) => {
       startTime = roundUpTo30Minutes(currentTime);
     } else if (selected > today) {
       startTime = new Date();
-      startTime.setHours(9, 0, 0, 0); // 9:00 AM
+      startTime.setHours(9, 0, 0, 0); 
     } else {
       startTime = null;
     }
@@ -159,11 +159,24 @@ const ScheduleScreen = ({navigation}) => {
     }
   };
 
-  const handleReschedule = (item) => {  
+  // const handleReschedule = (item) => {  
+  //   navigation.navigate('Reschedule', {
+  //     selectedSchedule: item, 
+  //     scheduleId:item._id
+  //   });
+  // }
+
+  const handleReschedule = (item) => {
+    // Pass the original start time, end time, and feePerMinute to the Reschedule screen
     navigation.navigate('Reschedule', {
-      selectedSchedule: item, 
+      selectedSchedule: item,
+      scheduleId: item._id,
+      originalStartTime: item.startCallTime,
+      originalEndTime: item.endCallTime,
+      feePerMinute: item.officer.officerDetails.ConsultationTypeID.FeePerMinute,
     });
-  }
+  };
+  
 
   const itemRender = ({item}) => {
     return (
@@ -295,7 +308,7 @@ const ScheduleScreen = ({navigation}) => {
             <View className="px-5 h-44">
               <FlatList
                 data={scheduleList}
-                handleReschedule={handleReschedule}
+                
                 renderItem={({item}) => (
                   <View className="flex flex-row justify-between py-2 border-b-2 border-slate-200 px-0">
                     <View className="flex flex-row gap-2">

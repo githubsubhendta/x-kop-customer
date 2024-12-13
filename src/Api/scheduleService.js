@@ -10,3 +10,18 @@ export const getAllSchedules = async (page=1) => {
   }
 };
 
+export const updateSchedule = async (id, updatedData) => {
+  try { 
+    
+    const response = await appAxios.put(`${BASE_URI}/officer_schedule/schedules/${id}`, updatedData);
+    if (response.data) {
+      return response.data; 
+    } else {
+      throw new Error('Unexpected response structure');
+    }
+  } catch (error) {
+    console.error('Error updating schedule:', error);
+    throw error; 
+  }
+};
+
