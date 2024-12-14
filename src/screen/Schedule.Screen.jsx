@@ -28,10 +28,8 @@ const ScheduleScreen = ({navigation}) => {
   const {callHistory, fetchCallHistory, loading, hasMore} = useCallHistory();
   const [scheduleList, setScheduleList] = useState([]);
   const [selectedSchedule, setSelectedSchedule] = useState(null);
-
+  const [refreshing, setRefreshing] = useState(false);
   useEffect(() => {
-    // console.log("hekksfbjfbjfe===>",user.consultations)
-    // console.log("hekksfbjfbjfe===>",user.schedules)
     const currentDate = new Date().toISOString().split('T')[0];
     setSelected(currentDate);
   }, []);
@@ -39,10 +37,16 @@ const ScheduleScreen = ({navigation}) => {
   useEffect(() => {
     (async () => {
       const allHistory = await getAllSchedules();
-      // console.log("check history=>",allHistory)
       setScheduleList(allHistory);
     })();
-  }, [getAllSchedules]);
+  }, []);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    const allHistory = await getAllSchedules();
+    setScheduleList(allHistory);
+    setRefreshing(false);
+  };
 
   const marked = useMemo(
     () => ({
@@ -159,13 +163,6 @@ const ScheduleScreen = ({navigation}) => {
     }
   };
 
-  // const handleReschedule = (item) => {
-  //   navigation.navigate('Reschedule', {
-  //     selectedSchedule: item,
-  //     scheduleId:item._id
-  //   });
-  // }
-
   const handleReschedule = item => {
     // Pass the original start time, end time, and feePerMinute to the Reschedule screen
     navigation.navigate('Reschedule', {
@@ -213,17 +210,6 @@ const ScheduleScreen = ({navigation}) => {
                       return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
                     })()}
                   </Text>
-                  // <Text className="text-secondary text-sm font-light">
-                  //   Duration:{' '}
-                  //   {Math.ceil(
-                  //     parseFloat(
-                  //       (new Date(item.endCallTime) -
-                  //         new Date(item.startCallTime)) /
-                  //         (1000 * 60),
-                  //     ).toFixed(2),
-                  //   )}{' '}
-                  //   min
-                  // </Text>
                 )}
 
               <Text className="text-black text-sm text-medium">
@@ -248,11 +234,6 @@ const ScheduleScreen = ({navigation}) => {
             )}
           </View>
         </View>
-        {/* {item.date_time !== undefined && (
-          <TouchableOpacity>
-            <Text className="text-black text-base underline">Reschedule</Text>
-          </TouchableOpacity>
-        )} */}
       </View>
     );
   };
@@ -277,9 +258,6 @@ const ScheduleScreen = ({navigation}) => {
       'YYYY-MM-DD h:mm A',
     ).toDate();
     const endDateTime = moment(endDateTimeString, 'YYYY-MM-DD h:mm A').toDate();
-
-    // console.log(startDateTime);
-    // console.log(endDateTime);
     navigation.navigate('SelectConsultantsScreen', {
       startDateTime: JSON.stringify(startDateTime),
       endDateTime: JSON.stringify(endDateTime),
@@ -288,15 +266,19 @@ const ScheduleScreen = ({navigation}) => {
 
   return (
     <View className="flex-1 bg-white relative">
-      {/* <RefreshControl refreshing={refreshing} onRefresh={onRefresh} /> */}
       {!scheduleCall ? (
         <>
-          <View className="px-5 py-10">
-            <Text className="text-primary font-medium text-2xl">
-              History & Scheduling
-            </Text>
+          <View>
+            <ScrollView
+              className="px-5 py-10"
+              refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+              }>
+              <Text className="text-primary font-medium text-2xl">
+                History & Scheduling
+              </Text>
+            </ScrollView>
           </View>
-
           <View className="mt-2">
             <View className="px-5">
               <Text className="text-[#997654] font-medium text-sm">
@@ -400,17 +382,6 @@ const ScheduleScreen = ({navigation}) => {
             </View>
             <View className="bg-slate-300 h-[1px] my-3" />
             <View className="px-5">
-              {/* {user.consultations.length > 0 && (  
-               // <FlatList
-                //   data={user.consultations.sort(
-                //     (a, b) => new Date(b.endCallTime) - new Date(a.endCallTime),
-                //   )}
-                //   renderItem={itemRender}
-                //   keyExtractor={item => item._id}
-                //   scrollEnabled
-                //   style={{marginBottom: 350}}
-                // />  )} */}
-
               <FlatList
                 data={
                   callHistory.length > 0
