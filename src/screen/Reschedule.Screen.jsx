@@ -147,5 +147,3 @@ const Reschedule = ({route, navigation}) => {
 };
 
 export default Reschedule;
-
-

@@ -159,11 +159,11 @@ const ScheduleScreen = ({navigation}) => {
     }
   };
 
-  const handleReschedule = (item) => {  
+  const handleReschedule = item => {
     navigation.navigate('Reschedule', {
-      selectedSchedule: item, 
+      selectedSchedule: item,
     });
-  }
+  };
 
   const itemRender = ({item}) => {
     return (
@@ -361,8 +361,7 @@ const ScheduleScreen = ({navigation}) => {
                       </View>
                     </View>
                     {item.startTime !== undefined && (
-                      <TouchableOpacity
-                        onPress={() => handleReschedule(item)}>
+                      <TouchableOpacity onPress={() => handleReschedule(item)}>
                         <Text className="text-black text-xs font-bold pr-5 underline">
                           Reschedule
                         </Text>
