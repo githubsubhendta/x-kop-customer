@@ -109,8 +109,7 @@ const Reschedule = ({route, navigation}) => {
         endTime: endDateTime,
       };
       await updateSchedule(scheduleId, newSchedule);
-      // navigation.goBack();
-      navigation.navigate('Schedule');
+      navigation.goBack();
     } catch (error) {
       console.error('Error updating schedule:', error.message);
     }
