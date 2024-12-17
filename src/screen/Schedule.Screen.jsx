@@ -17,7 +17,8 @@ import {RadioButton} from 'react-native-paper';
 import moment from 'moment';
 import useUserStore from '../stores/user.store.js';
 import useCallHistory from '../Api/callHistory.js';
-import {getAllSchedules} from '../Api/scheduleService.js';
+import {deleteSchedule, getAllSchedules} from '../Api/scheduleService.js';
+import { useFocusEffect } from '@react-navigation/native';
 
 const ScheduleScreen = ({navigation}) => {
   const [scheduleCall, setScheduleCall] = useState(false);
@@ -34,13 +35,58 @@ const ScheduleScreen = ({navigation}) => {
     setSelected(currentDate);
   }, []);
 
+
+  useFocusEffect( 
+    React.useCallback(() => {
+      onRefresh(); 
+    }, [])
+  );
+
+  // useEffect(() => {
+  //   (async () => {
+  //     const allHistory = await getAllSchedules();
+  //     setScheduleList(allHistory);
+  //   })();
+  // }, []);
+
   useEffect(() => {
     (async () => {
-      const allHistory = await getAllSchedules();
-      setScheduleList(allHistory);
+      try {
+        const allHistory = await getAllSchedules(); // Fetch all schedules
+        const currentDate = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+  
+        const validSchedules = [];
+  
+        for (const schedule of allHistory) {
+          const { startTime, _id } = schedule; // Replace startCallTime with startTime
+  
+          // Validate if startTime exists and is a valid date
+          if (startTime && !isNaN(new Date(startTime).getTime())) {
+            const scheduleDate = new Date(startTime).toISOString().split('T')[0];
+  
+            if (scheduleDate < currentDate) {
+              
+              console.log(`Deleting expired schedule: ${_id}`);
+              await deleteSchedule(_id);
+            } else {
+              validSchedules.push(schedule); // Add valid schedules
+            }
+          } else {
+            console.warn(`Invalid startTime for schedule: ${JSON.stringify(schedule)}`);
+          }
+        }
+  
+        setScheduleList(validSchedules);
+      } catch (error) {
+        console.error('Error fetching or deleting schedules:', error);
+      }
     })();
   }, []);
+  
+  
+  
 
+  
   const onRefresh = async () => {
     setRefreshing(true);
     const allHistory = await getAllSchedules();
@@ -164,13 +210,13 @@ const ScheduleScreen = ({navigation}) => {
   };
 
   const handleReschedule = item => {
-    // Pass the original start time, end time, and feePerMinute to the Reschedule screen
+    
     navigation.navigate('Reschedule', {
       selectedSchedule: item,
       scheduleId: item._id,
-      originalStartTime: item.startCallTime,
-      originalEndTime: item.endCallTime,
-      feePerMinute: item.officer.officerDetails.ConsultationTypeID.FeePerMinute,
+      // originalStartTime: item.startCallTime,
+      // originalEndTime: item.endCallTime,
+      // feePerMinute: item.officer.officerDetails.ConsultationTypeID.FeePerMinute,
     });
   };
 

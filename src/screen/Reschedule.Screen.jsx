@@ -77,33 +77,69 @@ const Reschedule = ({route, navigation}) => {
     setTimeSlots(generateTimeSlots(startTime, endTime, interval));
   }, [selectedDate]);
 
+  // const handleRescheduleSubmit = async () => {
+  //   const date = selectedDate;
+
+  //   if (!timeSlots[selectedSlot]) {
+  //     console.error('Invalid time slot selected');
+  //     return;
+  //   }
+
+  //   const [startTime, endTime] = timeSlots[selectedSlot].split('-');
+  //   const startDateTimeString = `${date} ${startTime.trim()}`;
+  //   const endDateTimeString = `${date} ${endTime.trim()}`;
+  //   try {
+  //     // Format the date without redundant timezone information
+  //     const startDateTime = moment(
+  //       `${moment(date).format('YYYY-MM-DD')} ${startTime.trim()}`,
+  //       'YYYY-MM-DD hh:mm A',
+  //     ).toISOString();
+
+  //     const endDateTime = moment(
+  //       `${moment(date).format('YYYY-MM-DD')} ${endTime.trim()}`,
+  //       'YYYY-MM-DD hh:mm A',
+  //     ).toISOString();
+
+  //     if (!startDateTime || !endDateTime) {
+  //       throw new Error('Failed to parse dates');
+  //     }
+
+  //     const newSchedule = {
+  //       startTime: startDateTime,
+  //       endTime: endDateTime,
+  //     };
+  //     await updateSchedule(scheduleId, newSchedule);
+  //     navigation.goBack();
+  //   } catch (error) {
+  //     console.error('Error updating schedule:', error.message);
+  //   }
+  // };
+
   const handleRescheduleSubmit = async () => {
-    const date = selectedDate;
-
     if (!timeSlots[selectedSlot]) {
-      console.error('Invalid time slot selected');
-      return;
+      alert('Please select a valid time slot before submitting.');
+      return; // Exit the function if no valid time slot is selected
     }
-
+  
+    const date = selectedDate;
     const [startTime, endTime] = timeSlots[selectedSlot].split('-');
-    const startDateTimeString = `${date} ${startTime.trim()}`;
-    const endDateTimeString = `${date} ${endTime.trim()}`;
+    
     try {
       // Format the date without redundant timezone information
       const startDateTime = moment(
         `${moment(date).format('YYYY-MM-DD')} ${startTime.trim()}`,
         'YYYY-MM-DD hh:mm A',
       ).toISOString();
-
+  
       const endDateTime = moment(
         `${moment(date).format('YYYY-MM-DD')} ${endTime.trim()}`,
         'YYYY-MM-DD hh:mm A',
       ).toISOString();
-
+  
       if (!startDateTime || !endDateTime) {
         throw new Error('Failed to parse dates');
       }
-
+  
       const newSchedule = {
         startTime: startDateTime,
         endTime: endDateTime,
@@ -114,6 +150,8 @@ const Reschedule = ({route, navigation}) => {
       console.error('Error updating schedule:', error.message);
     }
   };
+  
+  
 
   return (
     <View className="flex-1 px-5 py-10">

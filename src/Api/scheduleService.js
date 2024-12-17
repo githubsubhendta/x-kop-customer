@@ -28,3 +28,15 @@ export const updateSchedule = async (id, updatedData) => {
     throw error;
   }
 };
+
+export const deleteSchedule  = async (scheduleId,userId)=>{
+try {
+  const res = await appAxios.delete(`${BASE_URI}/officer-schedule/schedules/${scheduleId}`,{
+    userId
+  });
+  return res.data
+} catch (error) {
+    console.error('Error deleting schedule:', error);
+    throw error;
+  }
+}
