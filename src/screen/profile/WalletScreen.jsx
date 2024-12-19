@@ -18,6 +18,7 @@ import {useSnackbar} from '../../shared/SnackbarProvider';
 import RNFetchBlob from 'react-native-blob-util';
 import {BASE_URI} from '../../Api/ApiManager';
 import {useBankPaymentList} from '../../Api/backPaymentService';
+import WithdrawModal from './WidthdrawModal';
 
 const WalletScreen = ({navigation}) => {
   const {loading, data} = useHttpRequest();
@@ -26,6 +27,7 @@ const WalletScreen = ({navigation}) => {
   const {user, addLoggedInUserAction} = userStoreAction(state => state);
   const [loading1, setLoading1] = React.useState(false);
   const [isModalVisible, setModalVisible] = useState(false);
+  const [isWithdrawModalVisible, setWithdrawModalVisible] = useState(false);
   const {showSnackbar} = useSnackbar();
   const {dirs} = RNFetchBlob.fs;
 
@@ -167,7 +169,9 @@ const WalletScreen = ({navigation}) => {
           <Text style={styles.buttonText}>Add Money</Text>
         </TouchableOpacity>
         {/* onPress={()=>navigation.push("PaymentScreen")} */}
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => setWithdrawModalVisible(true)}>
           <Text style={styles.buttonText}>Withdraw</Text>
         </TouchableOpacity>
 
@@ -175,6 +179,13 @@ const WalletScreen = ({navigation}) => {
           modalVisible={isModalVisible}
           setModalVisible={setModalVisible}
           alertMessage={alertMessage}
+        />
+
+        <WithdrawModal
+          modalVisible={isWithdrawModalVisible}
+          setModalVisible={setWithdrawModalVisible}
+          accountDetails={user?.bankDetails}
+          walletBalance={user?.wallet || 0}
         />
       </View>
     </View>

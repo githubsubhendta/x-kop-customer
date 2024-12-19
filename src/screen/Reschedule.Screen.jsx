@@ -37,19 +37,37 @@ const Reschedule = ({route, navigation}) => {
     }
   }, [selectedSchedule]);
 
+  // const generateTimeSlots = (startTime, endTime, interval) => {
+  //   let slots = [];
+  //   let currentTime = new Date();
+  //   while (currentTime < endTime) {
+  //     let endTimeSlot = new Date(currentTime.getTime() + interval);
+  //     if (endTimeSlot > endTime) {
+  //       break;
+  //     }
+  //     slots.push(formatTime(currentTime) + ' - ' + formatTime(endTimeSlot));
+  //     currentTime = endTimeSlot;
+  //   }
+  //   return slots;
+  // };
   const generateTimeSlots = (startTime, endTime, interval) => {
     let slots = [];
-    let currentTime = new Date(startTime);
-    while (currentTime < endTime) {
-      let endTimeSlot = new Date(currentTime.getTime() + interval);
-      if (endTimeSlot > endTime) {
-        break;
+    let currentTime = new Date(); // Current time
+  
+    let slotStart = new Date(startTime);
+    while (slotStart < endTime) {
+      let slotEnd = new Date(slotStart.getTime() + interval);
+  
+      // Exclude past slots
+      if (slotEnd > currentTime) {
+        slots.push(formatTime(slotStart) + ' - ' + formatTime(slotEnd));
       }
-      slots.push(formatTime(currentTime) + ' - ' + formatTime(endTimeSlot));
-      currentTime = endTimeSlot;
+  
+      slotStart = slotEnd;
     }
     return slots;
   };
+  
 
   const roundUpTo30Minutes = date => {
     let minutes = date.getMinutes();
