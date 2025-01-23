@@ -170,8 +170,8 @@ const WalletScreen = ({navigation}) => {
         </TouchableOpacity>
         {/* onPress={()=>navigation.push("PaymentScreen")} */}
         <TouchableOpacity
-          style={styles.button}
-          onPress={() => setWithdrawModalVisible(true)}>
+          style={[styles.button,user?.wallet === 0 && styles.buttonDisabled,]}
+          onPress={() => setWithdrawModalVisible(true)} disabled={user?.wallet === 0}>
           <Text style={styles.buttonText}>Withdraw</Text>
         </TouchableOpacity>
 
@@ -245,6 +245,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flex: 1,
     marginHorizontal: 5,
+  },
+  buttonDisabled: {
+    backgroundColor: "gray", 
+    opacity: 0.9,
   },
   buttonText: {
     color: 'white',

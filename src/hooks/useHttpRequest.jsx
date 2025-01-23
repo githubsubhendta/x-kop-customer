@@ -7,7 +7,7 @@ const useHttpRequest = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [data, setData] = useState(null);
-  const User = userStoreAction(state=>state.localTokens);
+  const User = userStoreAction();
 
   const fetchData = async (endpoint, method = 'GET', requestData = null) => {
     setLoading(true);
