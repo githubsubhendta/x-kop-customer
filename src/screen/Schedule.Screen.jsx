@@ -18,7 +18,7 @@ import moment from 'moment';
 import useUserStore from '../stores/user.store.js';
 import useCallHistory from '../Api/callHistory.js';
 import {deleteSchedule, getAllSchedules} from '../Api/scheduleService.js';
-import { useFocusEffect } from '@react-navigation/native';
+import {useFocusEffect} from '@react-navigation/native';
 
 const ScheduleScreen = ({navigation}) => {
   const [scheduleCall, setScheduleCall] = useState(false);
@@ -35,11 +35,10 @@ const ScheduleScreen = ({navigation}) => {
     setSelected(currentDate);
   }, []);
 
-
-  useFocusEffect( 
+  useFocusEffect(
     React.useCallback(() => {
-      onRefresh(); 
-    }, [])
+      onRefresh();
+    }, []),
   );
 
   // useEffect(() => {
@@ -52,41 +51,39 @@ const ScheduleScreen = ({navigation}) => {
   useEffect(() => {
     (async () => {
       try {
-        const allHistory = await getAllSchedules(); // Fetch all schedules
+        const allHistory = await getAllSchedules();
         const currentDate = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
-  
+
         const validSchedules = [];
-  
+
         for (const schedule of allHistory) {
-          const { startTime, _id } = schedule; // Replace startCallTime with startTime
-  
+          const {startTime, _id} = schedule; // Replace startCallTime with startTime
+
           // Validate if startTime exists and is a valid date
           if (startTime && !isNaN(new Date(startTime).getTime())) {
-            const scheduleDate = new Date(startTime).toISOString().split('T')[0];
-  
+            const scheduleDate = new Date(startTime)
+              .toISOString()
+              .split('T')[0];
+
             if (scheduleDate < currentDate) {
-              
               console.log(`Deleting expired schedule: ${_id}`);
               await deleteSchedule(_id);
             } else {
               validSchedules.push(schedule); // Add valid schedules
             }
           } else {
-            console.warn(`Invalid startTime for schedule: ${JSON.stringify(schedule)}`);
+            console.warn(
+              `Invalid startTime for schedule: ${JSON.stringify(schedule)}`,
+            );
           }
         }
-  
+
         setScheduleList(validSchedules);
       } catch (error) {
         console.error('Error fetching or deleting schedules:', error);
       }
     })();
   }, []);
-  
-  
-  
-
-  
   const onRefresh = async () => {
     setRefreshing(true);
     const allHistory = await getAllSchedules();
@@ -208,9 +205,7 @@ const ScheduleScreen = ({navigation}) => {
       fetchCallHistory();
     }
   };
-
   const handleReschedule = item => {
-    
     navigation.navigate('Reschedule', {
       selectedSchedule: item,
       scheduleId: item._id,
@@ -336,7 +331,7 @@ const ScheduleScreen = ({navigation}) => {
               <FlatList
                 data={scheduleList}
                 renderItem={({item}) => (
-                  <View className="flex flex-row justify-between py-2 border-b-2 border-slate-200 px-0">
+                  <View className="flex flex-row justify-center py-2 border-b-2 border-slate-200 px-0">
                     <View className="flex flex-row gap-2">
                       <View className="w-[50px] h-[50px] rounded-full">
                         <Image
@@ -348,7 +343,7 @@ const ScheduleScreen = ({navigation}) => {
                         <Text className="text-black font-medium text-base">
                           {item.officer.name}
                         </Text>
-                        <View className="flex flex-row gap-5">
+                        <View className="flex flex-row gap-4">
                           <Text className="text-secondary text-sm font-light">
                             Duration:{' '}
                             {/* {(new Date(item.endTime) -
@@ -374,6 +369,7 @@ const ScheduleScreen = ({navigation}) => {
                               )}`;
                             })()}
                           </Text>
+
                           <Text className="text-black text-sm text-medium">
                             Fee: ₹{' '}
                             {parseInt(
@@ -401,7 +397,7 @@ const ScheduleScreen = ({navigation}) => {
                     </View>
                     {item.startTime !== undefined && (
                       <TouchableOpacity onPress={() => handleReschedule(item)}>
-                        <Text className="text-black text-xs font-bold pr-5 underline">
+                        <Text className="text-black text-xs font-normal underline">
                           Reschedule
                         </Text>
                       </TouchableOpacity>
@@ -427,28 +423,33 @@ const ScheduleScreen = ({navigation}) => {
               <Text className="text-[#997654] text-md">Previous Calls</Text>
             </View>
             <View className="bg-slate-300 h-[1px] my-3" />
-            <View className="px-5">
-              <FlatList
-                data={
-                  callHistory.length > 0
-                    ? callHistory.sort(
-                        (a, b) =>
-                          new Date(b.startCallTime) - new Date(a.startCallTime),
-                      )
-                    : []
-                }
-                renderItem={itemRender}
-                keyExtractor={item => item._id.toString()}
-                onEndReached={handleLoadMore}
-                onEndReachedThreshold={0.5}
-                ListFooterComponent={
-                  loading ? (
-                    <ActivityIndicator size="large" color="#0000ff" />
-                  ) : null
-                }
-              />
-            </View>
+            {callHistory && callHistory.length > 0 ? (
+              <View className="px-5">
+                <FlatList
+                  data={callHistory.sort(
+                    (a, b) =>
+                      new Date(b.startCallTime) - new Date(a.startCallTime),
+                  )}
+                  renderItem={itemRender}
+                  keyExtractor={item => item._id.toString()}
+                  onEndReached={handleLoadMore}
+                  onEndReachedThreshold={0.5}
+                  ListFooterComponent={
+                    loading ? (
+                      <ActivityIndicator size="large" color="#0000ff" />
+                    ) : null
+                  }
+                />
+              </View>
+            ) : (
+              <View className="px-5">
+                <Text className="text-gray-500 text-sm">
+                  No call history available.
+                </Text>
+              </View>
+            )}
           </View>
+
           <TouchableOpacity
             className="absolute bottom-4 right-6 bg-primary px-3 py-3 rounded-xl"
             onPress={() => {

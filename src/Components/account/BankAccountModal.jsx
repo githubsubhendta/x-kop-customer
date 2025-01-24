@@ -88,7 +88,7 @@ useEffect(()=>{
       <View className="flex-1 justify-center items-center bg-gray-600 bg-opacity-50">
         <View className="bg-white w-11/12 p-5 rounded-md">
           <Text className="text-xl font-bold mb-4 text-black">
-            {accountDetails ? 'Edit Bank Account' : 'Add Bank Account'}
+            {accountDetails && accountNumber ? 'Edit Bank Account' : 'Add Bank Account'}
           </Text>
 
           

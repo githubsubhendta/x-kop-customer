@@ -1,21 +1,22 @@
-import React, {useState, useEffect} from 'react';
-import {View, Text, TouchableOpacity, ScrollView} from 'react-native';
-import {Calendar} from 'react-native-calendars';
-import {RadioButton} from 'react-native-paper';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { Calendar } from 'react-native-calendars';
+import { RadioButton } from 'react-native-paper';
 import moment from 'moment';
-import {SvgXml} from 'react-native-svg';
-import {SVG_arrow_back} from '../utils/SVGImage';
-import {updateSchedule} from '../Api/scheduleService';
+import { SvgXml } from 'react-native-svg';
+import { SVG_arrow_back } from '../utils/SVGImage';
+import { updateSchedule } from '../Api/scheduleService';
 
-const Reschedule = ({route, navigation}) => {
-  const {selectedSchedule, scheduleId} = route.params;
+const Reschedule = ({ route, navigation }) => {
+  const { selectedSchedule, scheduleId } = route.params;
   const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split('T')[0],
+    new Date().toISOString().split('T')[0]
   );
   const [timeSlots, setTimeSlots] = useState([]);
   const [selectedSlot, setSelectedSlot] = useState(null);
-  const [refreshing, setRefreshing] = useState(false);
+  // const [refreshing, setRefreshing] = useState(false);
 
+  // Effect to set the selected slot based on the selected schedule
   useEffect(() => {
     const date = new Date(selectedSchedule.startTime);
     const options = {
@@ -23,12 +24,16 @@ const Reschedule = ({route, navigation}) => {
       minute: 'numeric',
       hour12: true,
     };
-    const formattedTime = date.toLocaleTimeString('en-US', options);
-    const selectedIndex = timeSlots.findIndex(item =>
-      item.includes(formattedTime),
-    );
+    const formattedTime = date.toLocaleTimeString('en-US', options).trim();
 
-    setSelectedSlot(selectedIndex);
+    const selectedIndex = timeSlots.findIndex(item => {
+      const slotStartTime = item.split(' - ')[0].trim();
+      return slotStartTime === formattedTime;
+    });
+    // Set the selected slot to the correct index if found
+    if (selectedIndex !== -1) {
+      setSelectedSlot(selectedIndex);
+    }
   }, [timeSlots, selectedSchedule]);
 
   useEffect(() => {
@@ -37,37 +42,23 @@ const Reschedule = ({route, navigation}) => {
     }
   }, [selectedSchedule]);
 
-  // const generateTimeSlots = (startTime, endTime, interval) => {
-  //   let slots = [];
-  //   let currentTime = new Date();
-  //   while (currentTime < endTime) {
-  //     let endTimeSlot = new Date(currentTime.getTime() + interval);
-  //     if (endTimeSlot > endTime) {
-  //       break;
-  //     }
-  //     slots.push(formatTime(currentTime) + ' - ' + formatTime(endTimeSlot));
-  //     currentTime = endTimeSlot;
-  //   }
-  //   return slots;
-  // };
   const generateTimeSlots = (startTime, endTime, interval) => {
     let slots = [];
-    let currentTime = new Date(); // Current time
-  
+    let currentTime = new Date();
+
     let slotStart = new Date(startTime);
     while (slotStart < endTime) {
       let slotEnd = new Date(slotStart.getTime() + interval);
-  
+
       // Exclude past slots
       if (slotEnd > currentTime) {
         slots.push(formatTime(slotStart) + ' - ' + formatTime(slotEnd));
       }
-  
+
       slotStart = slotEnd;
     }
     return slots;
   };
-  
 
   const roundUpTo30Minutes = date => {
     let minutes = date.getMinutes();
@@ -95,69 +86,28 @@ const Reschedule = ({route, navigation}) => {
     setTimeSlots(generateTimeSlots(startTime, endTime, interval));
   }, [selectedDate]);
 
-  // const handleRescheduleSubmit = async () => {
-  //   const date = selectedDate;
-
-  //   if (!timeSlots[selectedSlot]) {
-  //     console.error('Invalid time slot selected');
-  //     return;
-  //   }
-
-  //   const [startTime, endTime] = timeSlots[selectedSlot].split('-');
-  //   const startDateTimeString = `${date} ${startTime.trim()}`;
-  //   const endDateTimeString = `${date} ${endTime.trim()}`;
-  //   try {
-  //     // Format the date without redundant timezone information
-  //     const startDateTime = moment(
-  //       `${moment(date).format('YYYY-MM-DD')} ${startTime.trim()}`,
-  //       'YYYY-MM-DD hh:mm A',
-  //     ).toISOString();
-
-  //     const endDateTime = moment(
-  //       `${moment(date).format('YYYY-MM-DD')} ${endTime.trim()}`,
-  //       'YYYY-MM-DD hh:mm A',
-  //     ).toISOString();
-
-  //     if (!startDateTime || !endDateTime) {
-  //       throw new Error('Failed to parse dates');
-  //     }
-
-  //     const newSchedule = {
-  //       startTime: startDateTime,
-  //       endTime: endDateTime,
-  //     };
-  //     await updateSchedule(scheduleId, newSchedule);
-  //     navigation.goBack();
-  //   } catch (error) {
-  //     console.error('Error updating schedule:', error.message);
-  //   }
-  // };
-
   const handleRescheduleSubmit = async () => {
-    if (!timeSlots[selectedSlot]) {
+    if (selectedSlot === null) {
       alert('Please select a valid time slot before submitting.');
-      return; // Exit the function if no valid time slot is selected
+      return;
     }
-  
     const date = selectedDate;
     const [startTime, endTime] = timeSlots[selectedSlot].split('-');
-    
     try {
-      // Format the date without redundant timezone information
       const startDateTime = moment(
         `${moment(date).format('YYYY-MM-DD')} ${startTime.trim()}`,
-        'YYYY-MM-DD hh:mm A',
+        'YYYY-MM-DD hh:mm A'
       ).toISOString();
-  
+
       const endDateTime = moment(
         `${moment(date).format('YYYY-MM-DD')} ${endTime.trim()}`,
-        'YYYY-MM-DD hh:mm A',
+        'YYYY-MM-DD hh:mm A'
       ).toISOString();
-  
+
       if (!startDateTime || !endDateTime) {
         throw new Error('Failed to parse dates');
       }
-  
+
       const newSchedule = {
         startTime: startDateTime,
         endTime: endDateTime,
@@ -168,20 +118,18 @@ const Reschedule = ({route, navigation}) => {
       console.error('Error updating schedule:', error.message);
     }
   };
-  
-  
-
+  // useEffect(() => {
+  //   console.log("Selected Slot has changed:", selectedSlot);
+  // }, [selectedSlot]);
   return (
-    <View className="flex-1 px-5 py-10">
+    <View className="flex-1 px-5 py-10 bg-white">
       <View className="flex flex-row space-x-4 my-2">
         <TouchableOpacity
           className="w-8 h-8 justify-center -ml-1"
           onPress={() => navigation.goBack()}>
           <SvgXml xml={SVG_arrow_back} height={'100%'} width={'100%'} />
         </TouchableOpacity>
-        <Text className="text-primary font-medium text-2xl">
-          Reschedule Call
-        </Text>
+        <Text className="text-primary font-medium text-2xl">Reschedule Call</Text>
       </View>
       <View className="pt-2 mb-10 bg-transparent">
         <Calendar
@@ -208,26 +156,26 @@ const Reschedule = ({route, navigation}) => {
         </View>
       )}
       <ScrollView horizontal={true} className="gap-3">
-        {timeSlots.length > 0 ? (
+        {timeSlots &&
+          timeSlots.length &&
           timeSlots.map((item, index) => (
             <TouchableOpacity
               key={'slot_key' + index}
-              className={`flex flex-row items-center px-2 py-1 border ${
-                selectedSlot === index ? 'border-primary' : 'border-secondary'
-              } rounded-lg`}
               onPress={() => setSelectedSlot(index)}>
-              <RadioButton
-                color="#997654"
-                status={selectedSlot === index ? 'checked' : 'unchecked'}
-                value="option1"
-                onPress={() => setSelectedSlot(index)}
-              />
-              <Text className="text-primary">{item}</Text>
+              <View
+                className={`flex flex-row items-center px-2 py-2 border-2 ${
+                  selectedSlot === index ? 'border-primary' : 'border-secondary'
+                } rounded-lg`}>
+                <RadioButton
+                  color="#997654"
+                  status={selectedSlot === index ? 'checked' : 'unchecked'}
+                  value="option1"
+                  onPress={() => setSelectedSlot(index)}
+                />
+                <Text className="text-primary">{item}</Text>
+              </View>
             </TouchableOpacity>
-          ))
-        ) : (
-          <Text>No available time slots</Text>
-        )}
+          ))}
       </ScrollView>
       <View className="px-6 mt-5">
         <TouchableOpacity

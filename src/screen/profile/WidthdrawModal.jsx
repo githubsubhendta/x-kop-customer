@@ -28,7 +28,7 @@ const WithdrawModal = ({modalVisible, setModalVisible}) => {
     if (user && Object.keys(bankDetails).length) {
       setAccountDetails(bankDetails); 
     } else { 
-      fetchData(`/bank/getBankDetails?userId=${user._id}`); 
+      fetchData(`/bank/getBankDetails?userId=${user._id}`,"GET"); 
     }
     // console.log("==================>", user);
   }, [bankDetails, user]);

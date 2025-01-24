@@ -158,27 +158,20 @@ const ContactScreen = () => {
               </ScrollView>
             )}
           </View>
-          <View
-            style={{
-              paddingVertical: 8,
-              backgroundColor: '#F6F6F6',
-              marginHorizontal: 6,
-              borderRadius: 16,
-            }}>
+          <View className="py-2 bg-gray-100 mx-1 rounded-xl">
             <ScrollView
               showsVerticalScrollIndicator={false}
-              className="h-[550px] overflow-y-auto scrollbar-hidden mb-64 ">
+              className="h-[550px] overflow-y-auto scrollbar-hidden mb-16">
               {alphabet.map((letter, index) => (
                 <TouchableOpacity
                   key={index}
                   onPress={() => setSelectedLetter(letter)}>
                   <Text
-                    style={{
-                      paddingHorizontal: 8,
-                      paddingVertical: 4,
-                      textAlign: 'center',
-                      color: selectedLetter === letter ? '#862A0D' : '#9E9E9E',
-                    }}>
+                    className={`px-2 py-1 text-center ${
+                      selectedLetter === letter
+                        ? 'text-[#862A0D]'
+                        : 'text-gray-400'
+                    }`}>
                     {letter}
                   </Text>
                 </TouchableOpacity>
