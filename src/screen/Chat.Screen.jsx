@@ -23,14 +23,16 @@ import {SvgXml} from 'react-native-svg';
 import Video from 'react-native-video';
 import {SVG_download, SVG_PDF} from '../utils/SVGImage.js';
 import RNFS from 'rn-fetch-blob';
+import { AnimatedCircularProgress } from 'react-native-circular-progress';
 
-const Message = ({item, user, onLongPress, onPress, selectedMessages}) => {
+const Message = ({ item, user, onLongPress, onPress, selectedMessages }) => {
   const [downloading, setDownloading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [fileExists, setFileExists] = useState(false);
 
-  const isFileExist = async fileUrl => {
-    const {fs} = RNFS;
+  // Function to check if a file already exists
+  const isFileExist = async (fileUrl) => {
+    const { fs } = RNFS;
     const downloadDir =
       Platform.OS === 'android' && fs.dirs.DownloadDir
         ? fs.dirs.DownloadDir
@@ -41,6 +43,7 @@ const Message = ({item, user, onLongPress, onPress, selectedMessages}) => {
     return exists;
   };
 
+  // Check file existence when the component mounts or item.content changes
   useEffect(() => {
     const checkFileExistence = async () => {
       const exists = await isFileExist(item.content);
@@ -49,11 +52,12 @@ const Message = ({item, user, onLongPress, onPress, selectedMessages}) => {
     checkFileExistence();
   }, [item.content]);
 
-  const downloadFiles = async fileUrl => {
+  // Function to download files
+  const downloadFiles = async (fileUrl) => {
     try {
       setDownloading(true);
       setProgress(0);
-      const {config, fs} = RNFS;
+      const { config, fs } = RNFS;
 
       const downloadDir =
         Platform.OS === 'android' && fs.dirs.DownloadDir
@@ -62,31 +66,33 @@ const Message = ({item, user, onLongPress, onPress, selectedMessages}) => {
       const fileName = fileUrl.split('/').pop();
       const filePath = `${downloadDir}/${fileName}`;
 
+      // Check if the download directory exists
       const dirExists = await fs.exists(downloadDir);
       if (!dirExists) {
-        Alert.alert(
-          'Error',
-          `The download directory ${downloadDir} does not exist.`,
-        );
+        Alert.alert('Error', `The download directory ${downloadDir} does not exist.`);
         return;
       }
 
+      // Check if the file already exists
       const fileExists = await fs.exists(filePath);
       if (fileExists) {
         Alert.alert('File Exists', `The file "${fileName}" already exists.`);
         return;
       }
 
-      const task = config({path: filePath, fileCache: true}).fetch(
-        'GET',
-        fileUrl,
-      );
-      task.progress(({bytesWritten, contentLength}) => {
-        const progressPercentage = (bytesWritten / contentLength) * 100;
-        setProgress(progressPercentage);
-        console.log(`Download progress: ${progressPercentage.toFixed(2)}%`);
+      // Start the download task
+      const task = config({ path: filePath, fileCache: true }).fetch('GET', fileUrl);
+      task.progress(({ bytesWritten, contentLength }) => {
+        if (contentLength > 0) {
+          const progressPercentage = (bytesWritten / contentLength) * 100;
+          setProgress(progressPercentage);
+          console.log(`Download progress: ${progressPercentage.toFixed(2)}%`);
+        } else {
+          console.log('Download progress: Unknown (contentLength not available)');
+        }
       });
 
+      // Wait for the download to complete
       const result = await task;
 
       if (result?.respInfo?.status === 200) {
@@ -106,6 +112,7 @@ const Message = ({item, user, onLongPress, onPress, selectedMessages}) => {
       setDownloading(false);
     }
   };
+
   return (
     <View>
       <TouchableOpacity
@@ -117,23 +124,41 @@ const Message = ({item, user, onLongPress, onPress, selectedMessages}) => {
             ? styles.currentUserMessage
             : styles.otherUserMessage,
           selectedMessages.includes(item._id) > 0 && styles.selectedMessage,
-        ]}>
+        ]}
+      >
         {item.type === 'text' && (
           <Text style={styles.content}>{item.content}</Text>
         )}
         {item.type === 'image' && item.content && (
           <View style={styles.image}>
             <TouchableOpacity onPress={() => item.openImageModal(item.content)}>
-              <Image source={{uri: item.content}} style={styles.image} />
+              <Image source={{ uri: item.content }} style={styles.image} />
             </TouchableOpacity>
             {!fileExists && item.sender !== user._id && (
-              <View className="absolute right-0 -bottom-7 w-8 h-7">
-                <SvgXml
-                  onPress={() => downloadFiles(item.content)}
-                  xml={SVG_download}
-                  height={'100%'}
-                  width={'100%'}
-                />
+              <View className="absolute right-0 -bottom-5 w-8 h-7">
+                {downloading ? (
+                  <AnimatedCircularProgress
+                    size={40}
+                    width={4}
+                    fill={progress}
+                    tintColor="#4F46E5"
+                    backgroundColor="#E5E7EB"
+                    lineCap="round"
+                  >
+                    {(fill) => (
+                      <Text className="text-xs font-bold text-gray-700">
+                        {Math.round(progress)}%
+                      </Text>
+                    )}
+                  </AnimatedCircularProgress>
+                ) : (
+                  <SvgXml
+                    onPress={() => downloadFiles(item.content)}
+                    xml={SVG_download}
+                    height={'100%'}
+                    width={'100%'}
+                  />
+                )}
               </View>
             )}
           </View>
@@ -142,7 +167,8 @@ const Message = ({item, user, onLongPress, onPress, selectedMessages}) => {
           <View style={styles.videoContainer}>
             <TouchableOpacity
               onPress={() => item.openVideoModal(item.content)}
-              style={styles.videoContainer}>
+              style={styles.videoContainer}
+            >
               <Icon
                 name="play-circle-outline"
                 size={40}
@@ -151,13 +177,30 @@ const Message = ({item, user, onLongPress, onPress, selectedMessages}) => {
               />
             </TouchableOpacity>
             {!fileExists && item.sender !== user._id && (
-              <View className="absolute right-0 -bottom-7  w-8 h-7">
-                <SvgXml
-                  onPress={() => downloadFiles(item.content)}
-                  xml={SVG_download}
-                  height={'100%'}
-                  width={'100%'}
-                />
+              <View className="absolute right-0 -bottom-7 w-8 h-7">
+                {downloading ? (
+                  <AnimatedCircularProgress
+                    size={40}
+                    width={4}
+                    fill={progress}
+                    tintColor="#4F46E5"
+                    backgroundColor="#E5E7EB"
+                    lineCap="round"
+                  >
+                    {(fill) => (
+                      <Text className="text-xs font-bold text-gray-700">
+                        {Math.round(progress)}%
+                      </Text>
+                    )}
+                  </AnimatedCircularProgress>
+                ) : (
+                  <SvgXml
+                    onPress={() => downloadFiles(item.content)}
+                    xml={SVG_download}
+                    height={'100%'}
+                    width={'100%'}
+                  />
+                )}
               </View>
             )}
           </View>
@@ -168,13 +211,30 @@ const Message = ({item, user, onLongPress, onPress, selectedMessages}) => {
               <SvgXml xml={SVG_PDF} height={'100%'} width={'100%'} />
             </TouchableOpacity>
             {!fileExists && item.sender !== user._id && (
-              <View className="absolute -right-14 mt-1  w-8 h-8">
-                <SvgXml
-                  onPress={() => downloadFiles(item.content)}
-                  xml={SVG_download}
-                  height={'100%'}
-                  width={'100%'}
-                />
+              <View className="absolute -right-14 mt-1 w-8 h-8">
+                {downloading ? (
+                  <AnimatedCircularProgress
+                    size={40}
+                    width={4}
+                    fill={progress}
+                    tintColor="#4F46E5"
+                    backgroundColor="#E5E7EB"
+                    lineCap="round"
+                  >
+                    {(fill) => (
+                      <Text className="text-xs font-bold text-gray-700">
+                        {Math.round(progress)}%
+                      </Text>
+                    )}
+                  </AnimatedCircularProgress>
+                ) : (
+                  <SvgXml
+                    onPress={() => downloadFiles(item.content)}
+                    xml={SVG_download}
+                    height={'100%'}
+                    width={'100%'}
+                  />
+                )}
               </View>
             )}
           </View>
@@ -196,6 +256,7 @@ const Message = ({item, user, onLongPress, onPress, selectedMessages}) => {
   );
 };
 
+
 const ChatScreen = ({route, navigation}) => {
   const {webSocket} = useWebSocket();
   const {user} = useUserStore();
@@ -208,15 +269,12 @@ const ChatScreen = ({route, navigation}) => {
   const flatListRef = useRef(null);
   const [isModalVisible, setModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
-  const [selectedVideo, setSelectedVideo] = useState(false);
+  const [selectedVideo, setSelectedVideo] = useState(null);
   const [isVideoModalVisible, setVideoModalVisible] = useState(false);
   const {conversations, setConversations} = useChatStore();
-  const showEditButton = selectedMessages.length === 1;
+  const [downloadedMedia, setDownloadedMedia] = useState({}); // Track downloaded media
 
-  // const officer =
-  //   chats?.participants?.find(
-  //     participant => participant?.officerDetails === undefined,
-  //   ) || {};
+  const showEditButton = selectedMessages.length === 1;
 
   const officer =
     chats?.participants?.find(participant => participant?.officerDetails) || {};
@@ -260,14 +318,30 @@ const ChatScreen = ({route, navigation}) => {
     );
   };
 
-  const openImageModal = imageUri => {
+  const openImageModal = async imageUri => {
+    if (!downloadedMedia[imageUri]) {
+      // Simulate download process
+      await downloadMedia(imageUri);
+      setDownloadedMedia(prev => ({...prev, [imageUri]: true}));
+    }
     setSelectedImage(imageUri);
     setModalVisible(true);
   };
 
-  const openVideoModal = videoUri => {
+  const openVideoModal = async videoUri => {
+    if (!downloadedMedia[videoUri]) {
+      // Simulate download process
+      await downloadMedia(videoUri);
+      setDownloadedMedia(prev => ({...prev, [videoUri]: true}));
+    }
     setSelectedVideo(videoUri);
     setVideoModalVisible(true);
+  };
+
+  const downloadMedia = async uri => {
+    // Implement your download logic here
+    // This is a placeholder for the actual download process
+    return new Promise(resolve => setTimeout(resolve, 1000)); // Simulate download delay
   };
 
   const {loading, hasMoreChats, loadMoreChats} = usePaginatedChats(chatId);
@@ -295,7 +369,6 @@ const ChatScreen = ({route, navigation}) => {
     (async () => {
       const getInitial = await getAllConversations(chatId);
 
-      // setConversations([])
       if (conversations.length === 0) {
         setConversations([
           {conversationId: chatId, messages: getInitial.messages},
@@ -449,7 +522,7 @@ const ChatScreen = ({route, navigation}) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flex: 1, 
   },
   messageContainer: {
     marginVertical: 5,
@@ -458,14 +531,49 @@ const styles = StyleSheet.create({
     maxWidth: '75%',
     alignSelf: 'flex-start',
   },
+  progressContainer: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: [{ translateX: -20 }, { translateY: -20 }],
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  progressText: {
+    position: 'absolute',
+    fontSize: 12,
+    color: '#fff',
+  },
   currentUserMessage: {
     backgroundColor: '#e1ffc7',
     alignSelf: 'flex-end',
+    shadowColor: '#000', 
+  shadowOffset: {
+    width: 0, 
+    height: 2, 
+  },
+  shadowOpacity: 0.25,
+  shadowRadius: 3.84,
+  elevation: 2,
+  borderRadius: 8, 
+  paddingLeft: 10, 
+  marginVertical: 5, 
   },
   otherUserMessage: {
-    backgroundColor: '#f1f1f1',
-    alignSelf: 'flex-start',
+  backgroundColor: '#fff',
+  alignSelf: 'flex-start',
+  shadowColor: '#000', 
+  shadowOffset: {
+    width: 0, 
+    height: 2, 
   },
+  shadowOpacity: 0.25,
+  shadowRadius: 3.84,
+  elevation: 2,
+  borderRadius: 8, 
+  paddingLeft: 10, 
+  marginVertical: 5, 
+},
   selectedMessage: {
     borderColor: 'blue',
     borderWidth: 2,
