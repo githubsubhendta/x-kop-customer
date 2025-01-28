@@ -30,7 +30,7 @@ const Message = ({ item, user, onLongPress, onPress, selectedMessages }) => {
   const [progress, setProgress] = useState(0);
   const [fileExists, setFileExists] = useState(false);
 
-  // Function to check if a file already exists
+  
   const isFileExist = async (fileUrl) => {
     const { fs } = RNFS;
     const downloadDir =
@@ -43,7 +43,7 @@ const Message = ({ item, user, onLongPress, onPress, selectedMessages }) => {
     return exists;
   };
 
-  // Check file existence when the component mounts or item.content changes
+  
   useEffect(() => {
     const checkFileExistence = async () => {
       const exists = await isFileExist(item.content);
@@ -51,8 +51,6 @@ const Message = ({ item, user, onLongPress, onPress, selectedMessages }) => {
     };
     checkFileExistence();
   }, [item.content]);
-
-  // Function to download files
   const downloadFiles = async (fileUrl) => {
     try {
       setDownloading(true);
@@ -65,22 +63,16 @@ const Message = ({ item, user, onLongPress, onPress, selectedMessages }) => {
           : fs.dirs.DocumentDir;
       const fileName = fileUrl.split('/').pop();
       const filePath = `${downloadDir}/${fileName}`;
-
-      // Check if the download directory exists
       const dirExists = await fs.exists(downloadDir);
       if (!dirExists) {
         Alert.alert('Error', `The download directory ${downloadDir} does not exist.`);
         return;
       }
-
-      // Check if the file already exists
       const fileExists = await fs.exists(filePath);
       if (fileExists) {
         Alert.alert('File Exists', `The file "${fileName}" already exists.`);
         return;
       }
-
-      // Start the download task
       const task = config({ path: filePath, fileCache: true }).fetch('GET', fileUrl);
       task.progress(({ bytesWritten, contentLength }) => {
         if (contentLength > 0) {
@@ -91,10 +83,7 @@ const Message = ({ item, user, onLongPress, onPress, selectedMessages }) => {
           console.log('Download progress: Unknown (contentLength not available)');
         }
       });
-
-      // Wait for the download to complete
       const result = await task;
-
       if (result?.respInfo?.status === 200) {
         Alert.alert('Download Complete', `File downloaded to: ${filePath}`);
         console.log('Download successful:', filePath);
@@ -180,7 +169,7 @@ const Message = ({ item, user, onLongPress, onPress, selectedMessages }) => {
               <View className="absolute right-0 -bottom-7 w-8 h-7">
                 {downloading ? (
                   <AnimatedCircularProgress
-                    size={40}
+                    size={30}
                     width={4}
                     fill={progress}
                     tintColor="#4F46E5"
@@ -255,8 +244,6 @@ const Message = ({ item, user, onLongPress, onPress, selectedMessages }) => {
     </View>
   );
 };
-
-
 const ChatScreen = ({route, navigation}) => {
   const {webSocket} = useWebSocket();
   const {user} = useUserStore();
@@ -272,19 +259,15 @@ const ChatScreen = ({route, navigation}) => {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [isVideoModalVisible, setVideoModalVisible] = useState(false);
   const {conversations, setConversations} = useChatStore();
-  const [downloadedMedia, setDownloadedMedia] = useState({}); // Track downloaded media
-
+  const [downloadedMedia, setDownloadedMedia] = useState({}); 
   const showEditButton = selectedMessages.length === 1;
-
   const officer =
     chats?.participants?.find(participant => participant?.officerDetails) || {};
-
   useEffect(() => {
     if (conversations.length) {
       const currentConversation = conversations.find(
         convo => convo.conversationId === chatId,
       );
-
       if (currentConversation) {
         setAllMessages(
           currentConversation.messages.sort(
@@ -294,7 +277,6 @@ const ChatScreen = ({route, navigation}) => {
       }
     }
   }, [conversations, chatId, setConversations]);
-
   const handleUpdateMessage = useCallback(() => {
     if (editingMessage && editContent.trim()) {
       if (webSocket) {
@@ -309,7 +291,6 @@ const ChatScreen = ({route, navigation}) => {
       setEditContent('');
     }
   }, [webSocket, editingMessage, editContent]);
-
   const toggleMessageSelection = messageId => {
     setSelectedMessages(prev =>
       prev.includes(messageId)
@@ -317,33 +298,27 @@ const ChatScreen = ({route, navigation}) => {
         : [...prev, messageId],
     );
   };
-
   const openImageModal = async imageUri => {
     if (!downloadedMedia[imageUri]) {
-      // Simulate download process
       await downloadMedia(imageUri);
       setDownloadedMedia(prev => ({...prev, [imageUri]: true}));
     }
     setSelectedImage(imageUri);
     setModalVisible(true);
   };
-
   const openVideoModal = async videoUri => {
     if (!downloadedMedia[videoUri]) {
-      // Simulate download process
+      
       await downloadMedia(videoUri);
       setDownloadedMedia(prev => ({...prev, [videoUri]: true}));
     }
     setSelectedVideo(videoUri);
     setVideoModalVisible(true);
   };
-
   const downloadMedia = async uri => {
-    // Implement your download logic here
-    // This is a placeholder for the actual download process
-    return new Promise(resolve => setTimeout(resolve, 1000)); // Simulate download delay
+    
+    return new Promise(resolve => setTimeout(resolve, 1000)); 
   };
-
   const {loading, hasMoreChats, loadMoreChats} = usePaginatedChats(chatId);
 
   const onLoadMore = () => {
@@ -420,7 +395,6 @@ const ChatScreen = ({route, navigation}) => {
     const filterType = allMessages.find(msg => msg._id === messageId);
     return filterType.type;
   };
-
   const handleEditMessage = useCallback(
     messageId => {
       const messageToEdit = allMessages.find(msg => msg._id === messageId);
@@ -446,7 +420,6 @@ const ChatScreen = ({route, navigation}) => {
         openMenu={openMenu}
         navigation={navigation}
       />
-
       <ChatArea
         flatListRef={flatListRef}
         allMessages={allMessages.map(message => ({
@@ -474,7 +447,6 @@ const ChatScreen = ({route, navigation}) => {
         loading={loading}
         onLoadMore={onLoadMore}
       />
-
       <ChatMessageInput
         user={user}
         officer={officer}
@@ -498,7 +470,6 @@ const ChatScreen = ({route, navigation}) => {
           </View>
         </TouchableWithoutFeedback>
       </Modal>
-
       <Modal visible={isVideoModalVisible} transparent={true}>
         <TouchableWithoutFeedback onPress={() => setVideoModalVisible(false)}>
           <View style={styles.modalBackground}>
