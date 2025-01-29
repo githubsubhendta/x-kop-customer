@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState, useCallback, memo} from 'react';
+import React, { useEffect, useRef, useState, useCallback, memo } from 'react';
 import {
   View,
   StyleSheet,
@@ -14,16 +14,16 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import ChatHeader from './ChatHeader';
 import ChatMessageInput from './ChatMessageInput';
 import ChatArea from './ChatArea';
-import {useWebSocket} from '../../shared/WebSocketProvider';
+import { useWebSocket } from '../../shared/WebSocketProvider';
 import useUserStore from '../../stores/user.store';
-import {getAllConversations, usePaginatedChats} from '../../Api/chatService.js';
+import { getAllConversations, usePaginatedChats } from '../../Api/chatService.js';
 import useChatStore from '../../stores/chat.store.js';
-import {SvgXml} from 'react-native-svg';
+import { SvgXml } from 'react-native-svg';
 import Video from 'react-native-video';
-import {SVG_PDF} from '../../utils/SVGImage.js';
+import { SVG_PDF } from '../../utils/SVGImage.js';
 import { useConversationList } from '../../Api/conversationService.js';
 
-const Message = ({item, user, onLongPress, selectedMessages}) => {
+const Message = ({ item, user, onLongPress, selectedMessages }) => {
   return (
     <TouchableOpacity
       onLongPress={onLongPress}
@@ -39,7 +39,7 @@ const Message = ({item, user, onLongPress, selectedMessages}) => {
       )}
       {item.type === 'image' && item.content && (
         <TouchableOpacity onPress={() => item.openImageModal(item.content)}>
-          <Image source={{uri: item.content}} style={styles.image} />
+          <Image source={{ uri: item.content }} style={styles.image} />
         </TouchableOpacity>
       )}
       {item.type === 'video' && (
@@ -75,9 +75,9 @@ const Message = ({item, user, onLongPress, selectedMessages}) => {
   );
 };
 
-const ChatModal = ({chatId, isVisible, onClose}) => {
-  const {webSocket} = useWebSocket();
-  const {user} = useUserStore();
+const ChatModal = ({ chatId, isVisible, onClose }) => {
+  const { webSocket } = useWebSocket();
+  const { user } = useUserStore();
   const [openMenu, setOpenMenu] = useState(false);
   const [allMessages, setAllMessages] = useState([]);
   const [selectedMessages, setSelectedMessages] = useState([]);
@@ -87,26 +87,31 @@ const ChatModal = ({chatId, isVisible, onClose}) => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedVideo, setSelectedVideo] = useState(false);
   const [isVideoModalVisible, setVideoModalVisible] = useState(false);
-  const {conversations, setConversations} = useChatStore();
+  const { conversations, setConversations } = useChatStore();
   const showEditButton = selectedMessages.length === 1;
   const chats = user.chats.find(chat => chat._id === chatId);
-  const {conversationList, getAllConversationList } = useConversationList();
+  const { conversationList, getAllConversationList } = useConversationList();
 
   // const officer =
   //   chats?.participants?.find(participant => participant?.officerDetails) || {};
 
-  const [officer,setOfficer] = useState({});
+  const [officer, setOfficer] = useState({});
 
   useEffect(() => {
     getAllConversationList();
-}, []);
+  }, []);
 
-useEffect(()=>{
-  if(conversationList.length){
-    const chats = conversationList?.filter(chat => chat._id==chatId);
-    chats.length && setOfficer(chats[0]?.participants?.find(participant => participant?.officerDetails) || {})
-  }
-},[conversationList])
+  useEffect(() => {
+    if (conversationList.length) {
+      const chats = conversationList?.filter(chat => chat._id == chatId);
+      chats.length &&
+        setOfficer(
+          chats[0]?.participants?.find(
+            participant => participant?.officerDetails,
+          ) || {},
+        );
+    }
+  }, [conversationList]);
 
   useEffect(() => {
     if (conversations.length) {
@@ -122,7 +127,7 @@ useEffect(()=>{
         );
       }
     }
-  }, [conversations,conversationList, chatId, setConversations]);
+  }, [conversations, conversationList, chatId, setConversations]);
 
   const handleUpdateMessage = useCallback(() => {
     if (editingMessage && editContent.trim()) {
@@ -130,7 +135,7 @@ useEffect(()=>{
         webSocket.emit('updatemessage', {
           messageId: editingMessage,
           newContent: editContent,
-          reciever: {id: officer._id, mobile: officer.mobile},
+          reciever: { id: officer._id, mobile: officer.mobile },
         });
       }
       setSelectedMessages([]);
@@ -156,7 +161,7 @@ useEffect(()=>{
     setVideoModalVisible(true);
   };
 
-  const {loading, hasMoreChats, loadMoreChats} = usePaginatedChats(chatId);
+  const { loading, hasMoreChats, loadMoreChats } = usePaginatedChats(chatId);
 
   const onLoadMore = () => {
     if (!loading && hasMoreChats) {
@@ -183,7 +188,7 @@ useEffect(()=>{
 
       if (conversations.length === 0) {
         setConversations([
-          {conversationId: chatId, messages: getInitial.messages},
+          { conversationId: chatId, messages: getInitial.messages },
         ]);
       } else {
         const currentConversation = conversations.find(
@@ -194,7 +199,7 @@ useEffect(()=>{
         } else {
           setConversations([
             ...conversations,
-            {conversationId: chatId, messages: getInitial.messages},
+            { conversationId: chatId, messages: getInitial.messages },
           ]);
         }
       }
@@ -218,7 +223,7 @@ useEffect(()=>{
             if (webSocket) {
               webSocket.emit('deletemessages', {
                 messageIds: selectedMessages,
-                reciever: {id: officer._id, mobile: officer.mobile},
+                reciever: { id: officer._id, mobile: officer.mobile },
               });
             }
           },
@@ -258,12 +263,13 @@ useEffect(()=>{
               openImageModal,
               openVideoModal,
             }))}
-            renderMessage={({item}) => (
+            renderMessage={({ item }) => (
               <Message
                 item={item}
                 user={user}
                 onLongPress={() =>
-                  item.sender !== officer._id && toggleMessageSelection(item._id)
+                  item.sender !== officer._id &&
+                  toggleMessageSelection(item._id)
                 }
                 selectedMessages={selectedMessages}
               />
@@ -271,7 +277,7 @@ useEffect(()=>{
             loading={loading}
             onLoadMore={onLoadMore}
           />
-         
+
           <ChatMessageInput
             user={user}
             officer={officer}
@@ -367,4 +373,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ChatModal
+export default ChatModal;
