@@ -55,7 +55,7 @@ const AccountScreen = ({navigation}) => {
             <View className="flex flex-row  items-center gap-2">
               <SvgXml xml={SVG_wallet} height={'30px'} width={'30px'} />
               <Text className="text-[#862A0D] text-[16px]">
-                ₹{user?.wallet == undefined ? '0' : user?.wallet}
+                ₹{user?.wallet === undefined ? '0' : user?.wallet}
               </Text>
             </View>
           </TouchableOpacity>
