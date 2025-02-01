@@ -81,3 +81,55 @@ const useUserStore = create(
 export default useUserStore;
 
 
+// const useUserStore = create(
+//   (set, get) => ({
+//     isLoggedIn: false,
+//     user: { wallet: 0 },
+//     localTokens: null,
+//     whatwedoStatus: null,
+//     onboardStatus: null,
+
+//     addLoggedInUserAction: async (user, isLoggedIn = false, tokens = null) => {
+//       if (tokens) {
+//         await AsyncStorage.setItem('Authorized_data', JSON.stringify(tokens));
+//         set({ user, isLoggedIn, localTokens: tokens });
+//       } else {
+//         set({ user, isLoggedIn });
+//       }
+//     },
+
+//     handleUpdateUser: (user) => set({ user }),
+
+//     updateUserWallet: async (feeDeduction) => {
+//       set((state) => {
+//         if (state.user.wallet < feeDeduction) {
+//           console.log("Insufficient balance, cannot deduct fee. Call should end.");
+//           return state;
+//         }
+
+//         const newWalletBalance = state.user.wallet - feeDeduction;
+//         const updatedUser = { ...state.user, wallet: newWalletBalance };
+//         AsyncStorage.setItem('user-storage', JSON.stringify(updatedUser));
+//         return { user: updatedUser };
+//       });
+//     },
+
+//     handlewhatwedoAction: (whatwedoStatus) => set({ whatwedoStatus }),
+//     addOnboardStatus: (onboardStatus) => set({ onboardStatus }),
+
+//     addLocalTokens: async (localTokenData) => {
+//       await AsyncStorage.setItem('Authorized_data', JSON.stringify(localTokenData));
+//       set({ localTokens: localTokenData });
+//     },
+//   }),
+// );
+
+// export default useUserStore;
+
+
+
+
+
+
+
+

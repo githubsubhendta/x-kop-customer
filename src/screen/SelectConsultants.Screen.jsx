@@ -71,7 +71,7 @@ const SelectConsultantsScreen = ({route, navigation}) => {
 
   const handleSelection = indx => {
     if (parseInt(user.wallet) <= parseInt(arr_type[indx].FeePerMinute) * 2) {
-      Alert.alert('Your balance is not sufficient for this call.');
+      Alert.alert('Please add sufficient balance to your wallet for this call.');
       return false;
     }
     setSelected(indx);

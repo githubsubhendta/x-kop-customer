@@ -6,7 +6,8 @@ import {
   StyleSheet,
   Image,
   Alert,
-  TextInput
+  TextInput,
+  Modal,
 } from 'react-native';
 import {SvgXml} from 'react-native-svg';
 import {RtcSurfaceView} from 'react-native-agora';
@@ -23,13 +24,14 @@ import {useWebSocket} from '../../shared/WebSocketProvider.jsx';
 
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import ChatModal from '../../Components/chat/ChatModal.jsx';
-import { useCallDuration } from '../../shared/CallDurationContext.js';
+import {useCallDuration} from '../../shared/CallDurationContext.js';
 import useChatStore from '../../stores/chat.store.js';
 
 const AudioScreen = ({route, navigation}) => {
   const {config, mobile, reciever_data, consultType} = route.params || {};
+  const [showModal, setShowModal] = useState(false);
 
-  const {webSocket,leave} = useWebSocket();
+  const {webSocket, leave} = useWebSocket();
   const [isMuted, setIsMuted] = useState(false);
   const [isSpeakerEnabled, setIsSpeakerEnabled] = useState(true);
   const [connectionStatus, setConnectionStatus] = useState('Not Connected');
@@ -39,16 +41,17 @@ const AudioScreen = ({route, navigation}) => {
   let callMinUpdate;
   const [modelChat, setModelChat] = useState(false);
   const [callStatus, setCallStatus] = useState(true);
-  const { callDuration, startCall, stopCall,isBalanceEnough,isBalanceZero } = useCallDuration();
+  const {callDuration, startCall, stopCall, isBalanceEnough, isBalanceZero} =
+    useCallDuration();
 
   const startTime = new Date(reciever_data.consultationData.startCallTime);
 
   const {conversations} = useChatStore();
 
   useEffect(() => {
-    startCall(startTime, consultType,reciever_data.userInfo.mobile,webSocket);
+    startCall(startTime, consultType, reciever_data.userInfo.mobile, webSocket);
     return () => {
-      stopCall(); 
+      stopCall();
     };
   }, [webSocket]);
 
@@ -86,8 +89,7 @@ const AudioScreen = ({route, navigation}) => {
       webSocket.emit('handsup', {otherUserId: mobile});
       clearInterval(callDurationInterval);
       setCallStatus(false);
-      stopCall()
-    
+      stopCall();
     }
   }, [engine, webSocket, mobile, navigation]);
 
@@ -101,7 +103,7 @@ const AudioScreen = ({route, navigation}) => {
     const handleHandsup = async () => {
       clearInterval(callDurationInterval);
       setCallStatus(false);
-      stopCall()
+      stopCall();
       navigation.reset({
         index: 0,
         routes: [{name: 'LayoutScreen'}],
@@ -146,12 +148,11 @@ const AudioScreen = ({route, navigation}) => {
     };
   }, [webSocket, engine, createTwoButtonAlert, navigation, config, mobile]);
 
-
   // useEffect(() => {
   //   const handleCallDurationUpdate = (data) => {
   //     console.log("check callDuration==>",data.callDuration)
   //   };
-  
+
   //   webSocket.on('updateCallDuration', handleCallDurationUpdate);
   //   return () => {
   //     webSocket.off('updateCallDuration', handleCallDurationUpdate);
@@ -159,26 +160,53 @@ const AudioScreen = ({route, navigation}) => {
   // }, [webSocket, endCall]);
 
   useEffect(() => {
-    if(isBalanceZero){
+    if (isBalanceZero) {
       endCall();
     }
-   }, [isBalanceZero]);
+  }, [isBalanceZero]);
 
   useEffect(() => {
-    if(isBalanceEnough){
-     Alert.alert("your balance is not enough")
+    if (isBalanceEnough) {
+      setShowModal(true); 
+
+      const timeout = setTimeout(() => {
+        setShowModal(false); 
+      }, 5000);
+  
+      return () => clearTimeout(timeout);
+      // Alert.alert('Your balance is not enough', '', [
+      //   {
+      //     text: 'Cancel',
+      //     onPress: () => console.log('Balance alert dismissed'),
+      //   },
+      //   {
+      //     text: 'Go to Wallet',
+      //     onPress: () => , // Open modal to navigate to wallet
+      //   },
+      // ]);
     }
-   }, [isBalanceEnough]);
+  }, [isBalanceEnough]);
 
-   const handleClose = useCallback(() => setModelChat(false), []);
+  const handleClose = useCallback(() => setModelChat(false), []);
 
-   const chatModal = useMemo(() => (
-     <ChatModal 
-       chatId={reciever_data?.chatId} 
-       isVisible={modelChat} 
-       onClose={handleClose} 
-     />
-   ), [reciever_data, modelChat, handleClose,conversations]); 
+  const chatModal = useMemo(
+    () => (
+      <ChatModal
+        chatId={reciever_data?.chatId}
+        isVisible={modelChat}
+        onClose={handleClose}
+      />
+    ),
+    [reciever_data, modelChat, handleClose, conversations],
+  );
+  const handleModalClose = () => {
+    setShowModal(false);
+  };
+
+  const handleNavigateToWallet = () => {
+    setShowModal(false); // Close modal before navigating
+    navigation.navigate('WalletScreen'); // Navigate to wallet screen
+  };
 
   return (
     <View style={styles.container}>
@@ -203,7 +231,9 @@ const AudioScreen = ({route, navigation}) => {
               <Text style={styles.title}>General Offences</Text>
               <Text style={styles.status}>Call in Progress</Text>
               <View style={styles.counterContainer}>
-                <Text style={styles.callDuration}>{callDuration} mins left</Text>
+                <Text style={styles.callDuration}>
+                  {callDuration} mins left
+                </Text>
               </View>
             </View>
           </View>
@@ -213,9 +243,9 @@ const AudioScreen = ({route, navigation}) => {
             </TouchableOpacity>
             <TouchableOpacity style={styles.button} onPress={toggleMute}>
               {isMuted ? (
-                <SvgXml xml={SVG_mute_mic} />
+                <SvgXml xml={SVG_unmute_mic} />       
               ) : (
-                <SvgXml xml={SVG_unmute_mic} />
+                <SvgXml xml={SVG_mute_mic} />
               )}
             </TouchableOpacity>
             <TouchableOpacity style={styles.button} onPress={toggleSpeaker}>
@@ -249,8 +279,31 @@ const AudioScreen = ({route, navigation}) => {
           </View>
         </TouchableOpacity>
       </View>
-         {/* <ChatModal chatId={reciever_data?.chatId} isVisible={modelChat} onClose={()=>setModelChat(false)} /> */}
-         {chatModal}
+      {/* <ChatModal chatId={reciever_data?.chatId} isVisible={modelChat} onClose={()=>setModelChat(false)} /> */}
+      {chatModal}
+
+      <Modal visible={showModal} animationType="slide" transparent={true}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalText}>
+              Your balance is not enough. Please add more funds.
+            </Text>
+            <View className="flex flex-row justify-center space-x-4">
+            <TouchableOpacity
+                onPress={handleModalClose}
+                style={styles.modalButton}>
+                <Text style={styles.modalButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handleNavigateToWallet}
+                style={styles.modalButton}>
+                <Text style={styles.modalButtonText}>Go to Wallet</Text>
+              </TouchableOpacity>
+              
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -355,6 +408,36 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5,
     margin: 10,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    width: 300,
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modalText: {
+    fontSize: 18,
+    marginBottom: 20,
+    color: 'black',
+  },
+  modalButton: {
+    marginTop: 10,
+    backgroundColor: '#D22B2B',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    gap: 10,
+  },
+  modalButtonText: {
+    fontSize: 16,
+    color: '#fff',
   },
 });
 
