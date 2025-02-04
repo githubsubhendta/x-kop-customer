@@ -491,134 +491,30 @@ export const SVG_hangout_red = `<svg xmlns="http://www.w3.org/2000/svg" width="5
 </defs>
 </svg>`;
 
-export const SVG_unmute_mic = `<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 38 38" fill="none">
-<g filter="url(#filter0_d_2_33)">
-<circle cx="19" cy="15" r="15" fill="white"/>
-</g>
-<g clip-path="url(#clip0_2_33)">
-<path d="M17.8 7.9C17.8 7.24 18.34 6.7 19 6.7C19.66 6.7 20.2 7.24 20.2 7.9L20.19 11.81L22 13.6V8C22 6.34 20.66 5 19 5C17.46 5 16.21 6.16 16.04 7.65L17.8 9.41V7.9ZM26 14H24.3C24.3 14.58 24.2 15.13 24.03 15.64L25.3 16.91C25.74 16.03 26 15.04 26 14ZM11.41 5.86L10 7.27L16 13.27V14C16 15.66 17.34 17 19 17C19.23 17 19.44 16.97 19.65 16.92L21.31 18.58C20.6 18.91 19.81 19.1 19 19.1C16.24 19.1 13.7 17 13.7 14H12C12 17.41 14.72 20.23 18 20.72V24H20V20.72C20.91 20.59 21.77 20.27 22.55 19.82L26.75 24.02L28.16 22.61L11.41 5.86Z" fill="black"/>
-</g>
-<defs>
-<filter id="filter0_d_2_33" x="0" y="0" width="38" height="38" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-<feFlood flood-opacity="0" result="BackgroundImageFix"/>
-<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
-<feOffset dy="4"/>
-<feGaussianBlur stdDeviation="2"/>
-<feComposite in2="hardAlpha" operator="out"/>
-<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"/>
-<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_2_33"/>
-<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_2_33" result="shape"/>
-</filter>
-<clipPath id="clip0_2_33">
-<rect width="24" height="24" fill="white" transform="translate(7 3)"/>
-</clipPath>
-</defs>
-</svg>`;
+export const SVG_unmute_mic = `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000"><path d="m710-362-58-58q14-23 21-48t7-52h80q0 44-13 83.5T710-362ZM480-594Zm112 112-72-72v-206q0-17-11.5-28.5T480-800q-17 0-28.5 11.5T440-760v126l-80-80v-46q0-50 35-85t85-35q50 0 85 35t35 85v240q0 11-2.5 20t-5.5 18ZM440-120v-123q-104-14-172-93t-68-184h80q0 83 57.5 141.5T480-320q34 0 64.5-10.5T600-360l57 57q-29 23-63.5 39T520-243v123h-80Zm352 64L56-792l56-56 736 736-56 56Z"/></svg>`;
 
-export const SVG_mute_mic = `<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 38 38" fill="none">
-<g filter="url(#filter0_d_2_38)">
-<circle cx="19" cy="15" r="15" fill="white"/>
-</g>
-<g clip-path="url(#clip0_2_38)">
-<path d="M19 17C20.66 17 22 15.66 22 14V8C22 6.34 20.66 5 19 5C17.34 5 16 6.34 16 8V14C16 15.66 17.34 17 19 17ZM18 8C18 7.45 18.45 7 19 7C19.55 7 20 7.45 20 8V14C20 14.55 19.55 15 19 15C18.45 15 18 14.55 18 14V8ZM24 14C24 16.76 21.76 19 19 19C16.24 19 14 16.76 14 14H12C12 17.53 14.61 20.43 18 20.92V24H20V20.92C23.39 20.43 26 17.53 26 14H24Z" fill="black"/>
-</g>
-<defs>
-<filter id="filter0_d_2_38" x="0" y="0" width="38" height="38" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-<feFlood flood-opacity="0" result="BackgroundImageFix"/>
-<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
-<feOffset dy="4"/>
-<feGaussianBlur stdDeviation="2"/>
-<feComposite in2="hardAlpha" operator="out"/>
-<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"/>
-<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_2_38"/>
-<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_2_38" result="shape"/>
-</filter>
-<clipPath id="clip0_2_38">
-<rect width="24" height="24" fill="white" transform="translate(7 3)"/>
-</clipPath>
-</defs>
-</svg>`;
+export const SVG_mute_mic = `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000"><path d="M480-400q-50 0-85-35t-35-85v-240q0-50 35-85t85-35q50 0 85 35t35 85v240q0 50-35 85t-85 35Zm0-240Zm-40 520v-123q-104-14-172-93t-68-184h80q0 83 58.5 141.5T480-320q83 0 141.5-58.5T680-520h80q0 105-68 184t-172 93v123h-80Zm40-360q17 0 28.5-11.5T520-520v-240q0-17-11.5-28.5T480-800q-17 0-28.5 11.5T440-760v240q0 17 11.5 28.5T480-480Z"/></svg>`;
 
 export const SVG_stop_camera = `<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 38 38" fill="none">
-<g filter="url(#filter0_d_2_64)">
-<path d="M34 15C34 23.2843 27.2843 30 19 30C10.7157 30 4 23.2843 4 15C4 6.71573 10.7157 0 19 0C27.2843 0 34 6.71573 34 15Z" fill="white"/>
-</g>
-<path d="M22 11V19H12V11H22ZM23 9H11C10.45 9 10 9.45 10 10V20C10 20.55 10.45 21 11 21H23C23.55 21 24 20.55 24 20V16.5L28 20.5V9.5L24 13.5V10C24 9.45 23.55 9 23 9Z" fill="black"/>
-<defs>
-<filter id="filter0_d_2_64" x="0" y="0" width="38" height="38" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-<feFlood flood-opacity="0" result="BackgroundImageFix"/>
-<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
-<feOffset dy="4"/>
-<feGaussianBlur stdDeviation="2"/>
-<feComposite in2="hardAlpha" operator="out"/>
-<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"/>
-<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_2_64"/>
-<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_2_64" result="shape"/>
-</filter>
-</defs>
-</svg>`;
+  <path d="M22 11V19H12V11H22ZM23 9H11C10.45 9 10 9.45 10 10V20C10 20.55 10.45 21 11 21H23C23.55 21 24 20.55 24 20V16.5L28 20.5V9.5L24 13.5V10C24 9.45 23.55 9 23 9Z" fill="black"/>
+</svg>
+`;
 
 export const SVG_switch_camera = `<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 38 38" fill="none">
-<g filter="url(#filter0_d_2_86)">
-<path d="M34 15C34 23.2843 27.2843 30 19 30C10.7157 30 4 23.2843 4 15C4 6.71573 10.7157 0 19 0C27.2843 0 34 6.71573 34 15Z" fill="white"/>
-</g>
-<g clip-path="url(#clip0_2_86)">
-<path d="M16.56 11L14.56 9L10.41 4.86L9 6.27L11.73 9H11C10.45 9 10 9.45 10 10V20C10 20.55 10.45 21 11 21H23C23.21 21 23.39 20.92 23.55 20.82L26.73 24L28.14 22.59L19.28 13.73L16.56 11ZM12 19V11H13.73L21.73 19H12ZM22 11V13.61L28 19.61V9.5L24 13.5V10C24 9.45 23.55 9 23 9H17.39L19.39 11H22Z" fill="black"/>
-</g>
-<defs>
-<filter id="filter0_d_2_86" x="0" y="0" width="38" height="38" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-<feFlood flood-opacity="0" result="BackgroundImageFix"/>
-<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
-<feOffset dy="4"/>
-<feGaussianBlur stdDeviation="2"/>
-<feComposite in2="hardAlpha" operator="out"/>
-<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"/>
-<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_2_86"/>
-<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_2_86" result="shape"/>
-</filter>
-<clipPath id="clip0_2_86">
-<rect width="24" height="24" fill="white" transform="translate(7 3)"/>
-</clipPath>
-</defs>
-</svg>`;
+  <g clip-path="url(#clip0_2_86)">
+    <path d="M16.56 11L14.56 9L10.41 4.86L9 6.27L11.73 9H11C10.45 9 10 9.45 10 10V20C10 20.55 10.45 21 11 21H23C23.21 21 23.39 20.92 23.55 20.82L26.73 24L28.14 22.59L19.28 13.73L16.56 11ZM12 19V11H13.73L21.73 19H12ZM22 11V13.61L28 19.61V9.5L24 13.5V10C24 9.45 23.55 9 23 9H17.39L19.39 11H22Z" fill="black"/>
+  </g>
+  <defs>
+    <clipPath id="clip0_2_86">
+      <rect width="24" height="24" fill="white" transform="translate(7 3)"/>
+    </clipPath>
+  </defs>
+</svg>
+`;
 
-export const SVG_speaker = `<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 38 38" fill="none">
-<g filter="url(#filter0_d_3_93)">
-<circle cx="19" cy="15" r="15" fill="white"/>
-</g>
-<path d="M20.1993 7.5L15.9483 12H11.6974V18H15.9483L20.1993 22.5V7.5ZM22.4779 8.79694L22.2716 9.61195C24.5771 10.2659 26.1771 12.4732 26.1771 15C26.1771 17.5268 24.5771 19.7341 22.2716 20.388L22.4779 21.2031C25.1281 20.4513 26.9742 17.9045 26.9742 15C26.9742 12.0955 25.1281 9.54867 22.4779 8.79694ZM21.9277 10.9703L21.7215 11.7853C23.0979 12.1757 24.0517 13.4917 24.0517 15C24.0517 16.5083 23.0979 17.8243 21.7215 18.2147L21.9277 19.0297C23.6488 18.5415 24.8487 16.8861 24.8487 15C24.8487 13.1139 23.6488 11.4585 21.9277 10.9703ZM21.3776 13.1436L21.1714 13.9586C21.6185 14.0855 21.9262 14.51 21.9262 15C21.9262 15.49 21.6184 15.9145 21.1714 16.0414L21.3776 16.8564C22.1695 16.6318 22.7233 15.8678 22.7233 15C22.7233 14.1322 22.1695 13.3682 21.3776 13.1436Z" fill="black"/>
-<defs>
-<filter id="filter0_d_3_93" x="0" y="0" width="38" height="38" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-<feFlood flood-opacity="0" result="BackgroundImageFix"/>
-<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
-<feOffset dy="4"/>
-<feGaussianBlur stdDeviation="2"/>
-<feComposite in2="hardAlpha" operator="out"/>
-<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"/>
-<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_3_93"/>
-<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_3_93" result="shape"/>
-</filter>
-</defs>
-</svg>`;
+export const SVG_speaker = `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000"><path d="M560-131v-82q90-26 145-100t55-168q0-94-55-168T560-749v-82q124 28 202 125.5T840-481q0 127-78 224.5T560-131ZM120-360v-240h160l200-200v640L280-360H120Zm440 40v-322q47 22 73.5 66t26.5 96q0 51-26.5 94.5T560-320Z"/></svg>`;
 
-export const SVG_speakeroff = `<svg xmlns="http://www.w3.org/2000/svg" width="38" height="38" viewBox="0 0 38 38" fill="none">
-<g filter="url(#filter0_d_3_105)">
-<circle cx="19" cy="15" r="15" fill="white"/>
-</g>
-<path d="M20 16.707L25.146 21.854C25.2399 21.9479 25.3672 22.0006 25.5 22.0006C25.6328 22.0006 25.7601 21.9479 25.854 21.854C25.9479 21.7601 26.0006 21.6328 26.0006 21.5C26.0006 21.3672 25.9479 21.2399 25.854 21.146L12.854 8.14601C12.8075 8.09952 12.7523 8.06264 12.6916 8.03748C12.6308 8.01232 12.5657 7.99937 12.5 7.99937C12.4343 7.99937 12.3692 8.01232 12.3084 8.03748C12.2477 8.06264 12.1925 8.09952 12.146 8.14601C12.0995 8.19249 12.0626 8.24768 12.0375 8.30842C12.0123 8.36916 11.9994 8.43426 11.9994 8.50001C11.9994 8.56575 12.0123 8.63085 12.0375 8.69159C12.0626 8.75233 12.0995 8.80752 12.146 8.85401L15.286 11.993H14.5C14.1022 11.993 13.7206 12.151 13.4393 12.4323C13.158 12.7137 13 13.0952 13 13.493V16.482C13 16.8798 13.158 17.2614 13.4393 17.5427C13.7206 17.824 14.1022 17.982 14.5 17.982H16.223L19.149 20.857C19.2193 20.9263 19.3084 20.9732 19.4053 20.9919C19.5022 21.0106 19.6024 21.0002 19.6934 20.962C19.7844 20.9238 19.8621 20.8596 19.9166 20.7774C19.9712 20.6952 20.0002 20.5987 20 20.5V16.707ZM22.709 16.587L21.914 15.793C21.969 15.561 22.004 15.296 22.004 14.999C22.004 14.251 21.785 13.715 21.576 13.371C21.4727 13.2013 21.3488 13.0451 21.207 12.906L21.189 12.89C21.0919 12.8053 21.0322 12.6865 21.0206 12.5582C21.009 12.4299 21.0474 12.302 21.1277 12.2013C21.208 12.1006 21.3241 12.0348 21.4518 12.0176C21.5795 12.0004 21.7089 12.0331 21.813 12.109H21.814L21.815 12.11L21.817 12.112L21.823 12.116L21.838 12.129L21.883 12.169C21.9203 12.2023 21.9677 12.2497 22.025 12.311C22.139 12.434 22.285 12.613 22.43 12.851C22.722 13.331 23.004 14.044 23.004 14.999C23.007 15.5426 22.9069 16.0817 22.709 16.588M24.226 18.106L23.481 17.361C23.8273 16.624 24.0056 15.8193 24.003 15.005C24.0056 13.9138 23.6859 12.8462 23.084 11.936C22.8989 11.6525 22.688 11.3867 22.454 11.142C22.3732 11.0584 22.2888 10.9783 22.201 10.902L22.19 10.892C22.0891 10.8085 22.025 10.6887 22.0115 10.5584C21.9979 10.4281 22.0361 10.2977 22.1177 10.1953C22.1993 10.0928 22.3179 10.0265 22.4479 10.0105C22.578 9.99458 22.709 10.0303 22.813 10.11L22.814 10.111L22.817 10.113L22.824 10.119L22.846 10.138C22.8647 10.1527 22.89 10.1747 22.922 10.204C22.984 10.26 23.072 10.342 23.174 10.449C23.379 10.662 23.65 10.976 23.92 11.387C24.6289 12.4603 25.0056 13.7187 25.003 15.005C25.006 16.0869 24.739 17.1524 24.226 18.105M19.999 13.878L17.181 11.06L19.151 9.14201C19.2215 9.0737 19.3105 9.02764 19.4069 9.00957C19.5034 8.9915 19.6031 9.00222 19.6935 9.04039C19.7839 9.07856 19.8611 9.1425 19.9154 9.22423C19.9697 9.30595 19.9988 9.40187 19.999 9.50001V13.878Z" fill="black"/>
-<defs>
-<filter id="filter0_d_3_105" x="0" y="0" width="38" height="38" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-<feFlood flood-opacity="0" result="BackgroundImageFix"/>
-<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
-<feOffset dy="4"/>
-<feGaussianBlur stdDeviation="2"/>
-<feComposite in2="hardAlpha" operator="out"/>
-<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"/>
-<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_3_105"/>
-<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_3_105" result="shape"/>
-</filter>
-</defs>
-</svg>`;
+export const SVG_speakeroff = `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000"><path d="M792-56 671-177q-25 16-53 27.5T560-131v-82q14-5 27.5-10t25.5-12L480-368v208L280-360H120v-240h128L56-792l56-56 736 736-56 56Zm-8-232-58-58q17-31 25.5-65t8.5-70q0-94-55-168T560-749v-82q124 28 202 125.5T840-481q0 53-14.5 102T784-288ZM650-422l-90-90v-130q47 22 73.5 66t26.5 96q0 15-2.5 29.5T650-422ZM480-592 376-696l104-104v208Z"/></svg>`;
 
 export const SVG_request_video = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
 <mask id="mask0_446_1771" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="32" height="32">

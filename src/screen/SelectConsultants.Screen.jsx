@@ -71,7 +71,9 @@ const SelectConsultantsScreen = ({route, navigation}) => {
 
   const handleSelection = indx => {
     if (parseInt(user.wallet) <= parseInt(arr_type[indx].FeePerMinute) * 2) {
-      Alert.alert('Please add sufficient balance to your wallet for this call.');
+      Alert.alert(
+        'Please add sufficient balance to your wallet for this call.',
+      );
       return false;
     }
     setSelected(indx);
@@ -95,13 +97,17 @@ const SelectConsultantsScreen = ({route, navigation}) => {
               Select the consultant best suited for your matter
             </Text>
           </View>
-          <ScrollView horizontal={true} className="my-20">
+          <ScrollView
+            horizontal={true}
+            className="my-20 bg-transparent"
+            showsHorizontalScrollIndicator={false}
+            showsVerticalScrollIndicator={false}>
             {arr_type &&
               arr_type.map((item, index) => (
                 <TouchableOpacity
                   key={'key_' + index}
                   className={`relative bg-white w-40 h-52 mx-1 
-                shadow-2xl shadow-slate-500 rounded-md py-3 px-5 flex 
+                shadow-2xl shadow-slate-200 rounded-md py-3 px-5 flex 
                  justify-center items-center ${
                    selected == index && 'border-2 border-red-600'
                  }

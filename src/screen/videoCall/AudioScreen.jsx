@@ -48,12 +48,23 @@ const AudioScreen = ({route, navigation}) => {
 
   const {conversations} = useChatStore();
 
+  // useEffect(() => {
+  //   startCall(startTime, consultType, reciever_data.userInfo.mobile, webSocket);
+  //   return () => {
+  //     stopCall();
+  //   };
+  // }, [webSocket]);
   useEffect(() => {
-    startCall(startTime, consultType, reciever_data.userInfo.mobile, webSocket);
+    if (startTime && reciever_data?.userInfo?.mobile) {
+      startCall(startTime, consultType, reciever_data.userInfo.mobile, webSocket);
+    }
+  
     return () => {
       stopCall();
     };
-  }, [webSocket]);
+  }, [consultType, reciever_data?.userInfo?.mobile, webSocket]);
+  
+  
 
   const {engine, isJoined} = useAgoraEngine(
     config,
@@ -86,12 +97,12 @@ const AudioScreen = ({route, navigation}) => {
   const endCall = useCallback(async () => {
     if (engine.current) {
       await engine.current.leaveChannel();
-      webSocket.emit('handsup', {otherUserId: mobile});
+      webSocket.emit('handsup', { otherUserId: mobile });
       clearInterval(callDurationInterval);
       setCallStatus(false);
       stopCall();
     }
-  }, [engine, webSocket, mobile, navigation]);
+  }, [engine, webSocket, mobile, stopCall]);
 
   const switchToVideoCall = useCallback(async () => {
     if (engine.current) {
@@ -147,23 +158,12 @@ const AudioScreen = ({route, navigation}) => {
       });
     };
   }, [webSocket, engine, createTwoButtonAlert, navigation, config, mobile]);
-
-  // useEffect(() => {
-  //   const handleCallDurationUpdate = (data) => {
-  //     console.log("check callDuration==>",data.callDuration)
-  //   };
-
-  //   webSocket.on('updateCallDuration', handleCallDurationUpdate);
-  //   return () => {
-  //     webSocket.off('updateCallDuration', handleCallDurationUpdate);
-  //   };
-  // }, [webSocket, endCall]);
-
+  
   useEffect(() => {
     if (isBalanceZero) {
       endCall();
     }
-  }, [isBalanceZero]);
+  }, [isBalanceZero, endCall]);
 
   useEffect(() => {
     if (isBalanceEnough) {
@@ -204,8 +204,8 @@ const AudioScreen = ({route, navigation}) => {
   };
 
   const handleNavigateToWallet = () => {
-    setShowModal(false); // Close modal before navigating
-    navigation.navigate('WalletScreen'); // Navigate to wallet screen
+    setShowModal(false); 
+    navigation.navigate('WalletScreen'); 
   };
 
   return (
@@ -250,7 +250,7 @@ const AudioScreen = ({route, navigation}) => {
             </TouchableOpacity>
             <TouchableOpacity style={styles.button} onPress={toggleSpeaker}>
               {isSpeakerEnabled ? (
-                <SvgXml xml={SVG_speaker} />
+                <SvgXml xml={SVG_speaker} size="32" />
               ) : (
                 <SvgXml xml={SVG_speakeroff} />
               )}
@@ -299,7 +299,6 @@ const AudioScreen = ({route, navigation}) => {
                 style={styles.modalButton}>
                 <Text style={styles.modalButtonText}>Go to Wallet</Text>
               </TouchableOpacity>
-              
             </View>
           </View>
         </View>
@@ -368,6 +367,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     paddingHorizontal: 20,
     paddingBottom: 20,
+    backgroundColor:'#fff'
   },
   button: {
     width: 62,
@@ -378,6 +378,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderColor: 'slategray',
     borderWidth: 2,
+
   },
   messageInputContainer: {
     paddingHorizontal: 10,
