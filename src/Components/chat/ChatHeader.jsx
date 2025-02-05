@@ -19,7 +19,7 @@ const ChatHeader = ({
 }) => {
   return (
     <View >
-      <TouchableOpacity style={styles.header} onPress={{}}>
+      <TouchableOpacity style={styles.header}>
       <View className="flex flex-row space-x-3 justify-center items-center">
         <TouchableOpacity
           style={styles.backButton}
