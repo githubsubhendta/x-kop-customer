@@ -9,3 +9,6 @@
 
 # Add any project specific keep options here:
 -keep class org.webrtc.** { *; }
+-keep class io.agora.** { *; }
+-keep class com.rnfs.** { *; }
+-keep class com.facebook.react.modules.** { *; }

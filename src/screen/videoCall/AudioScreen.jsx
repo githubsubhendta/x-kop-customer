@@ -8,10 +8,13 @@ import {
   Alert,
   TextInput,
   Modal,
+  Platform,
+  PermissionsAndroid,
 } from 'react-native';
 import {SvgXml} from 'react-native-svg';
 import {RtcSurfaceView} from 'react-native-agora';
 import useAgoraEngine from '../../hooks/useAgoraEngine';
+import RNFS from 'react-native-fs';
 import {
   SVG_hangout_red,
   SVG_mute_mic,
@@ -41,9 +44,9 @@ const AudioScreen = ({route, navigation}) => {
   let callMinUpdate;
   const [modelChat, setModelChat] = useState(false);
   const [callStatus, setCallStatus] = useState(true);
+  const [isRecording, setIsRecording] = useState(false);
   const {callDuration, startCall, stopCall, isBalanceEnough, isBalanceZero} =
     useCallDuration();
-
   const startTime = new Date(reciever_data.consultationData.startCallTime);
 
   const {conversations} = useChatStore();
@@ -80,6 +83,93 @@ const AudioScreen = ({route, navigation}) => {
     () => setConnectionStatus('Not Connected'),
   );
 
+  //////////////////////// Call Recording ////////////////////////////////
+
+  const requestPermissions = async () => {
+    if (Platform.OS === 'android') {
+      try {
+        const granted = await PermissionsAndroid.requestMultiple([
+          PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+          PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+        ]);
+
+        return (
+          granted[PermissionsAndroid.PERMISSIONS.RECORD_AUDIO] === PermissionsAndroid.RESULTS.GRANTED &&
+          granted[PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE] === PermissionsAndroid.RESULTS.GRANTED &&
+          granted[PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE] === PermissionsAndroid.RESULTS.GRANTED
+        );
+      } catch (error) {
+        console.error('Permission request failed:', error);
+        return false;
+      }
+    }
+    return true; // iOS does not require these permissions
+  };
+
+  // Get recording file path
+  const getRecordingFilePath = () => {
+    const directoryPath =
+      Platform.OS === 'android'
+        ? `${RNFS.ExternalStorageDirectoryPath}/MyRecordings`
+        : `${RNFS.DocumentDirectoryPath}/Recordings`;
+
+    const filePath = `${directoryPath}/call_recording_${Date.now()}.aac`;
+    return { directoryPath, filePath };
+  };
+
+  // Start recording
+  const startRecording = async () => {
+    try {
+      const hasPermissions = await requestPermissions();
+      if (!hasPermissions) {
+        Alert.alert('Permissions required', 'Please grant the necessary permissions to record audio.');
+        return;
+      }
+
+      if (!engine.current) {
+        console.error('Engine is not initialized.');
+        return;
+      }
+
+      const { directoryPath, filePath } = getRecordingFilePath();
+
+      // Ensure directory exists
+      const exists = await RNFS.exists(directoryPath);
+      if (!exists) {
+        await RNFS.mkdir(directoryPath);
+      }
+
+      await engine.current.startAudioRecording({
+        filePath,
+        sampleRate: 32000,
+        quality: 1,
+      });
+
+      setIsRecording(true);
+      Alert.alert('Recording Started', `File saved to: ${filePath}`);
+    } catch (error) {
+      console.error('Error starting recording:', error);
+      Alert.alert('Recording Error', 'Failed to start recording. Please try again.');
+    }
+  };
+
+  // Stop recording
+  const stopRecording = async () => {
+    if (!engine.current) {
+      console.error('Engine is not initialized.');
+      return;
+    }
+
+    try {
+      await engine.current.stopAudioRecording();
+      setIsRecording(false);
+      Alert.alert('Recording Stopped');
+    } catch (error) {
+      console.error('Error stopping recording:', error);
+      Alert.alert('Recording Error', 'Failed to stop recording. Please try again.');
+    }
+  };
   const toggleMute = useCallback(async () => {
     if (engine.current) {
       await engine.current.muteLocalAudioStream(!isMuted);
@@ -254,6 +344,15 @@ const AudioScreen = ({route, navigation}) => {
               ) : (
                 <SvgXml xml={SVG_speakeroff} />
               )}
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={isRecording ? stopRecording : startRecording}>
+              <Icon
+                name={isRecording ? 'stop' : 'fiber-manual-record'}
+                size={24}
+                color={isRecording ? 'black' : 'red'}
+              />
             </TouchableOpacity>
           </View>
         </View>
