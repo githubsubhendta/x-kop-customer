@@ -69,7 +69,6 @@ const VideoCallScreen = ({route, navigation}) => {
         console.log('Permissions requested!');
       });
     }
-
     if (
       !config ||
       !config.channelName ||
@@ -80,9 +79,7 @@ const VideoCallScreen = ({route, navigation}) => {
       navigation.goBack();
       return;
     }
-
     init();
-
     return () => {
       endCall();
     };
@@ -93,7 +90,7 @@ const VideoCallScreen = ({route, navigation}) => {
       _engine.current = createAgoraRtcEngine();
       _engine.current.registerEventHandler({
         onJoinChannelSuccess: () => {
-          showMessage('Successfully joined the channel ' + config.channelName);
+          showMessage('Successfully joined the channel' + config.channelName);
           setJoined(true);
           setConnectionStatus('Connected');
         },
@@ -185,7 +182,6 @@ const VideoCallScreen = ({route, navigation}) => {
     setJoined(false);
     setConnectionStatus('Not Connected');
   };
-
   const toggleMic = () => {
     _engine.current?.muteLocalAudioStream(!isMicOn);
     setMicOn(prev => !prev);
@@ -199,27 +195,22 @@ const VideoCallScreen = ({route, navigation}) => {
     _engine.current?.enableLocalVideo(!isCameraOn);
     setCameraOn(prev => !prev);
   };
-
   const toggleSpeaker = () => {
     _engine.current?.setEnableSpeakerphone(!isSpeakerOn);
     setSpeakerOn(prev => !prev);
   };
-
   const showMessage = message => {
     console.log(message);
   };
-
   useEffect(() => {
     if (isBalanceZero) {
       endCall();
     }
   }, [isBalanceZero]);
-
   useEffect(() => {
     if (isBalanceEnough) {
       setShowModal(true);
     }
-
     return () => {
       setShowModal(false);
     };
@@ -325,54 +316,71 @@ const styles = StyleSheet.create({
   },
   fullView: {
     flex: 1,
+    backgroundColor: '#000', 
+    justifyContent: 'center',
+    alignItems: 'center',
     position: 'relative',
   },
   localContainer: {
     position: 'absolute',
-    bottom: 0,
-    right: 0,
-    width: 100,
-    height: 150,
-    marginTop: 10,
-    borderRadius: 10,
+    backgroundColor:'#000',
+    bottom: 10,
+    right: 20,
+    width: 120, 
+    height: 180,
+    borderRadius: 12,
     overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: '#fff', 
+    shadowColor: '#000',
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 5, 
   },
   local: {
     width: '100%',
     height: '100%',
+    borderRadius: 12,
   },
   remoteContainer: {
     flex: 1,
+    width: '100%',
     justifyContent: 'center',
     alignItems: 'center',
   },
   remote: {
-    width: width - 20,
+    width: width - 10,
     height: height / 2,
     borderRadius: 10,
   },
   counterContainer: {
-    width:200,
-    backgroundColor: '#997654',
+    position: 'absolute',
+    top: 10,
+    alignSelf: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    paddingVertical: 5,
+    paddingHorizontal: 16,
     borderRadius: 20,
-    margin: 10,
-    padding: 10,
   },
   callDuration: {
-    fontSize: 18,
-    color: 'white',
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   buttonHolder: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    paddingHorizontal: 20,
-    paddingBottom: 20,
+    marginVertical: 20,
   },
   button: {
-    width: 62,
-    height: 62,
+    width: 60,
+    height: 60,
+    borderRadius: 31,
+    backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
+   
   },
   text: {
     color: 'black',

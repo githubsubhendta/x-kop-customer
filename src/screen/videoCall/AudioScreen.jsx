@@ -11,8 +11,9 @@ import {
   Platform,
   PermissionsAndroid,
 } from 'react-native';
+import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import {SvgXml} from 'react-native-svg';
-import {RtcSurfaceView} from 'react-native-agora';
+// import {RtcSurfaceView} from 'react-native-agora';
 import useAgoraEngine from '../../hooks/useAgoraEngine';
 import RNFS from 'react-native-fs';
 import {
@@ -48,7 +49,6 @@ const AudioScreen = ({route, navigation}) => {
   const {callDuration, startCall, stopCall, isBalanceEnough, isBalanceZero} =
     useCallDuration();
   const startTime = new Date(reciever_data.consultationData.startCallTime);
-
   const {conversations} = useChatStore();
 
   // useEffect(() => {
@@ -57,17 +57,20 @@ const AudioScreen = ({route, navigation}) => {
   //     stopCall();
   //   };
   // }, [webSocket]);
+
   useEffect(() => {
     if (startTime && reciever_data?.userInfo?.mobile) {
-      startCall(startTime, consultType, reciever_data.userInfo.mobile, webSocket);
+      startCall(
+        startTime,
+        consultType,
+        reciever_data.userInfo.mobile,
+        webSocket,
+      );
     }
-  
     return () => {
       stopCall();
     };
   }, [consultType, reciever_data?.userInfo?.mobile, webSocket]);
-  
-  
 
   const {engine, isJoined} = useAgoraEngine(
     config,
@@ -86,80 +89,82 @@ const AudioScreen = ({route, navigation}) => {
   //////////////////////// Call Recording ////////////////////////////////
 
   const requestPermissions = async () => {
-    try {
-      if (Platform.OS === 'android') {
-        const permissions = [
-          PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+    if (Platform.OS === 'android') {
+      try {
+        const granted = await PermissionsAndroid.requestMultiple([
+          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
           PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
-        ];
-  
-        if (Platform.Version < 33) {
-          permissions.push(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE);
+          PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+        ]);
+        if (
+          granted['android.permission.WRITE_EXTERNAL_STORAGE'] ===
+            PermissionsAndroid.RESULTS.GRANTED &&
+          granted['android.permission.READ_EXTERNAL_STORAGE'] ===
+            PermissionsAndroid.RESULTS.GRANTED &&
+          granted['android.permission.RECORD_AUDIO'] ===
+            PermissionsAndroid.RESULTS.GRANTED
+        ) {
+          console.log('Permissions granted');
         } else {
-          permissions.push(PermissionsAndroid.PERMISSIONS.READ_MEDIA_AUDIO);
+          console.log('Permissions denied');
         }
-  
-        const granted = await PermissionsAndroid.requestMultiple(permissions);
-  
-        return Object.values(granted).every(status => status === PermissionsAndroid.RESULTS.GRANTED);
+      } catch (err) {
+        console.warn(err);
       }
-      return true; // iOS permissions handled in `Info.plist`
-    } catch (error) {
-      console.error('Permission request failed:', error);
-      return false;
+    } else if (Platform.OS === 'ios') {
+      const microphoneStatus = await request(PERMISSIONS.IOS.MICROPHONE);
+      if (microphoneStatus === RESULTS.GRANTED) {
+        console.log('Microphone permission granted');
+      } else {
+        console.log('Microphone permission denied');
+      }
     }
   };
-  
-  
+
+  useEffect(() => {
+    requestPermissions();
+  }, []);
   const getRecordingFilePath = () => {
     const directoryPath =
       Platform.OS === 'android'
         ? `${RNFS.DownloadDirectoryPath}/MyRecordings`
         : `${RNFS.DocumentDirectoryPath}/Recordings`;
-  
-    const filePath = `${directoryPath}/call_recording_${Date.now()}.aac`;
-  
-    return { directoryPath, filePath };
+
+    RNFS.mkdir(directoryPath)
+      .then(() => console.log('Directory created or already exists'))
+      .catch(err => console.error('Error creating directory:', err));
+
+    return `${directoryPath}/call_recording_${Date.now()}.aac`;
   };
-  
   const startRecording = async () => {
-    if (!engine.current) {
-      console.error('Engine is not initialized.');
-      return;
-    }
-  
-    try {
-      const { directoryPath, filePath } = getRecordingFilePath();
-  
-      // Ensure directory exists
-      const exists = await RNFS.exists(directoryPath);
-      if (!exists) {
-        await RNFS.mkdir(directoryPath);
+    if (engine.current) {
+      try {
+        const filePath = getRecordingFilePath();
+        await RNFS.mkdir(filePath.substring(0, filePath.lastIndexOf('/')));
+        console.log('Recording filePath ====>', filePath);
+        await engine.current.startAudioRecording({
+          filePath,
+          sampleRate: 32000,
+          quality: 1,
+        });
+        setIsRecording(true);
+        Alert.alert('Recording Started', `File saved to: ${filePath}`);
+      } catch (error) {
+        console.error('Error starting recording:', error);
+        Alert.alert(
+          'Error',
+          'Failed to start recording. Please check permissions and try again.',
+        );
       }
-  
-      console.log('Recording filePath ====>', filePath);
-      
-      await engine.current.startAudioRecording({
-        filePath,
-        sampleRate: 32000,
-        quality: 1,
-      });
-  
-      setIsRecording(true);
-      Alert.alert('Recording Started', `File saved to: ${filePath}`);
-    } catch (error) {
-      console.error('Error starting recording:', error);
     }
   };
-  
-  
   // Stop Recording
   const stopRecording = async () => {
     if (!engine.current) {
       console.error('Engine is not initialized.');
       return;
     }
-  
+
     try {
       await engine.current.stopAudioRecording();
       setIsRecording(false);
@@ -168,7 +173,6 @@ const AudioScreen = ({route, navigation}) => {
       console.error('Error stopping recording:', error);
     }
   };
-
 
   const toggleMute = useCallback(async () => {
     if (engine.current) {
@@ -187,7 +191,7 @@ const AudioScreen = ({route, navigation}) => {
   const endCall = useCallback(async () => {
     if (engine.current) {
       await engine.current.leaveChannel();
-      webSocket.emit('handsup', { otherUserId: mobile });
+      webSocket.emit('handsup', {otherUserId: mobile});
       clearInterval(callDurationInterval);
       setCallStatus(false);
       stopCall();
@@ -248,7 +252,7 @@ const AudioScreen = ({route, navigation}) => {
       });
     };
   }, [webSocket, engine, createTwoButtonAlert, navigation, config, mobile]);
-  
+
   useEffect(() => {
     if (isBalanceZero) {
       endCall();
@@ -257,12 +261,12 @@ const AudioScreen = ({route, navigation}) => {
 
   useEffect(() => {
     if (isBalanceEnough) {
-      setShowModal(true); 
+      setShowModal(true);
 
       const timeout = setTimeout(() => {
-        setShowModal(false); 
+        setShowModal(false);
       }, 5000);
-  
+
       return () => clearTimeout(timeout);
       // Alert.alert('Your balance is not enough', '', [
       //   {
@@ -294,8 +298,8 @@ const AudioScreen = ({route, navigation}) => {
   };
 
   const handleNavigateToWallet = () => {
-    setShowModal(false); 
-    navigation.navigate('WalletScreen'); 
+    setShowModal(false);
+    navigation.navigate('WalletScreen');
   };
 
   return (
@@ -333,7 +337,7 @@ const AudioScreen = ({route, navigation}) => {
             </TouchableOpacity>
             <TouchableOpacity style={styles.button} onPress={toggleMute}>
               {isMuted ? (
-                <SvgXml xml={SVG_unmute_mic} />       
+                <SvgXml xml={SVG_unmute_mic} />
               ) : (
                 <SvgXml xml={SVG_mute_mic} />
               )}
@@ -388,7 +392,7 @@ const AudioScreen = ({route, navigation}) => {
               Your balance is not enough. Please add more funds.
             </Text>
             <View className="flex flex-row justify-center space-x-4">
-            <TouchableOpacity
+              <TouchableOpacity
                 onPress={handleModalClose}
                 style={styles.modalButton}>
                 <Text style={styles.modalButtonText}>Cancel</Text>
@@ -466,7 +470,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     paddingHorizontal: 20,
     paddingBottom: 20,
-    backgroundColor:'#fff'
+    backgroundColor: '#fff',
   },
   button: {
     width: 62,
@@ -477,7 +481,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderColor: 'slategray',
     borderWidth: 2,
-
   },
   messageInputContainer: {
     paddingHorizontal: 10,
