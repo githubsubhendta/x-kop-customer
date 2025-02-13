@@ -51,7 +51,7 @@ const ContactScreen = () => {
   const displayedChats = [...(matchedChats || []), ...(otherChats || [])];
 
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
+    <SafeAreaView style={{flex: 1, backgroundColor: 'transparent'}}>
       <View>
         <Text
           style={{
@@ -114,7 +114,6 @@ const ContactScreen = () => {
                           })
                         }>
                         <Card.Title
-                          // className=""
                           title={officer?.name || 'Unknown Officer'}
                           subtitle={
                             officer?.officerDetails?.ConsultationTypeID
@@ -152,7 +151,7 @@ const ContactScreen = () => {
                   })
                 ) : (
                   <View style={{marginHorizontal: 16, marginTop: 20}}>
-                    <Text>No chats available</Text>
+                    <Text className="text-center text-[#997654] font-medium text-md">Contact Not Found</Text>
                   </View>
                 )}
               </ScrollView>

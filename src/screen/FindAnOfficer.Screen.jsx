@@ -44,7 +44,6 @@ const FindAnOfficerScreen = ({route, navigation}) => {
   }, [mobile, data, user.mobile, fetchData]);
 
   useEffect(() => {
-  //  console.log("check data==>",data?.data)
     if(data?.data?.mobile != undefined){
       setMobile(data?.data?.mobile);
     } else{

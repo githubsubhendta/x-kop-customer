@@ -44,7 +44,7 @@ const AccountScreen = ({navigation}) => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <SafeAreaView className="flex-1 bg-transparent">
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
       <ScrollView className="mb-14">
         <View className="flex flex-row justify-between my-5 mx-4">
@@ -53,7 +53,7 @@ const AccountScreen = ({navigation}) => {
             onPress={() => navigation.push('WalletScreen')}
             className="border border-[#862A0D] bg-slate-100 rounded-md w-30 h-10 items-start justify-center pl-1 pr-3">
             <View className="flex flex-row  items-center gap-2">
-              <SvgXml xml={SVG_wallet} height={'30px'} width={'30px'} />
+              <SvgXml xml={SVG_wallet} height={'30px'} width={'30px'}/>
               <Text className="text-[#862A0D] text-[16px]">
                 ₹{user?.wallet === undefined ? '0' : user?.wallet}
               </Text>

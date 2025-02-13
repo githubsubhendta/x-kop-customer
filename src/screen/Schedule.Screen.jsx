@@ -245,9 +245,7 @@ const ScheduleScreen = ({navigation}) => {
                       const seconds = Math.floor(
                         (durationInMs % (1000 * 60)) / 1000,
                       );
-
                       const pad = num => String(num).padStart(2, '0');
-
                       return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
                     })()}
                   </Text>
@@ -288,12 +286,9 @@ const ScheduleScreen = ({navigation}) => {
 
   const handleScheduleSubmit = async () => {
     const date = selected;
-
     const [startTime, endTime] = timeSlots[slot].split('-');
-
     const startDateTimeString = `${date} ${startTime}`;
     const endDateTimeString = `${date} ${endTime}`;
-
     const startDateTime = moment(
       startDateTimeString,
       'YYYY-MM-DD h:mm A',
@@ -306,7 +301,7 @@ const ScheduleScreen = ({navigation}) => {
   };
 
   return (
-    <View className="flex-1 bg-white relative">
+    <View className="flex-1 bg-transparent relative">
       {!scheduleCall ? (
         <>
           <View>

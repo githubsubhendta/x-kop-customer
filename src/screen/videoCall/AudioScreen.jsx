@@ -86,90 +86,90 @@ const AudioScreen = ({route, navigation}) => {
   //////////////////////// Call Recording ////////////////////////////////
 
   const requestPermissions = async () => {
-    if (Platform.OS === 'android') {
-      try {
-        const granted = await PermissionsAndroid.requestMultiple([
+    try {
+      if (Platform.OS === 'android') {
+        const permissions = [
           PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
-          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
           PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
-        ]);
-
-        return (
-          granted[PermissionsAndroid.PERMISSIONS.RECORD_AUDIO] === PermissionsAndroid.RESULTS.GRANTED &&
-          granted[PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE] === PermissionsAndroid.RESULTS.GRANTED &&
-          granted[PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE] === PermissionsAndroid.RESULTS.GRANTED
-        );
-      } catch (error) {
-        console.error('Permission request failed:', error);
-        return false;
+        ];
+  
+        if (Platform.Version < 33) {
+          permissions.push(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE);
+        } else {
+          permissions.push(PermissionsAndroid.PERMISSIONS.READ_MEDIA_AUDIO);
+        }
+  
+        const granted = await PermissionsAndroid.requestMultiple(permissions);
+  
+        return Object.values(granted).every(status => status === PermissionsAndroid.RESULTS.GRANTED);
       }
+      return true; // iOS permissions handled in `Info.plist`
+    } catch (error) {
+      console.error('Permission request failed:', error);
+      return false;
     }
-    return true; // iOS does not require these permissions
   };
-
-  // Get recording file path
+  
+  
   const getRecordingFilePath = () => {
     const directoryPath =
       Platform.OS === 'android'
-        ? `${RNFS.ExternalStorageDirectoryPath}/MyRecordings`
+        ? `${RNFS.DownloadDirectoryPath}/MyRecordings`
         : `${RNFS.DocumentDirectoryPath}/Recordings`;
-
+  
     const filePath = `${directoryPath}/call_recording_${Date.now()}.aac`;
+  
     return { directoryPath, filePath };
   };
-
-  // Start recording
+  
   const startRecording = async () => {
+    if (!engine.current) {
+      console.error('Engine is not initialized.');
+      return;
+    }
+  
     try {
-      const hasPermissions = await requestPermissions();
-      if (!hasPermissions) {
-        Alert.alert('Permissions required', 'Please grant the necessary permissions to record audio.');
-        return;
-      }
-
-      if (!engine.current) {
-        console.error('Engine is not initialized.');
-        return;
-      }
-
       const { directoryPath, filePath } = getRecordingFilePath();
-
+  
       // Ensure directory exists
       const exists = await RNFS.exists(directoryPath);
       if (!exists) {
         await RNFS.mkdir(directoryPath);
       }
-
+  
+      console.log('Recording filePath ====>', filePath);
+      
       await engine.current.startAudioRecording({
         filePath,
         sampleRate: 32000,
         quality: 1,
       });
-
+  
       setIsRecording(true);
       Alert.alert('Recording Started', `File saved to: ${filePath}`);
     } catch (error) {
       console.error('Error starting recording:', error);
-      Alert.alert('Recording Error', 'Failed to start recording. Please try again.');
     }
   };
-
-  // Stop recording
+  
+  
+  // Stop Recording
   const stopRecording = async () => {
     if (!engine.current) {
       console.error('Engine is not initialized.');
       return;
     }
-
+  
     try {
       await engine.current.stopAudioRecording();
       setIsRecording(false);
       Alert.alert('Recording Stopped');
     } catch (error) {
       console.error('Error stopping recording:', error);
-      Alert.alert('Recording Error', 'Failed to stop recording. Please try again.');
     }
   };
+
+
   const toggleMute = useCallback(async () => {
     if (engine.current) {
       await engine.current.muteLocalAudioStream(!isMuted);

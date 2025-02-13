@@ -281,7 +281,7 @@ const HomeScreen = ({handleTabPress}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff',
     // backgroundColor: '#e4cc9c',
   },
 });

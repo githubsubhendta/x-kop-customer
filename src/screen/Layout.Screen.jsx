@@ -390,17 +390,7 @@ const TabBarWithBorder = ({state, descriptors, navigation, selectedTab}) => {
                 <View>
                   {options.tabBarIcon({color: isFocused ? 'red' : 'black'})}
                   {route.name === selectedTab && (
-                    <View
-                      style={{
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        backgroundColor: '#862A0D',
-                        height: 10,
-                        width: 90,
-                        borderRadius: 2,
-                        marginTop: 4,
-                      }}
-                    />
+                    <View className="bg-orange-900 rounded-tl-full rounded-tr-full mt-1 mx-4 w-26 h-2 text-center flex flex-row justify-center" />
                   )}
                 </View>
               </View>
