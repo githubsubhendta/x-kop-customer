@@ -434,6 +434,8 @@ const VideoCallScreen = ({route, navigation}) => {
   const [isSpeakerOn, setSpeakerOn] = useState(true);
   const {webSocket} = useWebSocket();
   const [showModal, setShowModal] = useState(false);
+  const [isDisconnected, setIsDisconnected] = useState(false);
+
 
   const {
     callDuration,
@@ -580,20 +582,35 @@ const VideoCallScreen = ({route, navigation}) => {
     _engine.current?.switchCamera();
   };
 
+  // const toggleCamera = () => {
+  //   if (isCameraOn) {
+  //     // Turn off the camera and switch to audio-only call
+  //     _engine.current?.enableLocalVideo(false);
+  //     _engine.current?.muteLocalVideoStream(true);
+  //     navigation.goBack();
+      
+  //   } else {
+  //     // Turn on the camera and switch back to video call
+  //     _engine.current?.enableLocalVideo(true);
+  //     _engine.current?.muteLocalVideoStream(false);
+  //   }
+  //   setCameraOn(prev => !prev);
+  // };
+
   const toggleCamera = () => {
     if (isCameraOn) {
-      // Turn off the camera and switch to audio-only call
       _engine.current?.enableLocalVideo(false);
       _engine.current?.muteLocalVideoStream(true);
+      setIsDisconnected(true);  // Set disconnected state
       navigation.goBack();
-      
     } else {
-      // Turn on the camera and switch back to video call
       _engine.current?.enableLocalVideo(true);
       _engine.current?.muteLocalVideoStream(false);
+      setIsDisconnected(false);  // Reset disconnected state
     }
     setCameraOn(prev => !prev);
   };
+  
 
   const toggleSpeaker = () => {
     _engine.current?.setEnableSpeakerphone(!isSpeakerOn);
@@ -676,7 +693,7 @@ const VideoCallScreen = ({route, navigation}) => {
           {isCameraOn ? (
             <SvgXml xml={SVG_stop_camera} />
           ) : (
-            <SvgXml xml={SVG_switch_camera} />
+            <SvgXml xml={SVG_stop_camera} />
           )}
         </TouchableOpacity>
         <TouchableOpacity onPress={toggleSpeaker} style={styles.button}>
@@ -712,7 +729,17 @@ const VideoCallScreen = ({route, navigation}) => {
           </View>
         </View>
       </Modal>
+      {isDisconnected && (
+  <View style={styles.reconnectContainer}>
+    <Text style={styles.reconnectText}>You have been disconnected. Would you like to reconnect?</Text>
+    <TouchableOpacity onPress={startCallFun} style={styles.reconnectButton}>
+      <Text style={styles.reconnectButtonText}>Reconnect</Text>
+    </TouchableOpacity>
+  </View>
+)}
+
     </View>
+    
   );
 };
 
@@ -757,7 +784,7 @@ const styles = StyleSheet.create({
   },
   remote: {
     width: width - 10,
-    height: height / 2,
+    height: height / 3,
     borderRadius: 10,
   },
   counterContainer: {
@@ -820,6 +847,32 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
   },
   modalButtonText: {
+    color: '#fff',
+    fontSize: 16,
+  },
+  reconnectContainer: {
+    position: 'absolute',
+    bottom: 20,
+    left: 20,
+    right: 20,
+    backgroundColor: '#000',
+    padding: 10,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  reconnectText: {
+    color: '#fff',
+    fontSize: 16,
+    marginBottom: 10,
+  },
+  reconnectButton: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+  },
+  reconnectButtonText: {
     color: '#fff',
     fontSize: 16,
   },
