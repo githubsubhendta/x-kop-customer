@@ -737,9 +737,7 @@ const VideoCallScreen = ({route, navigation}) => {
     </TouchableOpacity>
   </View>
 )}
-
-    </View>
-    
+    </View>   
   );
 };
 
