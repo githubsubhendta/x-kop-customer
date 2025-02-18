@@ -13,7 +13,6 @@ export const getAllCallHistory = async (page=1) => {
   }
 };
 
-
 const useCallHistory = () => {
     const [callHistory, setCallHistory] = useState([]);
     const [page, setPage] = useState(1);
