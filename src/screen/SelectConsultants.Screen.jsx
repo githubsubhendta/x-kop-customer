@@ -41,15 +41,31 @@ const SelectConsultantsScreen = ({route, navigation}) => {
     }
   }, [data]);
 
+  // const handleScheduleSubmit = async () => {
+  //   if (selected != null) {
+  //     fetchData('/officer_schedule/schedules', 'POST', {
+  //       consultationTypeName: arr_type[selected].ConsultationTypeName,
+  //       startTime: recieve_params.startDateTime.replace(/\"/g, ''),
+  //       endTime: recieve_params.endDateTime.replace(/\"/g, ''),
+  //     });
+  //   }
+  // };
+
   const handleScheduleSubmit = async () => {
     if (selected != null) {
-      fetchData('/officer_schedule/schedules', 'POST', {
-        consultationTypeName: arr_type[selected].ConsultationTypeName,
-        startTime: recieve_params.startDateTime.replace(/\"/g, ''),
-        endTime: recieve_params.endDateTime.replace(/\"/g, ''),
-      });
+      try {
+        await fetchData('/officer_schedule/schedules', 'POST', {
+          consultationTypeName: arr_type[selected].ConsultationTypeName,
+          startTime: recieve_params.startDateTime.replace(/\"/g, ''),
+          endTime: recieve_params.endDateTime.replace(/\"/g, ''),
+        });
+      } catch (error) {
+        console.error('Schedule submit error:', error);
+        showSnackbar('Failed to schedule. Please try again.', 'error');
+      }
     }
   };
+  
 
   useEffect(() => {
     if (error) {
@@ -69,15 +85,27 @@ const SelectConsultantsScreen = ({route, navigation}) => {
     );
   }
 
-  const handleSelection = indx => {
+  // const handleSelection = indx => {
+  //   if (parseInt(user.wallet) <= parseInt(arr_type[indx].FeePerMinute) * 2) {
+  //     Alert.alert(
+  //       'Please add sufficient balance to your wallet for this call.',
+  //     );
+  //     return false;
+  //   }
+  //   setSelected(indx);
+  // };
+
+  const handleSelection = (indx) => {
+    if (!arr_type || !arr_type[indx]) return;
+  
     if (parseInt(user.wallet) <= parseInt(arr_type[indx].FeePerMinute) * 2) {
-      Alert.alert(
-        'Please add sufficient balance to your wallet for this call.',
-      );
-      return false;
+      Alert.alert('Please add sufficient balance to your wallet for this call.');
+      return;
     }
+  
     setSelected(indx);
   };
+  
   return (
     <SafeAreaView className="mx-3 py-2 flex-1">
       <View>

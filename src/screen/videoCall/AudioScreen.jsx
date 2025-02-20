@@ -136,26 +136,55 @@ const AudioScreen = ({route, navigation}) => {
 
     return `${directoryPath}/call_recording_${Date.now()}.aac`;
   };
+
+  const confirmAndStartRecording = () => {
+    Alert.alert(
+      'Start Recording',
+      'Do you want to start recording?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'OK',
+          onPress: startRecording,
+        },
+      ]
+    );
+  };
+  
   const startRecording = async () => {
-    if (engine.current) {
-      try {
-        const filePath = getRecordingFilePath();
-        await RNFS.mkdir(filePath.substring(0, filePath.lastIndexOf('/')));
-        console.log('Recording filePath ====>', filePath);
-        await engine.current.startAudioRecording({
-          filePath,
-          sampleRate: 32000,
-          quality: 1,
-        });
-        setIsRecording(true);
-        Alert.alert('Recording Started', `File saved to: ${filePath}`);
-      } catch (error) {
-        console.error('Error starting recording:', error);
-        Alert.alert(
-          'Error',
-          'Failed to start recording. Please check permissions and try again.',
-        );
-      }
+    if (!engine.current) {
+      console.error('Engine is not initialized');
+      Alert.alert('Error', 'Recording engine is not initialized.');
+      return;
+    }
+  
+    try {
+      const filePath = getRecordingFilePath();
+      const directoryPath = filePath.substring(0, filePath.lastIndexOf('/'));
+  
+      // Ensure the directory exists
+      await RNFS.mkdir(directoryPath, { recursive: true });
+  
+      console.log('Recording filePath ====>', filePath);
+  
+      // Start the recording
+      await engine.current.startAudioRecording({
+        filePath,
+        sampleRate: 32000,
+        quality: 1,
+      });
+  
+      setIsRecording(true);
+      // Alert.alert('Recording Started', `File will be saved to: ${filePath}`);
+    } catch (error) {
+      console.error('Error starting recording:', error);
+      Alert.alert(
+        'Error',
+        'Failed to start recording. Please check permissions and try again.'
+      );
     }
   };
   // Stop Recording
@@ -351,7 +380,7 @@ const AudioScreen = ({route, navigation}) => {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.button}
-              onPress={isRecording ? stopRecording : startRecording}>
+              onPress={isRecording ? stopRecording : confirmAndStartRecording}>
               <Icon
                 name={isRecording ? 'stop' : 'fiber-manual-record'}
                 size={24}

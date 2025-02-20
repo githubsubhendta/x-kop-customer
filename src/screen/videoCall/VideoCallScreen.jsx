@@ -238,13 +238,13 @@
 
 //   const _renderVideos = () => (
 //     <View style={styles.fullView}>
-      
+
 //       <View style={styles.remoteContainer}>
 //       <View style={styles.counterContainer}>
 //         <Text style={styles.callDuration}>{callDuration} mins left</Text>
 //       </View>
 //         {_renderRemoteVideos()}</View>
-      
+
 //       {isCameraOn && (
 //         <View style={styles.localContainer}>
 //           <RtcSurfaceView style={styles.local} canvas={{uid: 0}} />
@@ -316,7 +316,7 @@
 //   },
 //   fullView: {
 //     flex: 1,
-//     backgroundColor: '#000', 
+//     backgroundColor: '#000',
 //     justifyContent: 'center',
 //     alignItems: 'center',
 //     position: 'relative',
@@ -326,17 +326,17 @@
 //     backgroundColor:'#000',
 //     bottom: 10,
 //     right: 20,
-//     width: 120, 
+//     width: 120,
 //     height: 180,
 //     borderRadius: 12,
 //     overflow: 'hidden',
 //     borderWidth: 2,
-//     borderColor: '#fff', 
+//     borderColor: '#fff',
 //     shadowColor: '#000',
 //     shadowOpacity: 0.3,
 //     shadowRadius: 5,
 //     shadowOffset: { width: 0, height: 2 },
-//     elevation: 5, 
+//     elevation: 5,
 //   },
 //   local: {
 //     width: '100%',
@@ -380,7 +380,7 @@
 //     backgroundColor: '#fff',
 //     justifyContent: 'center',
 //     alignItems: 'center',
-   
+
 //   },
 //   text: {
 //     color: 'black',
@@ -489,6 +489,13 @@ const VideoCallScreen = ({ route, navigation }) => {
         onUserOffline: (_connection, Uid) => {
           showMessage('Remote user left the channel. uid: ' + Uid);
           setPeerIds((prev) => prev.filter((id) => id !== Uid));
+        },
+        onUserMuteVideo: (_connection, Uid, muted) => {
+          if (muted) {
+            showMessage('Remote user turned off the camera');
+            // Navigate back to the previous screen if the remote user turns off the camera
+            navigation.goBack();
+          }
         },
         onError: (err) => {
           console.error('Agora Error:', err);
@@ -654,12 +661,11 @@ const VideoCallScreen = ({ route, navigation }) => {
     <View style={styles.max}>
       {isJoined && _renderVideos()}
       <View style={styles.buttonHolder}>
-        
         <TouchableOpacity onPress={toggleMic} style={styles.button}>
           {isMicOn ? (
-            <SvgXml xml={SVG_mute_mic} />
-          ) : (
             <SvgXml xml={SVG_unmute_mic} />
+          ) : (
+            <SvgXml xml={SVG_mute_mic} />
           )}
         </TouchableOpacity>
         <TouchableOpacity onPress={switchCamera} style={styles.button}>
@@ -669,7 +675,7 @@ const VideoCallScreen = ({ route, navigation }) => {
           <SvgXml xml={SVG_hangout_red} />
         </TouchableOpacity>
         <TouchableOpacity onPress={toggleCamera} style={styles.button}>
-          <SvgXml xml={isCameraOn ? SVG_stop_camera : SVG_stop_camera} className="mt-2"/>
+          <SvgXml xml={isCameraOn ? SVG_stop_camera : SVG_stop_camera} className="mt-2" />
         </TouchableOpacity>
         <TouchableOpacity onPress={toggleSpeaker} style={styles.button}>
           {isSpeakerOn ? (
@@ -725,11 +731,17 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: '#fff',
-    shadowColor: '#000',
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    shadowOffset: {width: 0, height: 2},
-    elevation: 5,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOpacity: 0.3,
+        shadowRadius: 5,
+        shadowOffset: { width: 0, height: 2 },
+      },
+      android: {
+        elevation: 5,
+      },
+    }),
   },
   local: {
     width: '100%',
@@ -739,6 +751,7 @@ const styles = StyleSheet.create({
   remoteContainer: {
     flex: 1,
     width: '100%',
+    height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -774,6 +787,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOpacity: 0.3,
+        shadowRadius: 5,
+        shadowOffset: { width: 0, height: 2 },
+      },
+      android: {
+        elevation: 5,
+      },
+    }),
   },
   text: {
     color: '#fff',
