@@ -165,7 +165,7 @@ const AudioScreen = ({route, navigation}) => {
       const filePath = getRecordingFilePath();
       const directoryPath = filePath.substring(0, filePath.lastIndexOf('/'));
   
-      // Ensure the directory exists
+    
       await RNFS.mkdir(directoryPath, { recursive: true });
   
       console.log('Recording filePath ====>', filePath);
@@ -401,7 +401,7 @@ const AudioScreen = ({route, navigation}) => {
             editable={false}
           />
           <View style={styles.iconsContainer}>
-            {/* Attach File Button */}
+         
             <View style={styles.iconButton}>
               <Icon name="attach-file" size={24} color="#888" />
             </View>

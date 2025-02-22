@@ -244,6 +244,7 @@ const Message = ({ item, user, onLongPress, onPress, selectedMessages }) => {
     </View>
   );
 };
+
 const ChatScreen = ({route, navigation}) => {
   const {webSocket} = useWebSocket();
   const {user} = useUserStore();
@@ -263,6 +264,7 @@ const ChatScreen = ({route, navigation}) => {
   const showEditButton = selectedMessages.length === 1;
   const officer =
     chats?.participants?.find(participant => participant?.officerDetails) || {};
+
   useEffect(() => {
     if (conversations.length) {
       const currentConversation = conversations.find(
@@ -277,6 +279,7 @@ const ChatScreen = ({route, navigation}) => {
       }
     }
   }, [conversations, chatId, setConversations]);
+
   const handleUpdateMessage = useCallback(() => {
     if (editingMessage && editContent.trim()) {
       if (webSocket) {
@@ -291,6 +294,7 @@ const ChatScreen = ({route, navigation}) => {
       setEditContent('');
     }
   }, [webSocket, editingMessage, editContent]);
+
   const toggleMessageSelection = messageId => {
     setSelectedMessages(prev =>
       prev.includes(messageId)
@@ -298,6 +302,7 @@ const ChatScreen = ({route, navigation}) => {
         : [...prev, messageId],
     );
   };
+
   const openImageModal = async imageUri => {
     if (!downloadedMedia[imageUri]) {
       await downloadMedia(imageUri);
@@ -306,19 +311,20 @@ const ChatScreen = ({route, navigation}) => {
     setSelectedImage(imageUri);
     setModalVisible(true);
   };
+
   const openVideoModal = async videoUri => {
     if (!downloadedMedia[videoUri]) {
-      
       await downloadMedia(videoUri);
       setDownloadedMedia(prev => ({...prev, [videoUri]: true}));
     }
     setSelectedVideo(videoUri);
     setVideoModalVisible(true);
   };
+
   const downloadMedia = async uri => {
-    
     return new Promise(resolve => setTimeout(resolve, 1000)); 
   };
+
   const {loading, hasMoreChats, loadMoreChats} = usePaginatedChats(chatId);
 
   const onLoadMore = () => {
@@ -343,7 +349,6 @@ const ChatScreen = ({route, navigation}) => {
   useEffect(() => {
     (async () => {
       const getInitial = await getAllConversations(chatId);
-
       if (conversations.length === 0) {
         setConversations([
           {conversationId: chatId, messages: getInitial.messages},
@@ -395,6 +400,7 @@ const ChatScreen = ({route, navigation}) => {
     const filterType = allMessages.find(msg => msg._id === messageId);
     return filterType.type;
   };
+
   const handleEditMessage = useCallback(
     messageId => {
       const messageToEdit = allMessages.find(msg => msg._id === messageId);
