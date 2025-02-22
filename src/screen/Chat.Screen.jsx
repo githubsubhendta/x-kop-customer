@@ -365,6 +365,7 @@ const ChatScreen = ({route, navigation}) => {
             {conversationId: chatId, messages: getInitial.messages},
           ]);
         }
+        
       }
     })();
   }, []);
