@@ -11,6 +11,7 @@ import {
   Platform,
   PermissionsAndroid,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import {SvgXml} from 'react-native-svg';
 // import {RtcSurfaceView} from 'react-native-agora';
@@ -57,6 +58,15 @@ const AudioScreen = ({route, navigation}) => {
   //     stopCall();
   //   };
   // }, [webSocket]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (engine.current) {
+        engine.current.muteLocalAudioStream(false); 
+        engine.current.setEnableSpeakerphone(true); 
+      }
+    }, [engine])
+  );
 
   useEffect(() => {
     if (startTime && reciever_data?.userInfo?.mobile) {
@@ -227,11 +237,28 @@ const AudioScreen = ({route, navigation}) => {
     }
   }, [engine, webSocket, mobile, stopCall]);
 
+  // const switchToVideoCall = useCallback(async () => {
+  //   if (engine.current) {
+  //     webSocket.emit('videocall', {calleeId: mobile});
+  //   }
+  // }, [engine, webSocket, mobile]);
   const switchToVideoCall = useCallback(async () => {
     if (engine.current) {
-      webSocket.emit('videocall', {calleeId: mobile});
+      await engine.current.leaveChannel(); // Leave the audio channel first
+      webSocket.emit('videocall', { calleeId: mobile });
     }
   }, [engine, webSocket, mobile]);
+
+  useEffect(() => {
+    const resetAudioSettings = async () => {
+      if (engine.current) {
+        await engine.current.muteLocalAudioStream(false); // Unmute mic
+        await engine.current.setEnableSpeakerphone(true); // Enable speaker
+      }
+    };
+  
+    resetAudioSettings();
+  }, []);
 
   useEffect(() => {
     const handleHandsup = async () => {

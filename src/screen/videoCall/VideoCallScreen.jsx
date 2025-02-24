@@ -493,6 +493,7 @@ const VideoCallScreen = ({ route, navigation }) => {
         onUserMuteVideo: (_connection, Uid, muted) => {
           if (muted) {
             showMessage('Remote user turned off the camera');
+            // Navigate back to the previous screen if the remote user turns off the camera
             navigation.goBack();
           }
         },
@@ -502,6 +503,7 @@ const VideoCallScreen = ({ route, navigation }) => {
           setConnectionStatus('Error');
         },
       });
+
       _engine.current.initialize({
         appId: appId,
         channelProfile: ChannelProfileType.ChannelProfileCommunication,
@@ -524,7 +526,6 @@ const VideoCallScreen = ({ route, navigation }) => {
         config.uid,
         { clientRoleType: ClientRoleType.ClientRoleBroadcaster },
       );
-      
       setConnectionStatus('Connecting...');
     } catch (error) {
       console.error('Error joining channel:', error);
@@ -753,12 +754,10 @@ const styles = StyleSheet.create({
     height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
-    position:'relative'
   },
   remote: {
-    top: -50,
     width: width - 10,
-    height: height / 2,
+    height: height / 2.6,
     borderRadius: 10,
   },
   counterContainer: {
