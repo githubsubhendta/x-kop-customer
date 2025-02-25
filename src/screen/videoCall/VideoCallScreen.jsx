@@ -451,27 +451,28 @@ const VideoCallScreen = ({ route, navigation }) => {
           console.log('Permissions requested!');
         });
       }
-      if (
-        !config ||
-        !config.channelName ||
-        !config.token ||
-        typeof config.uid !== 'number'
-      ) {
+  
+      if (!config || !config.channelName || !config.token || typeof config.uid !== 'number') {
         console.error('Invalid config parameters');
         navigation.goBack();
         return;
       }
-      init();
+  
+      if (!_engine.current) {
+        init();
+      } else {
+        startCallFun(); // Rejoin the call instead of fully reinitializing
+      }
+  
       return () => {
         if (_engine.current) {
           _engine.current.leaveChannel();
-          _engine.current.removeAllListeners();
-          _engine.current.release();
-          _engine.current = null;
+          // Do NOT release the engine completely
         }
       };
-    }, [config, navigation]),
+    }, [config, navigation])
   );
+  
 
   const init = async () => {
     try {
