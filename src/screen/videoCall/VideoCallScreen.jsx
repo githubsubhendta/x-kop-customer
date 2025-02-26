@@ -389,7 +389,7 @@
 
 // export default VideoCallScreen;
 
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import {
   Platform,
   Text,
@@ -397,13 +397,16 @@ import {
   View,
   StyleSheet,
   Dimensions,
+  TextInput,
 } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
 import {
   ChannelProfileType,
   ClientRoleType,
   RtcSurfaceView,
   createAgoraRtcEngine,
 } from 'react-native-agora';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import requestCameraAndAudioPermission from '../../Components/permissions.js';
 import { SvgXml } from 'react-native-svg';
 import {
@@ -419,12 +422,15 @@ import { useWebSocket } from '../../shared/WebSocketProvider.jsx';
 import { useCallDuration } from '../../shared/CallDurationContext.js';
 import { Modal } from 'react-native-paper';
 import { useFocusEffect } from '@react-navigation/native';
+import useChatStore from '../../stores/chat.store.js';
+import ChatModal from '../../Components/chat/ChatModal.jsx';
 
 const { width, height } = Dimensions.get('window');
 const appId = '1be639d040da4a42be10d134055a2abd';
 
 const VideoCallScreen = ({ route, navigation }) => {
-  const { config, mobile } = route.params || {};
+  const { config, mobile, reciever_data, consultType } = route.params || {};
+
   const _engine = useRef(null);
   const [isJoined, setJoined] = useState(false);
   const [peerIds, setPeerIds] = useState([]);
@@ -434,6 +440,8 @@ const VideoCallScreen = ({ route, navigation }) => {
   const [isSpeakerOn, setSpeakerOn] = useState(true);
   const { webSocket } = useWebSocket();
   const [showModal, setShowModal] = useState(false);
+  const [modelChat, setModelChat] = useState(false);
+  const { conversations } = useChatStore();
 
   const {
     callDuration,
@@ -451,28 +459,31 @@ const VideoCallScreen = ({ route, navigation }) => {
           console.log('Permissions requested!');
         });
       }
-  
-      if (!config || !config.channelName || !config.token || typeof config.uid !== 'number') {
+
+      if (
+        !config ||
+        !config.channelName ||
+        !config.token ||
+        typeof config.uid !== 'number'
+      ) {
         console.error('Invalid config parameters');
         navigation.goBack();
         return;
       }
-  
+
       if (!_engine.current) {
         init();
       } else {
-        startCallFun(); // Rejoin the call instead of fully reinitializing
+        startCallFun();
       }
-  
+
       return () => {
         if (_engine.current) {
           _engine.current.leaveChannel();
-          // Do NOT release the engine completely
         }
       };
     }, [config, navigation])
   );
-  
 
   const init = async () => {
     try {
@@ -494,8 +505,6 @@ const VideoCallScreen = ({ route, navigation }) => {
         onUserMuteVideo: (_connection, Uid, muted) => {
           if (muted) {
             showMessage('Remote user turned off the camera');
-            // Navigate back to the previous screen if the remote user turns off the camera
-            navigation.goBack();
           }
         },
         onError: (err) => {
@@ -525,7 +534,7 @@ const VideoCallScreen = ({ route, navigation }) => {
         config.token,
         config.channelName,
         config.uid,
-        { clientRoleType: ClientRoleType.ClientRoleBroadcaster },
+        { clientRoleType: ClientRoleType.ClientRoleBroadcaster }
       );
       setConnectionStatus('Connecting...');
     } catch (error) {
@@ -590,7 +599,6 @@ const VideoCallScreen = ({ route, navigation }) => {
     if (isCameraOn) {
       _engine.current?.enableLocalVideo(false);
       _engine.current?.muteLocalVideoStream(true);
-      navigation.goBack();
     } else {
       _engine.current?.enableLocalVideo(true);
       _engine.current?.muteLocalVideoStream(false);
@@ -612,6 +620,25 @@ const VideoCallScreen = ({ route, navigation }) => {
       endCall();
     }
   }, [isBalanceZero]);
+
+  const handleClose = useCallback(() => setModelChat(false), []);
+
+  // Debug chat data before rendering
+  useEffect(() => {
+    console.log('Chat ID:', reciever_data?.chatId);
+    console.log('Conversations:', conversations);
+  }, [reciever_data, conversations, modelChat]);
+
+  const chatModal = useMemo(
+    () => (
+      <ChatModal
+        chatId={reciever_data?.chatId}
+        isVisible={modelChat}
+        onClose={handleClose}
+      />
+    ),
+    [reciever_data?.chatId, modelChat, handleClose, conversations]
+  );
 
   useEffect(() => {
     if (isBalanceEnough) {
@@ -676,7 +703,21 @@ const VideoCallScreen = ({ route, navigation }) => {
           <SvgXml xml={SVG_hangout_red} />
         </TouchableOpacity>
         <TouchableOpacity onPress={toggleCamera} style={styles.button}>
-          <SvgXml xml={isCameraOn ? SVG_stop_camera : SVG_stop_camera} className="mt-2" />
+          <SvgXml xml={isCameraOn ? SVG_stop_camera : SVG_stop_camera} />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => setModelChat(true)}
+        >
+          <Svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 576 512"
+            width={28}
+            height={28}
+            fill="#000"
+          >
+            <Path d="M284 224.8a34.1 34.1 0 1 0 34.3 34.1A34.2 34.2 0 0 0 284 224.8zm-110.5 0a34.1 34.1 0 1 0 34.3 34.1A34.2 34.2 0 0 0 173.6 224.8zm220.9 0a34.1 34.1 0 1 0 34.3 34.1A34.2 34.2 0 0 0 394.5 224.8zm153.8-55.3c-15.5-24.2-37.3-45.6-64.7-63.6-52.9-34.8-122.4-54-195.7-54a406 406 0 0 0 -72 6.4 238.5 238.5 0 0 0 -49.5-36.6C99.7-11.7 40.9 .7 11.1 11.4A14.3 14.3 0 0 0 5.6 34.8C26.5 56.5 61.2 99.3 52.7 138.3c-33.1 33.9-51.1 74.8-51.1 117.3 0 43.4 18 84.2 51.1 118.1 8.5 39-26.2 81.8-47.1 103.5a14.3 14.3 0 0 0 5.6 23.3c29.7 10.7 88.5 23.1 155.3-10.2a238.7 238.7 0 0 0 49.5-36.6A406 406 0 0 0 288 460.1c73.3 0 142.8-19.2 195.7-54 27.4-18 49.1-39.4 64.7-63.6 17.3-26.9 26.1-55.9 26.1-86.1C574.4 225.4 565.6 196.4 548.3 169.5zM285 409.9a345.7 345.7 0 0 1 -89.4-11.5l-20.1 19.4a184.4 184.4 0 0 1 -37.1 27.6 145.8 145.8 0 0 1 -52.5 14.9c1-1.8 1.9-3.6 2.8-5.4q30.3-55.7 16.3-100.1c-33-26-52.8-59.2-52.8-95.4 0-83.1 104.3-150.5 232.8-150.5s232.9 67.4 232.9 150.5C517.9 342.5 413.6 409.9 285 409.9z" />
+          </Svg>
         </TouchableOpacity>
         <TouchableOpacity onPress={toggleSpeaker} style={styles.button}>
           {isSpeakerOn ? (
@@ -686,6 +727,8 @@ const VideoCallScreen = ({ route, navigation }) => {
           )}
         </TouchableOpacity>
       </View>
+      {/* Render ChatModal outside the buttonHolder */}
+      {chatModal}
       <Modal visible={showModal} animationType="slide" transparent={true}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
@@ -695,12 +738,14 @@ const VideoCallScreen = ({ route, navigation }) => {
             <View style={styles.modalButtonContainer}>
               <TouchableOpacity
                 onPress={handleModalClose}
-                style={styles.modalButton}>
+                style={styles.modalButton}
+              >
                 <Text style={styles.modalButtonText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={handleNavigateToWallet}
-                style={styles.modalButton}>
+                style={styles.modalButton}
+              >
                 <Text style={styles.modalButtonText}>Go to Wallet</Text>
               </TouchableOpacity>
             </View>
@@ -782,8 +827,8 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   button: {
-    width: 60,
-    height: 60,
+    width: 45,
+    height: 45,
     borderRadius: 31,
     backgroundColor: '#fff',
     justifyContent: 'center',

@@ -166,30 +166,29 @@
 //       ]
 //     );
 //   };
-  
+
 //   const startRecording = async () => {
 //     if (!engine.current) {
 //       console.error('Engine is not initialized');
 //       Alert.alert('Error', 'Recording engine is not initialized.');
 //       return;
 //     }
-  
+
 //     try {
 //       const filePath = getRecordingFilePath();
 //       const directoryPath = filePath.substring(0, filePath.lastIndexOf('/'));
-  
-    
+
 //       await RNFS.mkdir(directoryPath, { recursive: true });
-  
+
 //       console.log('Recording filePath ====>', filePath);
-  
+
 //       // Start the recording
 //       await engine.current.startAudioRecording({
 //         filePath,
 //         sampleRate: 32000,
 //         quality: 1,
 //       });
-  
+
 //       setIsRecording(true);
 //       // Alert.alert('Recording Started', `File will be saved to: ${filePath}`);
 //     } catch (error) {
@@ -259,7 +258,7 @@
 //         await engine.current.setEnableSpeakerphone(true); // Enable speaker
 //       }
 //     };
-  
+
 //     resetAudioSettings();
 //   }, []);
 
@@ -431,7 +430,7 @@
 //             editable={false}
 //           />
 //           <View style={styles.iconsContainer}>
-         
+
 //             <View style={styles.iconButton}>
 //               <Icon name="attach-file" size={24} color="#888" />
 //             </View>
@@ -605,7 +604,7 @@
 
 // export default AudioScreen;
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {
   View,
   Text,
@@ -618,9 +617,9 @@ import {
   Platform,
   PermissionsAndroid,
 } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
-import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
-import { SvgXml } from 'react-native-svg';
+import {useFocusEffect} from '@react-navigation/native';
+import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
+import {SvgXml} from 'react-native-svg';
 import useAgoraEngine from '../../hooks/useAgoraEngine';
 import RNFS from 'react-native-fs';
 import {
@@ -631,17 +630,17 @@ import {
   SVG_speakeroff,
   SVG_unmute_mic,
 } from '../../utils/SVGImage.js';
-import { useWebSocket } from '../../shared/WebSocketProvider.jsx';
+import {useWebSocket} from '../../shared/WebSocketProvider.jsx';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import ChatModal from '../../Components/chat/ChatModal.jsx';
-import { useCallDuration } from '../../shared/CallDurationContext.js';
+import {useCallDuration} from '../../shared/CallDurationContext.js';
 import useChatStore from '../../stores/chat.store.js';
 
-const AudioScreen = ({ route, navigation }) => {
-  const { config, mobile, reciever_data, consultType } = route.params || {};
+const AudioScreen = ({route, navigation}) => {
+  const {config, mobile, reciever_data, consultType} = route.params || {};
   const [showModal, setShowModal] = useState(false);
 
-  const { webSocket, leave } = useWebSocket();
+  const {webSocket, leave} = useWebSocket();
   const [isMuted, setIsMuted] = useState(false);
   const [isSpeakerEnabled, setIsSpeakerEnabled] = useState(true);
   const [connectionStatus, setConnectionStatus] = useState('Not Connected');
@@ -652,23 +651,23 @@ const AudioScreen = ({ route, navigation }) => {
   const [modelChat, setModelChat] = useState(false);
   const [callStatus, setCallStatus] = useState(true);
   const [isRecording, setIsRecording] = useState(false);
-  const { callDuration, startCall, stopCall, isBalanceEnough, isBalanceZero } =
+  const {callDuration, startCall, stopCall, isBalanceEnough, isBalanceZero} =
     useCallDuration();
   const startTime = new Date(reciever_data.consultationData.startCallTime);
-  const { conversations } = useChatStore();
+  const {conversations} = useChatStore();
 
-  const { engine, isJoined } = useAgoraEngine(
+  const {engine, isJoined} = useAgoraEngine(
     config,
     () => setConnectionStatus('Connected'),
-    (Uid) => {
+    Uid => {
       if (!peerIds.includes(Uid)) {
-        setPeerIds((prev) => [...prev, Uid]);
+        setPeerIds(prev => [...prev, Uid]);
       }
     },
-    (Uid) => {
-      setPeerIds((prev) => prev.filter((id) => id !== Uid));
+    Uid => {
+      setPeerIds(prev => prev.filter(id => id !== Uid));
     },
-    () => setConnectionStatus('Not Connected')
+    () => setConnectionStatus('Not Connected'),
   );
 
   // Reset audio settings when the screen is focused
@@ -688,12 +687,17 @@ const AudioScreen = ({ route, navigation }) => {
       return () => {
         // Cleanup if necessary
       };
-    }, [engine])
+    }, [engine]),
   );
 
   useEffect(() => {
     if (startTime && reciever_data?.userInfo?.mobile) {
-      startCall(startTime, consultType, reciever_data.userInfo.mobile, webSocket);
+      startCall(
+        startTime,
+        consultType,
+        reciever_data.userInfo.mobile,
+        webSocket,
+      );
     }
     return () => {
       stopCall();
@@ -746,7 +750,7 @@ const AudioScreen = ({ route, navigation }) => {
 
     RNFS.mkdir(directoryPath)
       .then(() => console.log('Directory created or already exists'))
-      .catch((err) => console.error('Error creating directory:', err));
+      .catch(err => console.error('Error creating directory:', err));
 
     return `${directoryPath}/call_recording_${Date.now()}.aac`;
   };
@@ -775,7 +779,7 @@ const AudioScreen = ({ route, navigation }) => {
       const filePath = getRecordingFilePath();
       const directoryPath = filePath.substring(0, filePath.lastIndexOf('/'));
 
-      await RNFS.mkdir(directoryPath, { recursive: true });
+      await RNFS.mkdir(directoryPath, {recursive: true});
 
       console.log('Recording filePath ====>', filePath);
 
@@ -791,7 +795,7 @@ const AudioScreen = ({ route, navigation }) => {
       console.error('Error starting recording:', error);
       Alert.alert(
         'Error',
-        'Failed to start recording. Please check permissions and try again.'
+        'Failed to start recording. Please check permissions and try again.',
       );
     }
   };
@@ -814,21 +818,21 @@ const AudioScreen = ({ route, navigation }) => {
   const toggleMute = useCallback(async () => {
     if (engine.current) {
       await engine.current.muteLocalAudioStream(!isMuted);
-      setIsMuted((prev) => !prev);
+      setIsMuted(prev => !prev);
     }
   }, [isMuted, engine]);
 
   const toggleSpeaker = useCallback(async () => {
     if (engine.current) {
       await engine.current.setEnableSpeakerphone(!isSpeakerEnabled);
-      setIsSpeakerEnabled((prev) => !prev);
+      setIsSpeakerEnabled(prev => !prev);
     }
   }, [isSpeakerEnabled, engine]);
 
   const endCall = useCallback(async () => {
     if (engine.current) {
       await engine.current.leaveChannel();
-      webSocket.emit('handsup', { otherUserId: mobile });
+      webSocket.emit('handsup', {otherUserId: mobile});
       clearInterval(callDurationInterval);
       setCallStatus(false);
       stopCall();
@@ -838,7 +842,7 @@ const AudioScreen = ({ route, navigation }) => {
   const switchToVideoCall = useCallback(async () => {
     if (engine.current) {
       await engine.current.leaveChannel(); // Leave the audio channel first
-      webSocket.emit('videocall', { calleeId: mobile });
+      webSocket.emit('videocall', {calleeId: mobile});
     }
   }, [engine, webSocket, mobile]);
 
@@ -849,7 +853,7 @@ const AudioScreen = ({ route, navigation }) => {
       stopCall();
       navigation.reset({
         index: 0,
-        routes: [{ name: 'LayoutScreen' }],
+        routes: [{name: 'LayoutScreen'}],
       });
     };
     webSocket.on('appyHandsup', handleHandsup);
@@ -866,10 +870,14 @@ const AudioScreen = ({ route, navigation }) => {
       {
         text: 'OK',
         onPress: async () => {
-          webSocket.emit('VideoCallanswerCall', { callerId: mobile });
+          webSocket.emit('VideoCallanswerCall', {callerId: mobile});
           await engine.current?.leaveChannel();
           setTimeout(() => {
-            navigation.navigate('VideoCallScreen', { config, mobile });
+            navigation.navigate('VideoCallScreen', {
+              config,
+              mobile,
+              reciever_data,
+            });
           }, 300);
         },
       },
@@ -880,13 +888,13 @@ const AudioScreen = ({ route, navigation }) => {
     webSocket.on('newVideoCall', createTwoButtonAlert);
     webSocket.on('VideoCallAnswered', async () => {
       await engine.current?.leaveChannel();
-      navigation.navigate('VideoCallScreen', { config, mobile });
+      navigation.navigate('VideoCallScreen', {config, mobile});
     });
     return () => {
       webSocket.off('newVideoCall', createTwoButtonAlert);
       webSocket.off('VideoCallAnswered', async () => {
         await engine.current?.leaveChannel();
-        navigation.navigate('VideoCallScreen', { config, mobile });
+        navigation.navigate('VideoCallScreen', {config, mobile});
       });
     };
   }, [webSocket, engine, createTwoButtonAlert, navigation, config, mobile]);
@@ -919,7 +927,7 @@ const AudioScreen = ({ route, navigation }) => {
         onClose={handleClose}
       />
     ),
-    [reciever_data, modelChat, handleClose, conversations]
+    [reciever_data, modelChat, handleClose, conversations],
   );
 
   const handleModalClose = () => {
@@ -944,7 +952,7 @@ const AudioScreen = ({ route, navigation }) => {
           </View>
           <View style={styles.infoContainer}>
             <Image
-              source={{ uri: reciever_data?.userInfo?.avatar }}
+              source={{uri: reciever_data?.userInfo?.avatar}}
               style={styles.profileImage}
             />
             <View style={styles.textContainer}>

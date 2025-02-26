@@ -119,12 +119,14 @@ const ChatModal = ({ chatId, isVisible, onClose }) => {
         convo => convo.conversationId === chatId,
       );
 
-      if (currentConversation) {
+      if (currentConversation && Array.isArray(currentConversation.messages)) {
         setAllMessages(
-          currentConversation.messages.sort(
+          [...currentConversation.messages].sort(
             (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
           ),
         );
+      } else {
+        setAllMessages([]); // Fallback to an empty array
       }
     }
   }, [conversations, conversationList, chatId, setConversations]);
