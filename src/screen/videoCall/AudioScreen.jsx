@@ -841,7 +841,7 @@ const AudioScreen = ({route, navigation}) => {
 
   const switchToVideoCall = useCallback(async () => {
     if (engine.current) {
-      await engine.current.leaveChannel(); // Leave the audio channel first
+      await engine.current.leaveChannel(); 
       webSocket.emit('videocall', {calleeId: mobile});
     }
   }, [engine, webSocket, mobile]);

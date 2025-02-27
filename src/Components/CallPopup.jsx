@@ -8,8 +8,6 @@ import useUserStore from "../stores/user.store";
 
 const  CallPopup = ({ isVisible, onAccept, onReject, userInfo }) => {
   // const { user } = useUserStore();
-
-
   return (
     <Modal 
       isVisible={isVisible}

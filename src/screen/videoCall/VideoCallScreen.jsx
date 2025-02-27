@@ -585,12 +585,6 @@ const VideoCallScreen = ({route, navigation}) => {
     setJoined(false);
     setConnectionStatus('Not Connected');
   };
-
-  // const toggleMic = () => {
-  //   _engine.current?.muteLocalAudioStream(!isMicOn);
-  //   setMicOn((prev) => !prev);
-  // };
-
   const toggleMic = () => {
     const newMicStatus = !isMicOn;
     _engine.current?.muteLocalAudioStream(newMicStatus);
