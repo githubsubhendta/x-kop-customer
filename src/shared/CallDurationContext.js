@@ -10,18 +10,19 @@ export const useCallDuration = () => {
 export const CallDurationProvider = ({ children }) => {
   const [callDuration, setCallDuration] = useState('00:00:00');
   const [isCallActive, setIsCallActive] = useState(false);
-  const { user } = useUserStore();
+  const { user, handleUpdateUser } = useUserStore();
   const callDurationInterval = useRef(null);
   const [isBalanceZero, setIsBalanceZero] = useState(false);
+  const [isBalanceEnough, setIsBalanceEnough] = useState(false);
 
-  const [isBalanceEnough,setIsBalanceEnough] = useState(false);
-
-  let userUpdate = user.wallet;
-
-  useEffect(()=>{
-    userUpdate = user.wallet;
-  },[user])
   const startCall = useCallback((startTime, consultType, receiverUser, webSocket) => {
+    if (user.wallet < consultType.FeePerMinute) {
+      console.log("Insufficient balance to start the call");
+      setIsBalanceZero(true);
+      stopCall();
+      return;
+    }
+
     setIsCallActive(true);
     callDurationInterval.current = setInterval(() => {
       const currentTime = new Date();
@@ -31,34 +32,42 @@ export const CallDurationProvider = ({ children }) => {
       const hours = Math.floor((timeDifference / (1000 * 60 * 60)) % 24);
       const formattedDuration = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
       setCallDuration(formattedDuration);
-  
+
       webSocket.emit('syncCallDuration', {
         receiverUser,
         duration: formattedDuration
       });
-  
+
       if (seconds === 59) {
-        userUpdate -= consultType.FeePerMinute;
-        console.log("Updated Wallet Balance:", userUpdate);
-  
-        if (userUpdate <= consultType.FeePerMinute * 5) {
-          console.log("Warning: Low wallet balance");
-          setIsBalanceEnough(true);
+        const fee = consultType.FeePerMinute;
+        const updatedWallet = user.wallet - fee;
+
+        if (updatedWallet >= 0) {
+          handleUpdateUser({ ...user, wallet: updatedWallet });
+          console.log("Updated Wallet Balance:", updatedWallet);
+
+          if (updatedWallet <= consultType.FeePerMinute * 5) {
+            console.log("Warning: Low wallet balance");
+            setIsBalanceEnough(true);
+          } else {
+            setIsBalanceEnough(false);
+          }
+
+          if (updatedWallet <= 10) {
+            console.log("Wallet balance too low, ending call...");
+            setIsBalanceZero(true);
+            stopCall(); // End the call if the balance is <= 10
+          } else {
+            setIsBalanceZero(false);
+          }
         } else {
-          setIsBalanceEnough(false);
-        }
-  
-        if (userUpdate <= 10) {
-          console.log("Wallet balance too low, ending call...");
+          console.log("Insufficient balance to continue the call, ending call...");
           setIsBalanceZero(true);
-          stopCall(); 
-        } else {
-          setIsBalanceZero(false);
+          stopCall();
         }
       }
     }, 1000);
-  }, []);
-  
+  }, [user, handleUpdateUser, stopCall]);
 
   const stopCall = useCallback(() => {
     if (callDurationInterval.current) {
@@ -75,7 +84,6 @@ export const CallDurationProvider = ({ children }) => {
     </CallDurationContext.Provider>
   );
 };
-
 // import React, {
 //   createContext,
 //   useContext,

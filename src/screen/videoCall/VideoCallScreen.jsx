@@ -702,7 +702,7 @@ const VideoCallScreen = ({route, navigation}) => {
       <View style={styles.buttonHolder}>
         <TouchableOpacity onPress={toggleMic} style={styles.button}>
           {isMicOn ? (
-            <SvgXml xml={SVG_unmute_mic} />
+           <SvgXml xml={SVG_unmute_mic} />
           ) : (
             <SvgXml xml={SVG_mute_mic} />
           )}
