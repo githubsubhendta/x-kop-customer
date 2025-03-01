@@ -15,6 +15,8 @@ export const CallDurationProvider = ({ children }) => {
   const [isBalanceZero, setIsBalanceZero] = useState(false);
   const [isBalanceEnough, setIsBalanceEnough] = useState(false);
 
+  let walletBalance = user.wallet || 0;
+
   const startCall = useCallback((startTime, consultType, receiverUser, webSocket) => {
     if (user.wallet < consultType.FeePerMinute) {
       console.log("Insufficient balance to start the call");
@@ -40,23 +42,23 @@ export const CallDurationProvider = ({ children }) => {
 
       if (seconds === 59) {
         const fee = consultType.FeePerMinute;
-        const updatedWallet = user.wallet - fee;
+        // const updatedWallet = user.wallet - fee;
+        walletBalance = walletBalance-fee || 0;
+        if (walletBalance >= 0) {
+          handleUpdateUser({ ...user, wallet: walletBalance });
+          console.log(user.wallet,fee,walletBalance,"========","Updated Wallet Balance:", user.wallet - fee);
 
-        if (updatedWallet >= 0) {
-          handleUpdateUser({ ...user, wallet: updatedWallet });
-          console.log("Updated Wallet Balance:", updatedWallet);
-
-          if (updatedWallet <= consultType.FeePerMinute * 5) {
+          if (walletBalance <= consultType.FeePerMinute * 5) {
             console.log("Warning: Low wallet balance");
             setIsBalanceEnough(true);
           } else {
             setIsBalanceEnough(false);
           }
 
-          if (updatedWallet <= 10) {
-            console.log("Wallet balance too low, ending call...");
+          if (walletBalance <= 10) {
+            console.log("Wallet balance too low, ending call...",walletBalance);
             setIsBalanceZero(true);
-            stopCall(); // End the call if the balance is <= 10
+            stopCall(); 
           } else {
             setIsBalanceZero(false);
           }
