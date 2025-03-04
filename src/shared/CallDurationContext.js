@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
+import React, { createContext, useContext, useState, useCallback, useRef } from 'react';
 import useUserStore from '../stores/user.store';
 
 const CallDurationContext = createContext();
@@ -14,8 +14,9 @@ export const CallDurationProvider = ({ children }) => {
   const callDurationInterval = useRef(null);
   const [isBalanceZero, setIsBalanceZero] = useState(false);
   const [isBalanceEnough, setIsBalanceEnough] = useState(false);
+  const [remainingBalance, setRemainingBalance] = useState(user.wallet.toFixed(2)); // Initialize with 2 decimal places
 
-  let walletBalance = user.wallet || 0;
+  let walletBalance = user.wallet;
 
   const startCall = useCallback((startTime, consultType, receiverUser, webSocket) => {
     if (user.wallet < consultType.FeePerMinute) {
@@ -42,11 +43,10 @@ export const CallDurationProvider = ({ children }) => {
 
       if (seconds === 59) {
         const fee = consultType.FeePerMinute;
-        // const updatedWallet = user.wallet - fee;
-        walletBalance = walletBalance-fee || 0;
+        walletBalance = walletBalance - fee || 0;
         if (walletBalance >= 0) {
           handleUpdateUser({ ...user, wallet: walletBalance });
-          console.log(user.wallet,fee,walletBalance,"========","Updated Wallet Balance:", user.wallet - fee);
+          console.log(user.wallet, fee, walletBalance, "========", "Updated Wallet Balance:", user.wallet - fee);
 
           if (walletBalance <= consultType.FeePerMinute * 5) {
             console.log("Warning: Low wallet balance");
@@ -56,9 +56,9 @@ export const CallDurationProvider = ({ children }) => {
           }
 
           if (walletBalance <= 10) {
-            console.log("Wallet balance too low, ending call...",walletBalance);
+            console.log("Wallet balance too low, ending call...", walletBalance);
             setIsBalanceZero(true);
-            stopCall(); 
+            stopCall();
           } else {
             setIsBalanceZero(false);
           }
@@ -78,10 +78,15 @@ export const CallDurationProvider = ({ children }) => {
     }
     setIsCallActive(false);
     setCallDuration('00:00:00');
-  }, []);
+
+    // Calculate and log the remaining balance
+    const finalBalance = walletBalance.toFixed(2); 
+    setRemainingBalance(finalBalance); 
+    // console.log("Call ended. Remaining wallet balance:", finalBalance);
+  }, [walletBalance]);
 
   return (
-    <CallDurationContext.Provider value={{ callDuration, startCall, stopCall, isCallActive, isBalanceEnough, isBalanceZero }}>
+    <CallDurationContext.Provider value={{ callDuration, startCall, stopCall, isCallActive, isBalanceEnough, isBalanceZero, remainingBalance }}>
       {children}
     </CallDurationContext.Provider>
   );

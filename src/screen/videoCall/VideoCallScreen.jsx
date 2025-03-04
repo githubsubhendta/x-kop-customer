@@ -398,6 +398,7 @@ import {
   StyleSheet,
   Dimensions,
   TextInput,
+  Modal,
 } from 'react-native';
 import Svg, {Path} from 'react-native-svg';
 import {
@@ -406,7 +407,7 @@ import {
   RtcSurfaceView,
   createAgoraRtcEngine,
 } from 'react-native-agora';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+// import Icon from 'react-native-vector-icons/MaterialIcons';
 import requestCameraAndAudioPermission from '../../Components/permissions.js';
 import {SvgXml} from 'react-native-svg';
 import {
@@ -420,10 +421,11 @@ import {
 } from '../../utils/SVGImage.js';
 import {useWebSocket} from '../../shared/WebSocketProvider.jsx';
 import {useCallDuration} from '../../shared/CallDurationContext.js';
-import {Modal} from 'react-native-paper';
+
 import {useFocusEffect} from '@react-navigation/native';
 import useChatStore from '../../stores/chat.store.js';
 import ChatModal from '../../Components/chat/ChatModal.jsx';
+import CustomModal from '../../Components/CustomModal.jsx';
 
 const {width, height} = Dimensions.get('window');
 const appId = '1be639d040da4a42be10d134055a2abd';
@@ -618,18 +620,11 @@ const VideoCallScreen = ({route, navigation}) => {
     console.log(message);
   };
 
-  useEffect(() => {
-    if (isBalanceZero) {
-      endCall();
-    }
-  }, [isBalanceZero]);
-
   const handleClose = useCallback(() => setModelChat(false), []);
 
-  // Debug chat data before rendering
   useEffect(() => {
-    console.log('Chat ID:', reciever_data?.chatId);
-    console.log('Conversations:', conversations);
+    // console.log('Chat ID:', reciever_data?.chatId);
+    // console.log('Conversations:', conversations);
   }, [reciever_data, conversations, modelChat]);
 
   const chatModal = useMemo(
@@ -646,10 +641,13 @@ const VideoCallScreen = ({route, navigation}) => {
   useEffect(() => {
     if (isBalanceEnough) {
       setShowModal(true);
+
+      const timeout = setTimeout(() => {
+        setShowModal(false);
+      }, 5000);
+
+      return () => clearTimeout(timeout);
     }
-    return () => {
-      setShowModal(false);
-    };
   }, [isBalanceEnough]);
 
   const handleModalClose = () => {
@@ -674,6 +672,7 @@ const VideoCallScreen = ({route, navigation}) => {
 
   const _renderVideos = () => (
     <View style={styles.fullView}>
+      <View style={styles.splitContainer}>
       <View style={styles.remoteContainer}>
         <View style={styles.counterContainer}>
           <Text style={styles.callDuration}>{callDuration} mins left</Text>
@@ -693,6 +692,7 @@ const VideoCallScreen = ({route, navigation}) => {
           <Text style={styles.cameraOffText}>Camera is off</Text>
         </View>
       )}
+      </View>
     </View>
   );
 
@@ -702,7 +702,7 @@ const VideoCallScreen = ({route, navigation}) => {
       <View style={styles.buttonHolder}>
         <TouchableOpacity onPress={toggleMic} style={styles.button}>
           {isMicOn ? (
-           <SvgXml xml={SVG_unmute_mic} />
+            <SvgXml xml={SVG_unmute_mic} />
           ) : (
             <SvgXml xml={SVG_mute_mic} />
           )}
@@ -741,27 +741,19 @@ const VideoCallScreen = ({route, navigation}) => {
       </View>
       {/* Render ChatModal outside the buttonHolder */}
       {chatModal}
-      <Modal visible={showModal} animationType="slide" transparent={true}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalText}>
-              Your balance is not enough. Please add more funds.
-            </Text>
-            <View style={styles.modalButtonContainer}>
-              <TouchableOpacity
-                onPress={handleModalClose}
-                style={styles.modalButton}>
-                <Text style={styles.modalButtonText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handleNavigateToWallet}
-                style={styles.modalButton}>
-                <Text style={styles.modalButtonText}>Go to Wallet</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+
+      <CustomModal
+        isVisible={showModal}
+        onClose={() => setShowModal(false)}
+        message="Your balance is not enough. Please add more funds."
+        buttons={[
+          {label: 'Cancel', onPress: handleModalClose, color: 'gray'},
+          {
+            label: 'Go to Wallet',
+            onPress: handleNavigateToWallet,
+          },
+        ]}
+      />
     </View>
   );
 };
@@ -776,49 +768,59 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  localContainer: {
-    position: 'absolute',
-    backgroundColor: '#000',
-    bottom: 10,
-    right: 20,
-    width: 120,
-    height: 170,
-    borderRadius: 14,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: '#fff',
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOpacity: 0.3,
-        shadowRadius: 5,
-        shadowOffset: {width: 0, height: 2},
-      },
-      android: {
-        elevation: 5,
-      },
-    }),
+  splitContainer: {
+    flex: 1,
+    flexDirection: 'column',
+    justifyContent: 'center',
+    width: '100%',
   },
+  // localContainer: {
+  //   position: 'absolute',
+  //   backgroundColor: '#000',
+  //   bottom: 10,
+  //   right: 20,
+  //   width: 120,
+  //   height: 170,
+  //   borderRadius: 14,
+  //   overflow: 'hidden',
+  //   borderWidth: 1,
+  //   borderColor: '#fff',
+  //   ...Platform.select({
+  //     ios: {
+  //       shadowColor: '#000',
+  //       shadowOpacity: 0.3,
+  //       shadowRadius: 5,
+  //       shadowOffset: {width: 0, height: 2},
+  //     },
+  //     android: {
+  //       elevation: 5,
+  //     },
+  //   }),
+  // },
+  localContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#000',
+  },
+
   local: {
     width: '100%',
     height: '100%',
-    borderRadius: 12,
   },
   remoteContainer: {
     flex: 1,
-    width: '100%',
-    height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#000',
   },
   remote: {
-    width: width - 10,
-    height: height / 2.6,
-    borderRadius: 10,
+    width: '100%',
+    height: '100%',
   },
   counterContainer: {
     position: 'absolute',
-    top: 20,
+    top: 10,
     alignSelf: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
     paddingVertical: 5,
@@ -865,47 +867,34 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
-    width: '80%',
+    width: 300,
     backgroundColor: '#fff',
-    borderRadius: 10,
     padding: 20,
+    borderRadius: 10,
     alignItems: 'center',
   },
   modalText: {
-    fontSize: 16,
+    fontSize: 18,
     marginBottom: 20,
-    textAlign: 'center',
-  },
-  modalButtonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '100%',
+    color: 'black',
   },
   modalButton: {
-    backgroundColor: '#007AFF',
-    padding: 10,
+    marginTop: 10,
+    backgroundColor: '#D22B2B',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
     borderRadius: 5,
-    width: '40%',
-    alignItems: 'center',
+    gap: 10,
   },
   modalButtonText: {
-    color: '#fff',
     fontSize: 16,
+    color: '#fff',
   },
 
   localContainer2: {
-    position: 'absolute',
-    backgroundColor: '#000',
-    bottom: 10,
-    right: 20,
-    width: 120,
-    height: 170,
-    borderRadius: 14,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#000',
   },
   cameraOffText: {
     color: 'white',

@@ -613,7 +613,7 @@ import {
   Image,
   Alert,
   TextInput,
-  Modal,
+ 
   Platform,
   PermissionsAndroid,
 } from 'react-native';
@@ -635,10 +635,12 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import ChatModal from '../../Components/chat/ChatModal.jsx';
 import {useCallDuration} from '../../shared/CallDurationContext.js';
 import useChatStore from '../../stores/chat.store.js';
+import CustomModal from '../../Components/CustomModal.jsx';
 
 const AudioScreen = ({route, navigation}) => {
   const {config, mobile, reciever_data, consultType} = route.params || {};
   const [showModal, setShowModal] = useState(false);
+  const [showVideoCallModal, setShowVideoCallModal] = useState(false);
 
   const {webSocket, leave} = useWebSocket();
   const [isMuted, setIsMuted] = useState(false);
@@ -675,8 +677,8 @@ const AudioScreen = ({route, navigation}) => {
     useCallback(() => {
       const resetAudioSettings = async () => {
         if (engine.current) {
-          await engine.current.muteLocalAudioStream(false); // Unmute mic
-          await engine.current.setEnableSpeakerphone(true); // Enable speaker
+          await engine.current.muteLocalAudioStream(false);
+          await engine.current.setEnableSpeakerphone(true);
           setIsMuted(false);
           setIsSpeakerEnabled(true);
         }
@@ -820,7 +822,7 @@ const AudioScreen = ({route, navigation}) => {
       await engine.current.muteLocalAudioStream(!isMuted);
       setIsMuted(prev => !prev);
     }
-  }, [isMuted, engine]);
+  }, [engine]);
 
   const toggleSpeaker = useCallback(async () => {
     if (engine.current) {
@@ -841,7 +843,7 @@ const AudioScreen = ({route, navigation}) => {
 
   const switchToVideoCall = useCallback(async () => {
     if (engine.current) {
-      await engine.current.leaveChannel(); 
+      await engine.current.leaveChannel();
       webSocket.emit('videocall', {calleeId: mobile});
     }
   }, [engine, webSocket, mobile]);
@@ -861,27 +863,24 @@ const AudioScreen = ({route, navigation}) => {
   }, [webSocket, navigation]);
 
   const createTwoButtonAlert = () => {
-    Alert.alert('Call', 'Requesting for Video Call', [
-      {
-        text: 'Cancel',
-        onPress: () => console.log('Cancel Pressed'),
-        style: 'cancel',
-      },
-      {
-        text: 'OK',
-        onPress: async () => {
-          webSocket.emit('VideoCallanswerCall', {callerId: mobile});
-          await engine.current?.leaveChannel();
-          setTimeout(() => {
-            navigation.navigate('VideoCallScreen', {
-              config,
-              mobile,
-              reciever_data,
-            });
-          }, 300);
-        },
-      },
-    ]);
+    setShowVideoCallModal(true);
+  };
+
+  const handleVideoCallModalClose = () => {
+    setShowVideoCallModal(false);
+  };
+
+  const handleVideoCallConfirm = async () => {
+    setShowVideoCallModal(false);
+    webSocket.emit('VideoCallanswerCall', {callerId: mobile});
+    await engine.current?.leaveChannel();
+    setTimeout(() => {
+      navigation.navigate('VideoCallScreen', {
+        config,
+        mobile,
+        reciever_data,
+      });
+    }, 300);
   };
 
   useEffect(() => {
@@ -1020,27 +1019,31 @@ const AudioScreen = ({route, navigation}) => {
       </View>
       {chatModal}
 
-      <Modal visible={showModal} animationType="slide" transparent={true}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalText}>
-              Your balance is not enough. Please add more funds.
-            </Text>
-            <View className="flex flex-row justify-center space-x-4">
-              <TouchableOpacity
-                onPress={handleModalClose}
-                style={styles.modalButton}>
-                <Text style={styles.modalButtonText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handleNavigateToWallet}
-                style={styles.modalButton}>
-                <Text style={styles.modalButtonText}>Go to Wallet</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+      <CustomModal
+        isVisible={showModal}
+        onClose={() => setShowModal(false)}
+        message="Your balance is not enough. Please add more funds."
+        buttons={[
+          {label: 'Cancel', onPress: handleModalClose, color: 'gray'},
+          {
+            label: 'Go to Wallet',
+            onPress: handleNavigateToWallet,
+          },
+        ]}
+      />
+
+      <CustomModal
+        isVisible={showVideoCallModal}
+        onClose={handleVideoCallModalClose}
+        message="Requesting for Video Call"
+        buttons={[
+          {label: 'Cancel', onPress: handleVideoCallModalClose, color: 'gray'},
+          {
+            label: 'OK',
+            onPress: handleVideoCallConfirm,
+          },
+        ]}
+      />
     </View>
   );
 };
