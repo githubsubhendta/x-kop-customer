@@ -693,6 +693,9 @@ const VideoCallScreen = ({route, navigation}) => {
         </View>
       )}
       </View>
+      <View style={styles.counterContainer}>
+        <Text style={styles.callDuration}>{callDuration} mins left</Text>
+      </View>
     </View>
   );
 
@@ -766,7 +769,7 @@ const styles = StyleSheet.create({
   fullView: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'center', 
   },
   splitContainer: {
     flex: 1,
@@ -823,14 +826,14 @@ const styles = StyleSheet.create({
     top: 10,
     alignSelf: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    paddingVertical: 5,
-    paddingHorizontal: 16,
+    paddingVertical: 3,
+    paddingHorizontal: 12,
     borderRadius: 20,
   },
   callDuration: {
     color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 13,
+    fontWeight: 'medium',
   },
   buttonHolder: {
     flexDirection: 'row',
@@ -892,6 +895,7 @@ const styles = StyleSheet.create({
   },
 
   localContainer2: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#000',
@@ -899,7 +903,7 @@ const styles = StyleSheet.create({
   cameraOffText: {
     color: 'white',
     alignItems: 'center',
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: 'bold',
   },
 });

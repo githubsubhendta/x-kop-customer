@@ -52,12 +52,12 @@ const ScheduleScreen = ({navigation}) => {
     (async () => {
       try {
         const allHistory = await getAllSchedules();
-        const currentDate = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+        const currentDate = new Date().toISOString().split('T')[0];
 
         const validSchedules = [];
 
         for (const schedule of allHistory) {
-          const {startTime, _id} = schedule; // Replace startCallTime with startTime
+          const {startTime, _id} = schedule;
 
           // Validate if startTime exists and is a valid date
           if (startTime && !isNaN(new Date(startTime).getTime())) {
@@ -69,7 +69,7 @@ const ScheduleScreen = ({navigation}) => {
               console.log(`Deleting expired schedule: ${_id}`);
               await deleteSchedule(_id);
             } else {
-              validSchedules.push(schedule); // Add valid schedules
+              validSchedules.push(schedule);
             }
           } else {
             console.warn(
@@ -300,6 +300,20 @@ const ScheduleScreen = ({navigation}) => {
     });
   };
 
+  //////////////////// time showing on card //////////////////////////////////////
+  const timeFormate = dateString => {
+    const date = new Date(dateString);
+    let hours = date.getHours();
+    let minutes = date.getMinutes();
+    let ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    minutes = minutes < 10 ? '0' + minutes : minutes;
+    return `${hours}:${minutes} ${ampm}`;
+  };
+
+  //////////////////// time showing on card end//////////////////////////////////////
+
   return (
     <View className="flex-1 bg-transparent relative">
       {!scheduleCall ? (
@@ -326,25 +340,44 @@ const ScheduleScreen = ({navigation}) => {
               <FlatList
                 data={scheduleList}
                 renderItem={({item}) => (
-                  <View className="flex flex-row justify-center py-2 border-b-2 border-slate-200 px-0">
-                    <View className="flex flex-row gap-2">
-                      <View className="w-[50px] h-[50px] rounded-full">
+                  <View className="flex flex-row justify-between items-center py-3 border-b-2 border-slate-200 px-4">
+                    <View className="flex flex-row flex-1 items-center mr-2">
+                      {/* Avatar Container */}
+                      <View className="w-[18%] max-w-[50px] aspect-square rounded-full overflow-hidden bg-gray-200">
                         <Image
                           source={{uri: item.officer.avatar}}
-                          className="w-[100%] h-[100%] rounded-full"
+                          className="w-full h-full"
+                          resizeMode="cover"
                         />
                       </View>
-                      <View>
-                        <Text className="text-black font-medium text-base">
-                          {item.officer.name}
-                        </Text>
-                        <View className="flex flex-row gap-4">
-                          <Text className="text-secondary text-sm font-light">
+
+                      {/* Details Container */}
+                      <View className="ml-3">
+                        {/* Name */}
+                        <View className="flex flex-row justify-between items-center">
+                          <Text
+                            className="text-black font-medium text-base"
+                            numberOfLines={1}
+                            ellipsizeMode="tail">
+                            {item.officer.name}
+                          </Text>
+                          {item.startTime !== undefined && (
+                            <TouchableOpacity
+                              onPress={() => handleReschedule(item)}
+                              hitSlop={{top: 0, bottom: 10, left: 10, right: 5}}
+                              accessible
+                              accessibilityLabel="Reschedule appointment">
+                              <Text className="text-black text-sm font-bold underline">
+                                Reschedule
+                              </Text>
+                            </TouchableOpacity>
+                          )}
+                        </View>
+
+                        {/* Duration & Fee Row */}
+                        <View className="flex flex-row  items-center ">
+                          <Text className="text-secondary text-sm font-light mr-4">
                             Duration:{' '}
-                            {/* {(new Date(item.endTime) -
-                              new Date(item.startTime)) /
-                              (1000 * 60)}{' '}
-                            min */}
                             {(() => {
                               const durationInMs =
                                 new Date(item.endTime) -
@@ -365,38 +398,52 @@ const ScheduleScreen = ({navigation}) => {
                             })()}
                           </Text>
 
-                          <Text className="text-black text-sm text-medium">
-                            Fee: ₹{' '}
-                            {parseInt(
-                              (new Date(item.endTime) -
-                                new Date(item.startTime)) /
-                                (1000 * 60),
-                            ) *
+                          <Text className="text-black text-sm font-medium">
+                            Fee: ₹
+                            {(
+                              parseInt(
+                                (new Date(item.endTime) -
+                                  new Date(item.startTime)) /
+                                  (1000 * 60),
+                              ) *
                               parseFloat(
                                 item.officer.officerDetails.ConsultationTypeID
                                   .FeePerMinute,
-                              )}
+                              )
+                            ).toFixed(2)}
                           </Text>
                         </View>
+
+                        {/* Date/Time Row */}
                         {item.startTime !== undefined && (
-                          <View className="flex flex-row">
-                            <Text className="text-black text-sm font-medium">
+                          <View className="flex flex-row  items-center">
+                            <Text className="text-black text-[12px] font-medium mr-2">
                               {dateFormate(item.startTime)}
                             </Text>
-                            <Text className="text-[#36D158] text-sm font-medium text-left pl-9">
+                            <Text className="text-black text-[12px]">
+                              {timeFormate(item.startTime)} -{' '}
+                              {timeFormate(item.endTime)}
+                            </Text>
+                            <Text className="text-[#36D158] text-sm font-medium ml-4">
                               Unpaid
                             </Text>
                           </View>
                         )}
                       </View>
                     </View>
-                    {item.startTime !== undefined && (
-                      <TouchableOpacity onPress={() => handleReschedule(item)}>
-                        <Text className="text-black text-xs font-normal underline">
+
+                    {/* Reschedule Button */}
+                    {/* {item.startTime !== undefined && (
+                      <TouchableOpacity
+                        onPress={() => handleReschedule(item)}
+                        hitSlop={{top: 0, bottom: 10, left: 10, right: 5}}
+                        accessible
+                        accessibilityLabel="Reschedule appointment">
+                        <Text className="text-black text-xs font-bold underline">
                           Reschedule
                         </Text>
                       </TouchableOpacity>
-                    )}
+                    )} */}
                   </View>
                 )}
                 keyExtractor={item => item._id}
@@ -413,7 +460,7 @@ const ScheduleScreen = ({navigation}) => {
             </View>
           </View>
 
-          <View className="mb-40">
+          <View className="mb-50">
             <View className="px-5">
               <Text className="text-[#997654] text-md">Previous Calls</Text>
             </View>

@@ -613,7 +613,6 @@ import {
   Image,
   Alert,
   TextInput,
- 
   Platform,
   PermissionsAndroid,
 } from 'react-native';
@@ -641,6 +640,7 @@ const AudioScreen = ({route, navigation}) => {
   const {config, mobile, reciever_data, consultType} = route.params || {};
   const [showModal, setShowModal] = useState(false);
   const [showVideoCallModal, setShowVideoCallModal] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   const {webSocket, leave} = useWebSocket();
   const [isMuted, setIsMuted] = useState(false);
@@ -681,6 +681,7 @@ const AudioScreen = ({route, navigation}) => {
           await engine.current.setEnableSpeakerphone(true);
           setIsMuted(false);
           setIsSpeakerEnabled(true);
+          console.log('Speakerphone enabled on screen focus');
         }
       };
 
@@ -758,16 +759,16 @@ const AudioScreen = ({route, navigation}) => {
   };
 
   const confirmAndStartRecording = () => {
-    Alert.alert('Start Recording', 'Do you want to start recording?', [
-      {
-        text: 'Cancel',
-        style: 'cancel',
-      },
-      {
-        text: 'OK',
-        onPress: startRecording,
-      },
-    ]);
+    setIsModalVisible(true);
+  };
+
+  const handleCancel = () => {
+    setIsModalVisible(false); // Hide the modal
+  };
+
+  const handleOK = () => {
+    setIsModalVisible(false); // Hide the modal
+    startRecording(); // Start recording
   };
 
   const startRecording = async () => {
@@ -811,7 +812,7 @@ const AudioScreen = ({route, navigation}) => {
     try {
       await engine.current.stopAudioRecording();
       setIsRecording(false);
-      Alert.alert('Recording Stopped');
+      // Alert.alert('Recording Stopped');
     } catch (error) {
       console.error('Error stopping recording:', error);
     }
@@ -828,6 +829,7 @@ const AudioScreen = ({route, navigation}) => {
     if (engine.current) {
       await engine.current.setEnableSpeakerphone(!isSpeakerEnabled);
       setIsSpeakerEnabled(prev => !prev);
+      console.log(`Speakerphone ${!isSpeakerEnabled ? 'enabled' : 'disabled'}`);
     }
   }, [isSpeakerEnabled, engine]);
 
@@ -1028,6 +1030,24 @@ const AudioScreen = ({route, navigation}) => {
           {
             label: 'Go to Wallet',
             onPress: handleNavigateToWallet,
+          },
+        ]}
+      />
+
+      <CustomModal
+        isVisible={isModalVisible}
+        onClose={handleCancel}
+        message="Do you want to start recording?"
+        buttons={[
+          {
+            label: 'Cancel',
+            onPress: handleCancel,
+            color: 'gray'
+          },
+          {
+            label: 'OK',
+            onPress: handleOK,
+            
           },
         ]}
       />
