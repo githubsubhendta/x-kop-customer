@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     width: '100%',
     padding: 16,
-    // backgroundColor: '#fff',
+     backgroundColor: '#fff',
   },
   editContainer: {
     flexDirection: 'row',
