@@ -124,7 +124,8 @@ const WalletScreen = ({navigation}) => {
           Wallet Balance
         </Text>
         <Text style={styles.balanceAmount}>
-          ₹{user?.wallet == undefined ? '0' : user?.wallet}
+          ₹
+          {user?.wallet === undefined ? '0.00' : Number(user.wallet).toFixed(2)}
         </Text>
       </View>
       <View style={styles.transactionContainer}>
@@ -134,11 +135,9 @@ const WalletScreen = ({navigation}) => {
             Previous Receipts
           </Text>
         </View>
-        {/* <View className="bg-slate-300 h-[1px] my-3" /> */}
+    
         {user?.transactions.length > 0 && (
-          // bankHistory
-          // { loading, error, paymentList, loadMore, hasMore }
-
+          
           <FlatList
             data={bankHistory.paymentList}
             renderItem={itemRender}
@@ -170,8 +169,9 @@ const WalletScreen = ({navigation}) => {
         </TouchableOpacity>
         {/* onPress={()=>navigation.push("PaymentScreen")} */}
         <TouchableOpacity
-          style={[styles.button,user?.wallet === 0 && styles.buttonDisabled,]}
-          onPress={() => setWithdrawModalVisible(true)} disabled={user?.wallet === 0}>
+          style={[styles.button, user?.wallet === 0 && styles.buttonDisabled]}
+          onPress={() => setWithdrawModalVisible(true)}
+          disabled={user?.wallet === 0}>
           <Text style={styles.buttonText}>Withdraw</Text>
         </TouchableOpacity>
 
@@ -247,7 +247,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
   },
   buttonDisabled: {
-    backgroundColor: "gray", 
+    backgroundColor: 'gray',
     opacity: 0.9,
   },
   buttonText: {

@@ -118,9 +118,7 @@ const Reschedule = ({ route, navigation }) => {
       console.error('Error updating schedule:', error.message);
     }
   };
-  // useEffect(() => {
-  //   console.log("Selected Slot has changed:", selectedSlot);
-  // }, [selectedSlot]);
+  
   return (
     <View className="flex-1 px-5 py-10 bg-white">
       <View className="flex flex-row space-x-4 my-2">

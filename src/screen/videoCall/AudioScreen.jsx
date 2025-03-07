@@ -56,35 +56,17 @@ const AudioScreen = ({route, navigation}) => {
 
   const {engine, isJoined} = useAgoraEngine(
     config,
-    () => setConnectionStatus('Connected'),
-    Uid => {
-      if (!peerIds.includes(Uid)) {
-        setPeerIds(prev => [...prev, Uid]);
-      }
-    },
-    Uid => {
+    useCallback(() => setConnectionStatus('Connected'), []),
+    useCallback(Uid => {
+      setPeerIds(prev => [...prev, Uid]);
+    }, []),
+    useCallback(Uid => {
       setPeerIds(prev => prev.filter(id => id !== Uid));
-    },
-    () => setConnectionStatus('Not Connected'),
+    }, []),
+    useCallback(() => setConnectionStatus('Not Connected'), []),
   );
 
-  // Reset audio settings when the screen is focused
-  useFocusEffect(
-    useCallback(() => {
-      const resetAudioSettings = async () => {
-        if (engine.current) {
-          await engine.current.muteLocalAudioStream(false);
-          await engine.current.setEnableSpeakerphone(true);
-          setIsMuted(false);
-          setIsSpeakerEnabled(true);
-          console.log('Speakerphone enabled on screen focus');
-        }
-      };
-      resetAudioSettings();
-      return () => { 
-      };
-    }, [engine]),
-  );
+  
 
   useEffect(() => {
     if (startTime && reciever_data?.userInfo?.mobile) {
@@ -101,13 +83,14 @@ const AudioScreen = ({route, navigation}) => {
   }, [consultType, reciever_data?.userInfo?.mobile, webSocket]);
 
   //////////////////////// Call Recording ////////////////////////////////
-  const requestPermissions = async () => {
+  const requestPermissions = useCallback(async () => {
     if (Platform.OS === 'android') {
       try {
         const granted = await PermissionsAndroid.requestMultiple([
           PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
           PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
           PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+          PermissionsAndroid.PERMISSIONS.CAMERA, // Add camera permission
         ]);
         if (
           granted['android.permission.WRITE_EXTERNAL_STORAGE'] ===
@@ -115,6 +98,8 @@ const AudioScreen = ({route, navigation}) => {
           granted['android.permission.READ_EXTERNAL_STORAGE'] ===
             PermissionsAndroid.RESULTS.GRANTED &&
           granted['android.permission.RECORD_AUDIO'] ===
+            PermissionsAndroid.RESULTS.GRANTED &&
+          granted['android.permission.CAMERA'] === 
             PermissionsAndroid.RESULTS.GRANTED
         ) {
           console.log('Permissions granted');
@@ -126,17 +111,21 @@ const AudioScreen = ({route, navigation}) => {
       }
     } else if (Platform.OS === 'ios') {
       const microphoneStatus = await request(PERMISSIONS.IOS.MICROPHONE);
-      if (microphoneStatus === RESULTS.GRANTED) {
-        console.log('Microphone permission granted');
+      const cameraStatus = await request(PERMISSIONS.IOS.CAMERA); 
+      if (
+        microphoneStatus === RESULTS.GRANTED &&
+        cameraStatus === RESULTS.GRANTED
+      ) {
+        console.log('Microphone and camera permissions granted');
       } else {
-        console.log('Microphone permission denied');
+        console.log('Microphone or camera permission denied');
       }
     }
-  };
+  }, []);
 
   useEffect(() => {
     requestPermissions();
-  }, []);
+  }, [requestPermissions]);
 
   const getRecordingFilePath = () => {
     const directoryPath =
@@ -229,16 +218,12 @@ const AudioScreen = ({route, navigation}) => {
   const endCall = useCallback(async () => {
     if (engine.current) {
       await engine.current.leaveChannel();
-      webSocket.emit('handsup', {otherUserId: mobile});
-      clearInterval(callDurationInterval);
-      setCallStatus(false);
-      stopCall();
+      leave();
     }
-  }, [engine, webSocket, mobile, stopCall]);
+  }, [engine, leave]);
 
   const switchToVideoCall = useCallback(async () => {
     if (engine.current) {
-      await engine.current.leaveChannel();
       webSocket.emit('videocall', {calleeId: mobile});
     }
   }, [engine, webSocket, mobile]);
@@ -267,22 +252,29 @@ const AudioScreen = ({route, navigation}) => {
 
   const handleVideoCallConfirm = async () => {
     setShowVideoCallModal(false);
-    webSocket.emit('VideoCallanswerCall', {callerId: mobile});
-    await engine.current?.leaveChannel();
-    setTimeout(() => {
-      navigation.navigate('VideoCallScreen', {
-        config,
-        mobile,
-        reciever_data,
-      });
-    }, 300);
-  };
+    
+    try {
+        if (engine.current) {
+            await engine.current.leaveChannel();
+        }
+        
+        webSocket.emit('VideoCallanswerCall', { callerId: mobile });
+        
+        navigation.navigate('VideoCallScreen', {
+            config,
+            mobile,
+            reciever_data,
+        });
+    } catch (error) {
+        console.error("Error handling video call confirmation:", error);
+    }
+};
 
   useEffect(() => {
     webSocket.on('newVideoCall', createTwoButtonAlert);
     webSocket.on('VideoCallAnswered', async () => {
       await engine.current?.leaveChannel();
-      navigation.navigate('VideoCallScreen', {config, mobile});
+      navigation.navigate('VideoCallScreen', {config, mobile,reciever_data});
     });
     return () => {
       webSocket.off('newVideoCall', createTwoButtonAlert);
@@ -291,7 +283,7 @@ const AudioScreen = ({route, navigation}) => {
         navigation.navigate('VideoCallScreen', {config, mobile});
       });
     };
-  }, [webSocket, engine, createTwoButtonAlert, navigation, config, mobile]);
+  }, [webSocket, engine, createTwoButtonAlert, navigation, config, mobile,reciever_data]);
 
   useEffect(() => {
     if (isBalanceZero) {

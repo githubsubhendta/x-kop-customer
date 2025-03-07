@@ -166,19 +166,17 @@ const AccountScreen = ({navigation}) => {
     state => state,
   );
   const [modalVisible, setModalVisible] = useState(false);
-  const [refreshing, setRefreshing] = useState(false); // State for refresh control
+  const [refreshing, setRefreshing] = useState(false); 
 
   // Function to handle refresh
   const onRefresh = async () => {
-    setRefreshing(true); // Start refreshing
+    setRefreshing(true);
     try {
-      // Add your refresh logic here (e.g., fetch updated user data)
-      // Example: Fetch updated user data from the server
-      // await fetchUserData();
+      
     } catch (error) {
       console.error('Error refreshing data:', error);
     } finally {
-      setRefreshing(false); // Stop refreshing
+      setRefreshing(false); 
     }
   };
 
@@ -207,10 +205,10 @@ const AccountScreen = ({navigation}) => {
         className="mb-14"
         refreshControl={
           <RefreshControl
-            refreshing={refreshing} // Bind refreshing state
-            onRefresh={onRefresh} // Bind refresh function
-            colors={['#862A0D']} // Customize spinner color (optional)
-            tintColor="#862A0D" // Customize spinner color (optional)
+            refreshing={refreshing} 
+            onRefresh={onRefresh}
+            colors={['#862A0D']} 
+            tintColor="#862A0D" 
           />
         }>
         <View className="flex flex-row justify-between my-5 mx-4">

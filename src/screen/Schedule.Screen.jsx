@@ -432,18 +432,7 @@ const ScheduleScreen = ({navigation}) => {
                       </View>
                     </View>
 
-                    {/* Reschedule Button */}
-                    {/* {item.startTime !== undefined && (
-                      <TouchableOpacity
-                        onPress={() => handleReschedule(item)}
-                        hitSlop={{top: 0, bottom: 10, left: 10, right: 5}}
-                        accessible
-                        accessibilityLabel="Reschedule appointment">
-                        <Text className="text-black text-xs font-bold underline">
-                          Reschedule
-                        </Text>
-                      </TouchableOpacity>
-                    )} */}
+                    
                   </View>
                 )}
                 keyExtractor={item => item._id}
