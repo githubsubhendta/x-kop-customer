@@ -125,7 +125,7 @@ const AudioScreen = ({route, navigation}) => {
 
   useEffect(() => {
     requestPermissions();
-  }, [requestPermissions]);
+  }, []);
 
   const getRecordingFilePath = () => {
     const directoryPath =
@@ -218,9 +218,12 @@ const AudioScreen = ({route, navigation}) => {
   const endCall = useCallback(async () => {
     if (engine.current) {
       await engine.current.leaveChannel();
-      leave();
+      webSocket.emit('handsup', {otherUserId: mobile});
+      clearInterval(callDurationInterval);
+      setCallStatus(false);
+      stopCall();
     }
-  }, [engine, leave]);
+  }, [engine, webSocket, mobile, stopCall]);
 
   const switchToVideoCall = useCallback(async () => {
     if (engine.current) {

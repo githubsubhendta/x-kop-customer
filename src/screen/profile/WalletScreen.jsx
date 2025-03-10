@@ -51,11 +51,6 @@ const WalletScreen = ({navigation}) => {
 
   const downloadSlip = async transactionId => {
     try {
-      // const hasPermission = await requestStoragePermission();
-      // if (!hasPermission) {
-      //   Alert.alert('Permission Denied', 'You need to give permission to download the file.');
-      //   return;
-      // }
 
       console.log('Downloading transaction ID:', transactionId);
       const {dirs} = RNFetchBlob.fs;
@@ -150,24 +145,19 @@ const WalletScreen = ({navigation}) => {
             }
             style={{marginBottom: 20}}
           />
-          // <FlatList
-          //   data={user?.transactions}
-          //   renderItem={itemRender}
-          //   keyExtractor={item => item._id}
-          //   // style={{paddingBottom:100}}
-          // />
+         
         )}
       </View>
       <View
         className="flex flex-row justify-between"
-        // style={styles.buttonContainer}
+       
       >
         <TouchableOpacity
           style={styles.button}
           onPress={() => setModalVisible(true)}>
           <Text style={styles.buttonText}>Add Money</Text>
         </TouchableOpacity>
-        {/* onPress={()=>navigation.push("PaymentScreen")} */}
+        
         <TouchableOpacity
           style={[styles.button, user?.wallet === 0 && styles.buttonDisabled]}
           onPress={() => setWithdrawModalVisible(true)}

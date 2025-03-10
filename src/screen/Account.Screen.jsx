@@ -141,7 +141,7 @@
 // export default AccountScreen;
 
 import {View, Text, TouchableOpacity, StatusBar, RefreshControl} from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, { useState} from 'react';
 import {logoutUser} from '../Api/user.api.js';
 import userStoreAction from '../stores/user.store.js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -168,7 +168,7 @@ const AccountScreen = ({navigation}) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false); 
 
-  // Function to handle refresh
+
   const onRefresh = async () => {
     setRefreshing(true);
     try {

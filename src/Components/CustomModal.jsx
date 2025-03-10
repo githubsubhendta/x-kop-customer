@@ -9,11 +9,11 @@ const CustomModal = ({ isVisible, onClose, message, buttons = [] }) => {
 
   useEffect(() => {
     if (isVisible) {
-      // Animate the modal to fade in and scale up when it becomes visible
+      
       Animated.parallel([
         Animated.timing(fadeAnim, {
           toValue: 1,
-          duration: 200,
+          duration: 300,
           useNativeDriver: true,
         }),
         Animated.timing(scaleAnim, {

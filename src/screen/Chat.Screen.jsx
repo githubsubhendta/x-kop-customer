@@ -23,16 +23,16 @@ import {SvgXml} from 'react-native-svg';
 import Video from 'react-native-video';
 import {SVG_download, SVG_PDF} from '../utils/SVGImage.js';
 import RNFS from 'rn-fetch-blob';
-import { AnimatedCircularProgress } from 'react-native-circular-progress';
+import {AnimatedCircularProgress} from 'react-native-circular-progress';
+import CustomModal from '../Components/CustomModal.jsx';
 
-const Message = ({ item, user, onLongPress, onPress, selectedMessages }) => {
+const Message = ({item, user, onLongPress, onPress, selectedMessages}) => {
   const [downloading, setDownloading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [fileExists, setFileExists] = useState(false);
 
-  
-  const isFileExist = async (fileUrl) => {
-    const { fs } = RNFS;
+  const isFileExist = async fileUrl => {
+    const {fs} = RNFS;
     const downloadDir =
       Platform.OS === 'android' && fs.dirs.DownloadDir
         ? fs.dirs.DownloadDir
@@ -43,7 +43,6 @@ const Message = ({ item, user, onLongPress, onPress, selectedMessages }) => {
     return exists;
   };
 
-  
   useEffect(() => {
     const checkFileExistence = async () => {
       const exists = await isFileExist(item.content);
@@ -51,11 +50,71 @@ const Message = ({ item, user, onLongPress, onPress, selectedMessages }) => {
     };
     checkFileExistence();
   }, [item.content]);
-  const downloadFiles = async (fileUrl) => {
+  // const downloadFiles = async fileUrl => {
+  //   try {
+  //     setDownloading(true);
+  //     setProgress(0);
+  //     const {config, fs} = RNFS;
+
+  //     const downloadDir =
+  //       Platform.OS === 'android' && fs.dirs.DownloadDir
+  //         ? fs.dirs.DownloadDir
+  //         : fs.dirs.DocumentDir;
+  //     const fileName = fileUrl.split('/').pop();
+  //     const filePath = `${downloadDir}/${fileName}`;
+  //     const dirExists = await fs.exists(downloadDir);
+  //     if (!dirExists) {
+  //       Alert.alert(
+  //         'Error',
+  //         `The download directory ${downloadDir} does not exist.`,
+  //       );
+  //       return;
+  //     }
+  //     const fileExists = await fs.exists(filePath);
+  //     if (fileExists) {
+  //       Alert.alert('File Exists', `The file "${fileName}" already exists.`);
+  //       return;
+  //     }
+  //     const task = config({path: filePath, fileCache: true}).fetch(
+  //       'GET',
+  //       fileUrl,
+  //     );
+  //     task.progress(({bytesWritten, contentLength}) => {
+  //       if (contentLength > 0) {
+  //         const progressPercentage = (bytesWritten / contentLength) * 100;
+  //         setProgress(progressPercentage);
+  //         console.log(`Download progress: ${progressPercentage.toFixed(2)}%`);
+  //       } else {
+  //         console.log(
+  //           'Download progress: Unknown (contentLength not available)',
+  //         );
+  //       }
+  //     });
+  //     const result = await task;
+  //     if (result?.respInfo?.status === 200) {
+  //       Alert.alert('Download Complete', `File downloaded to: ${filePath}`);
+  //       console.log('Download successful:', filePath);
+  //     } else {
+  //       Alert.alert(
+  //         'Download Failed',
+  //         `Failed with status code: ${result?.respInfo?.status || 'unknown'}`,
+  //       );
+  //       console.error('Download failed with status:', result?.respInfo?.status);
+  //     }
+  //   } catch (error) {
+  //     console.error('Download error:', error);
+  //     Alert.alert('Download Error', 'An error occurred while downloading.');
+  //   } finally {
+  //     setDownloading(false);
+  //   }
+  // };
+
+
+  const downloadFiles = async fileUrl => {
     try {
       setDownloading(true);
       setProgress(0);
-      const { config, fs } = RNFS;
+      const {config, fs} = RNFS;
 
       const downloadDir =
         Platform.OS === 'android' && fs.dirs.DownloadDir
@@ -63,39 +122,30 @@ const Message = ({ item, user, onLongPress, onPress, selectedMessages }) => {
           : fs.dirs.DocumentDir;
       const fileName = fileUrl.split('/').pop();
       const filePath = `${downloadDir}/${fileName}`;
-      const dirExists = await fs.exists(downloadDir);
-      if (!dirExists) {
-        Alert.alert('Error', `The download directory ${downloadDir} does not exist.`);
-        return;
-      }
-      const fileExists = await fs.exists(filePath);
-      if (fileExists) {
-        Alert.alert('File Exists', `The file "${fileName}" already exists.`);
-        return;
-      }
-      const task = config({ path: filePath, fileCache: true }).fetch('GET', fileUrl);
-      task.progress(({ bytesWritten, contentLength }) => {
+
+      const task = config({path: filePath, fileCache: true}).fetch(
+        'GET',
+        fileUrl,
+      );
+
+      task.progress(({bytesWritten, contentLength}) => {
         if (contentLength > 0) {
-          const progressPercentage = (bytesWritten / contentLength) * 100;
-          setProgress(progressPercentage);
-          console.log(`Download progress: ${progressPercentage.toFixed(2)}%`);
-        } else {
-          console.log('Download progress: Unknown (contentLength not available)');
+          setProgress((bytesWritten / contentLength) * 100);
         }
       });
+
       const result = await task;
+
       if (result?.respInfo?.status === 200) {
         Alert.alert('Download Complete', `File downloaded to: ${filePath}`);
-        console.log('Download successful:', filePath);
+        setFileExists(true); 
       } else {
         Alert.alert(
           'Download Failed',
           `Failed with status code: ${result?.respInfo?.status || 'unknown'}`,
         );
-        console.error('Download failed with status:', result?.respInfo?.status);
       }
     } catch (error) {
-      console.error('Download error:', error);
       Alert.alert('Download Error', 'An error occurred while downloading.');
     } finally {
       setDownloading(false);
@@ -113,18 +163,17 @@ const Message = ({ item, user, onLongPress, onPress, selectedMessages }) => {
             ? styles.currentUserMessage
             : styles.otherUserMessage,
           selectedMessages.includes(item._id) > 0 && styles.selectedMessage,
-        ]}
-      >
+        ]}>
         {item.type === 'text' && (
           <Text style={styles.content}>{item.content}</Text>
         )}
         {item.type === 'image' && item.content && (
           <View style={styles.image}>
             <TouchableOpacity onPress={() => item.openImageModal(item.content)}>
-              <Image source={{ uri: item.content }} style={styles.image} />
+              <Image source={{uri: item.content}} style={styles.image} />
             </TouchableOpacity>
             {!fileExists && item.sender !== user._id && (
-              <View className="absolute right-0 -bottom-5 w-8 h-7">
+              <View className="absolute right-0 -bottom-7 w-8 h-7">
                 {downloading ? (
                   <AnimatedCircularProgress
                     size={40}
@@ -132,9 +181,8 @@ const Message = ({ item, user, onLongPress, onPress, selectedMessages }) => {
                     fill={progress}
                     tintColor="#4F46E5"
                     backgroundColor="#E5E7EB"
-                    lineCap="round"
-                  >
-                    {(fill) => (
+                    lineCap="round">
+                    {fill => (
                       <Text className="text-xs font-bold text-gray-700">
                         {Math.round(progress)}%
                       </Text>
@@ -156,8 +204,7 @@ const Message = ({ item, user, onLongPress, onPress, selectedMessages }) => {
           <View style={styles.videoContainer}>
             <TouchableOpacity
               onPress={() => item.openVideoModal(item.content)}
-              style={styles.videoContainer}
-            >
+              style={styles.videoContainer}>
               <Icon
                 name="play-circle-outline"
                 size={40}
@@ -169,14 +216,13 @@ const Message = ({ item, user, onLongPress, onPress, selectedMessages }) => {
               <View className="absolute right-0 -bottom-7 w-8 h-7">
                 {downloading ? (
                   <AnimatedCircularProgress
-                    size={30}
+                    size={40}
                     width={4}
                     fill={progress}
                     tintColor="#4F46E5"
                     backgroundColor="#E5E7EB"
-                    lineCap="round"
-                  >
-                    {(fill) => (
+                    lineCap="round">
+                    {fill => (
                       <Text className="text-xs font-bold text-gray-700">
                         {Math.round(progress)}%
                       </Text>
@@ -195,12 +241,12 @@ const Message = ({ item, user, onLongPress, onPress, selectedMessages }) => {
           </View>
         )}
         {item.type === 'file' && (
-          <View style={styles.backButton}>
+          <View style={styles.backButton1}>
             <TouchableOpacity style={styles.backButton}>
               <SvgXml xml={SVG_PDF} height={'100%'} width={'100%'} />
             </TouchableOpacity>
             {!fileExists && item.sender !== user._id && (
-              <View className="absolute -right-14 mt-1 w-8 h-8">
+              <View className="absolute right-0 -bottom-7 w-8 h-7">
                 {downloading ? (
                   <AnimatedCircularProgress
                     size={40}
@@ -208,9 +254,8 @@ const Message = ({ item, user, onLongPress, onPress, selectedMessages }) => {
                     fill={progress}
                     tintColor="#4F46E5"
                     backgroundColor="#E5E7EB"
-                    lineCap="round"
-                  >
-                    {(fill) => (
+                    lineCap="round">
+                    {fill => (
                       <Text className="text-xs font-bold text-gray-700">
                         {Math.round(progress)}%
                       </Text>
@@ -260,7 +305,8 @@ const ChatScreen = ({route, navigation}) => {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [isVideoModalVisible, setVideoModalVisible] = useState(false);
   const {conversations, setConversations} = useChatStore();
-  const [downloadedMedia, setDownloadedMedia] = useState({}); 
+  const [downloadedMedia, setDownloadedMedia] = useState({});
+  const [isDeleteVisible, setIsDeleteVisible] = useState(false);
   const showEditButton = selectedMessages.length === 1;
   const officer =
     chats?.participants?.find(participant => participant?.officerDetails) || {};
@@ -322,7 +368,7 @@ const ChatScreen = ({route, navigation}) => {
   };
 
   const downloadMedia = async uri => {
-    return new Promise(resolve => setTimeout(resolve, 1000)); 
+    return new Promise(resolve => setTimeout(resolve, 1000));
   };
 
   const {loading, hasMoreChats, loadMoreChats} = usePaginatedChats(chatId);
@@ -365,37 +411,52 @@ const ChatScreen = ({route, navigation}) => {
             {conversationId: chatId, messages: getInitial.messages},
           ]);
         }
-        
       }
     })();
   }, []);
 
   const deleteMessages = useCallback(() => {
     if (selectedMessages.length === 0) return;
-    Alert.alert(
-      'Delete Messages',
-      'Are you sure you want to delete the selected message(s)?',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Delete',
-          onPress: () => {
-            setSelectedMessages([]);
-            if (webSocket) {
-              webSocket.emit('deletemessages', {
-                messageIds: selectedMessages,
-                reciever: {id: officer._id, mobile: officer.mobile},
-              });
-            }
-          },
-          style: 'destructive',
-        },
-      ],
-    );
-  }, [selectedMessages, webSocket, user]);
+    setIsDeleteVisible(true);
+  }, [selectedMessages]);
+
+  const confirmDelete = () => {
+    setIsDeleteVisible(false);
+    setSelectedMessages([]);
+    if (webSocket) {
+      webSocket.emit('deletemessages', {
+        messageIds: selectedMessages,
+        reciever: {id: officer._id, mobile: officer.mobile},
+      });
+    }
+  };
+
+  // const deleteMessages = useCallback(() => {
+  //   if (selectedMessages.length === 0) return;
+  //   Alert.alert(
+  //     'Delete Messages',
+  //     'Are you sure you want to delete the selected message(s)?',
+  //     [
+  //       {
+  //         text: 'Cancel',
+  //         style: 'cancel',
+  //       },
+  //       {
+  //         text: 'Delete',
+  //         onPress: () => {
+  //           setSelectedMessages([]);
+  //           if (webSocket) {
+  //             webSocket.emit('deletemessages', {
+  //               messageIds: selectedMessages,
+  //               reciever: {id: officer._id, mobile: officer.mobile},
+  //             });
+  //           }
+  //         },
+  //         style: 'destructive',
+  //       },
+  //     ],
+  //   );
+  // }, [selectedMessages, webSocket, user]);
 
   const filterMessageType = messageId => {
     const filterType = allMessages.find(msg => msg._id === messageId);
@@ -427,6 +488,21 @@ const ChatScreen = ({route, navigation}) => {
         openMenu={openMenu}
         navigation={navigation}
       />
+
+      <CustomModal
+        isVisible={isDeleteVisible}
+        message="Are you sure you want to delete the selected message(s)?"
+        onClose={() => setIsDeleteVisible(false)}
+        buttons={[
+          {
+            label: 'Cancel',
+            onPress: () => setIsDeleteVisible(false),
+            color: '#999',
+          },
+          {label: 'Delete', onPress: confirmDelete, color: '#D22B2B'},
+        ]}
+      />
+
       <ChatArea
         flatListRef={flatListRef}
         allMessages={allMessages.map(message => ({
@@ -500,11 +576,11 @@ const ChatScreen = ({route, navigation}) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1, 
+    flex: 1,
   },
   messageContainer: {
-    marginVertical: 5,
-    padding: 10,
+    marginHorizontal: 3,
+    padding: 5,
     borderRadius: 10,
     maxWidth: '75%',
     alignSelf: 'flex-start',
@@ -513,47 +589,47 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: '50%',
     left: '50%',
-    transform: [{ translateX: -20 }, { translateY: -20 }],
+    transform: [{translateX: -20}, {translateY: -20}],
     alignItems: 'center',
     justifyContent: 'center',
   },
   progressText: {
     position: 'absolute',
-    fontSize: 12,
-    color: '#fff',
+    fontSize: 8,
+    color: '#000',
   },
   currentUserMessage: {
     backgroundColor: '#e1ffc7',
     alignSelf: 'flex-end',
-    shadowColor: '#000', 
-  shadowOffset: {
-    width: 0, 
-    height: 2, 
-  },
-  shadowOpacity: 0.25,
-  shadowRadius: 3.84,
-  elevation: 2,
-  borderRadius: 8, 
-  paddingLeft: 10, 
-  marginVertical: 5, 
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 2,
+    borderRadius: 8,
+    paddingLeft: 10,
+    marginVertical: 5,
   },
   otherUserMessage: {
-  backgroundColor: '#fff',
-  alignSelf: 'flex-start',
-  shadowColor: '#000', 
-  shadowOffset: {
-    width: 0, 
-    height: 2, 
+    backgroundColor: '#fff',
+    alignSelf: 'flex-start',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 2,
+    borderRadius: 8,
+    paddingLeft: 10,
+    marginVertical: 5,
   },
-  shadowOpacity: 0.25,
-  shadowRadius: 3.84,
-  elevation: 2,
-  borderRadius: 8, 
-  paddingLeft: 10, 
-  marginVertical: 5, 
-},
   selectedMessage: {
-    borderColor: 'blue',
+    borderColor: '#228B22',
     borderWidth: 2,
   },
   content: {
@@ -603,6 +679,11 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
   },
+  backButton1: {
+    position: 'relative',
+    justifyContent: 'between',
+    items: 'center',
+  }
 });
 
 export default ChatScreen;

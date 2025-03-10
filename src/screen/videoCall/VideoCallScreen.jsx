@@ -262,8 +262,6 @@ const VideoCallScreen = ({route, navigation}) => {
   const handleClose = useCallback(() => setModelChat(false), []);
 
   useEffect(() => {
-    // console.log('Chat ID:', reciever_data?.chatId);
-    // console.log('Conversations:', conversations);
   }, [reciever_data, conversations, modelChat]);
 
   const chatModal = useMemo(
@@ -378,7 +376,7 @@ const VideoCallScreen = ({route, navigation}) => {
           )}
         </TouchableOpacity>
       </View>
-      {/* Render ChatModal outside the buttonHolder */}
+      
       {chatModal}
 
       <CustomModal
