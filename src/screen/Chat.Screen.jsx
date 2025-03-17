@@ -109,7 +109,6 @@ const Message = ({item, user, onLongPress, onPress, selectedMessages}) => {
   //   }
   // };
 
-
   const downloadFiles = async fileUrl => {
     try {
       setDownloading(true);
@@ -138,7 +137,7 @@ const Message = ({item, user, onLongPress, onPress, selectedMessages}) => {
 
       if (result?.respInfo?.status === 200) {
         Alert.alert('Download Complete', `File downloaded to: ${filePath}`);
-        setFileExists(true); 
+        setFileExists(true);
       } else {
         Alert.alert(
           'Download Failed',
@@ -496,7 +495,10 @@ const ChatScreen = ({route, navigation}) => {
         buttons={[
           {
             label: 'Cancel',
-            onPress: () => setIsDeleteVisible(false),
+            onPress: () => {
+              setIsDeleteVisible(false);
+              setSelectedMessages([]);
+            },
             color: '#999',
           },
           {label: 'Delete', onPress: confirmDelete, color: '#D22B2B'},
@@ -683,7 +685,7 @@ const styles = StyleSheet.create({
     position: 'relative',
     justifyContent: 'between',
     items: 'center',
-  }
+  },
 });
 
 export default ChatScreen;

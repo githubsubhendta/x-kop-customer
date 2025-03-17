@@ -1,5 +1,4 @@
 
-
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {
   View,
@@ -90,7 +89,7 @@ const AudioScreen = ({route, navigation}) => {
           PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
           PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
           PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
-          PermissionsAndroid.PERMISSIONS.CAMERA, // Add camera permission
+          PermissionsAndroid.PERMISSIONS.CAMERA, 
         ]);
         if (
           granted['android.permission.WRITE_EXTERNAL_STORAGE'] ===
@@ -194,7 +193,7 @@ const AudioScreen = ({route, navigation}) => {
     try {
       await engine.current.stopAudioRecording();
       setIsRecording(false);
-      // Alert.alert('Recording Stopped');
+      
     } catch (error) {
       console.error('Error stopping recording:', error);
     }

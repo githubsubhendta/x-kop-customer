@@ -411,29 +411,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: '100%',
   },
-  // localContainer: {
-  //   position: 'absolute',
-  //   backgroundColor: '#000',
-  //   bottom: 10,
-  //   right: 20,
-  //   width: 120,
-  //   height: 170,
-  //   borderRadius: 14,
-  //   overflow: 'hidden',
-  //   borderWidth: 1,
-  //   borderColor: '#fff',
-  //   ...Platform.select({
-  //     ios: {
-  //       shadowColor: '#000',
-  //       shadowOpacity: 0.3,
-  //       shadowRadius: 5,
-  //       shadowOffset: {width: 0, height: 2},
-  //     },
-  //     android: {
-  //       elevation: 5,
-  //     },
-  //   }),
-  // },
   localContainer: {
     flex: 1,
     justifyContent: 'center',
