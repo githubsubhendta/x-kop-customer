@@ -40,7 +40,7 @@
 //         uid: 0,
 //       });
 //     }
-    
+
 //   }, [mobile, data, user.mobile, fetchData]);
 
 //   useEffect(() => {
@@ -53,7 +53,7 @@
 //           rtcMessage: data.data,
 //           consultationTypeName: recieve_params.ConsultationTypeName
 //         });
-  
+
 //         tokenData.current = {data: data.data, mobile};
 //       }
 //     }
@@ -156,7 +156,6 @@
 
 // export default FindAnOfficerScreen;
 
-
 import {View, Text, StatusBar, TouchableOpacity, TextInput} from 'react-native';
 import React, {useState, useEffect, useCallback, useRef} from 'react';
 import {SafeAreaView} from 'react-native-safe-area-context';
@@ -215,10 +214,12 @@ const FindAnOfficerScreen = ({route, navigation}) => {
         tokenData.current = {data: data.data, mobile};
 
         // Set a timeout to hang up the call if not answered within 30 seconds
-        callTimeoutRef.current = setTimeout(() => {
-          webSocket.emit('hangup', { calleeId: mobile });
-          navigation.goBack();
-        }, 40000); // 30 seconds
+        // callTimeoutRef.current = setTimeout(() => {
+        //   webSocket.emit('hangup', { calleeId: mobile });
+        //   navigation.goBack();
+        // }, 40000); // 30 seconds
+        webSocket.emit('hangup', {calleeId: mobile});
+        navigation.goBack();
       }
     }
   }, [data, mobile, webSocket]);
@@ -286,8 +287,7 @@ const FindAnOfficerScreen = ({route, navigation}) => {
             className="m-auto"
           />
         </View>
-        <View
-          className="p-4 rounded-full mx-2 bg-[#8E8284]">
+        <View className="p-4 rounded-full mx-2 bg-[#8E8284]">
           <SvgXml
             xml={SVG_mic_white}
             height={'40px'}
@@ -306,8 +306,6 @@ const FindAnOfficerScreen = ({route, navigation}) => {
 };
 
 export default FindAnOfficerScreen;
-
-
 
 // import {View, Text, StatusBar, TouchableOpacity, TextInput} from 'react-native';
 // import React, {useState, useEffect, useCallback, useRef} from 'react';
