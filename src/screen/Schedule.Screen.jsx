@@ -336,11 +336,11 @@ const ScheduleScreen = ({navigation}) => {
               </Text>
             </View>
             <View className="bg-[#C9C9C9] h-[1px] my-3 mb-4" />
-            <View className="px-5 h-44">
+            <View className="px-4 h-44">
               <FlatList
                 data={scheduleList}
                 renderItem={({item}) => (
-                  <View className="flex flex-row justify-between items-center py-3 border-b-2 border-slate-200 px-4">
+                  <View className="flex flex-row justify-between items-center py-3 border-b-2 border-slate-200 ">
                     <View className="flex flex-row flex-1 items-center mr-2">
                       {/* Avatar Container */}
                       <View className="w-[18%] max-w-[50px] aspect-square rounded-full overflow-hidden bg-gray-200">
@@ -352,22 +352,23 @@ const ScheduleScreen = ({navigation}) => {
                       </View>
 
                       {/* Details Container */}
-                      <View className="ml-3">
+                      <View className="pl-3">
                         {/* Name */}
                         <View className="flex flex-row justify-between items-center">
                           <Text
-                            className="text-black font-medium text-base"
+                            className="text-black font-medium text-sm truncate overflow-hidden whitespace-nowrap"
                             numberOfLines={1}
                             ellipsizeMode="tail">
                             {item.officer.name}
                           </Text>
+
                           {item.startTime !== undefined && (
                             <TouchableOpacity
                               onPress={() => handleReschedule(item)}
                               hitSlop={{top: 0, bottom: 10, left: 10, right: 5}}
                               accessible
                               accessibilityLabel="Reschedule appointment">
-                              <Text className="text-black text-sm font-bold underline">
+                              <Text className="text-red-800 text-xs font-bold underline pl-2">
                                 Reschedule
                               </Text>
                             </TouchableOpacity>
@@ -431,8 +432,6 @@ const ScheduleScreen = ({navigation}) => {
                         )}
                       </View>
                     </View>
-
-                    
                   </View>
                 )}
                 keyExtractor={item => item._id}
