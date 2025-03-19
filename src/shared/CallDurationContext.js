@@ -70,66 +70,6 @@ export const CallDurationProvider = ({ children }) => {
       }
     }, 1000);
   }, [user, handleUpdateUser, stopCall]);
-
-//   const startCall = useCallback((startTime, consultType, receiverUser, webSocket, isAccepted) => {
-//   if (!isAccepted) {
-//     console.log("Call was not accepted. Wallet deduction stopped.");
-//     return;
-//   }
-
-//   if (user.wallet < consultType.FeePerMinute) {
-//     console.log("Insufficient balance to start the call");
-//     setIsBalanceZero(true);
-//     stopCall();
-//     return;
-//   }
-
-//   setIsCallActive(true);
-//   callDurationInterval.current = setInterval(() => {
-//     const currentTime = new Date();
-//     const timeDifference = currentTime - startTime;
-//     const seconds = Math.floor((timeDifference / 1000) % 60);
-//     const minutes = Math.floor((timeDifference / (1000 * 60)) % 60);
-//     const hours = Math.floor((timeDifference / (1000 * 60 * 60)) % 24);
-//     const formattedDuration = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-//     setCallDuration(formattedDuration);
-
-//     webSocket.emit('syncCallDuration', {
-//       receiverUser,
-//       duration: formattedDuration
-//     });
-
-//     if (seconds === 59) {
-//       const fee = consultType.FeePerMinute;
-//       walletBalance = walletBalance - fee || 0;
-
-//       if (walletBalance >= 0) {
-//         handleUpdateUser({ ...user, wallet: walletBalance });
-
-//         if (walletBalance <= consultType.FeePerMinute * 5) {
-//           console.log("Warning: Low wallet balance");
-//           setIsBalanceEnough(true);
-//         } else {
-//           setIsBalanceEnough(false);
-//         }
-
-//         if (walletBalance <= 10) {
-//           console.log("Wallet balance too low, ending call...", walletBalance);
-//           setIsBalanceZero(true);
-//           stopCall();
-//         } else {
-//           setIsBalanceZero(false);
-//         }
-//       } else {
-//         console.log("Insufficient balance to continue the call, ending call...");
-//         setIsBalanceZero(true);
-//         stopCall();
-//       }
-//     }
-//   }, 1000);
-// }, [user, handleUpdateUser, stopCall]);
-
-
   const stopCall = useCallback(() => {
     if (callDurationInterval.current) {
       clearInterval(callDurationInterval.current);
