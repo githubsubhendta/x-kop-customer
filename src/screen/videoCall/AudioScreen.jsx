@@ -1,4 +1,3 @@
-
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {
   View,
@@ -65,8 +64,6 @@ const AudioScreen = ({route, navigation}) => {
     useCallback(() => setConnectionStatus('Not Connected'), []),
   );
 
-  
-
   useEffect(() => {
     if (startTime && reciever_data?.userInfo?.mobile) {
       startCall(
@@ -89,7 +86,7 @@ const AudioScreen = ({route, navigation}) => {
           PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
           PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
           PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
-          PermissionsAndroid.PERMISSIONS.CAMERA, 
+          PermissionsAndroid.PERMISSIONS.CAMERA,
         ]);
         if (
           granted['android.permission.WRITE_EXTERNAL_STORAGE'] ===
@@ -98,7 +95,7 @@ const AudioScreen = ({route, navigation}) => {
             PermissionsAndroid.RESULTS.GRANTED &&
           granted['android.permission.RECORD_AUDIO'] ===
             PermissionsAndroid.RESULTS.GRANTED &&
-          granted['android.permission.CAMERA'] === 
+          granted['android.permission.CAMERA'] ===
             PermissionsAndroid.RESULTS.GRANTED
         ) {
           console.log('Permissions granted');
@@ -110,7 +107,7 @@ const AudioScreen = ({route, navigation}) => {
       }
     } else if (Platform.OS === 'ios') {
       const microphoneStatus = await request(PERMISSIONS.IOS.MICROPHONE);
-      const cameraStatus = await request(PERMISSIONS.IOS.CAMERA); 
+      const cameraStatus = await request(PERMISSIONS.IOS.CAMERA);
       if (
         microphoneStatus === RESULTS.GRANTED &&
         cameraStatus === RESULTS.GRANTED
@@ -144,12 +141,12 @@ const AudioScreen = ({route, navigation}) => {
   };
 
   const handleCancel = () => {
-    setIsModalVisible(false); 
+    setIsModalVisible(false);
   };
 
   const handleOK = () => {
-    setIsModalVisible(false); 
-    startRecording(); 
+    setIsModalVisible(false);
+    startRecording();
   };
 
   const startRecording = async () => {
@@ -193,7 +190,6 @@ const AudioScreen = ({route, navigation}) => {
     try {
       await engine.current.stopAudioRecording();
       setIsRecording(false);
-      
     } catch (error) {
       console.error('Error stopping recording:', error);
     }
@@ -254,29 +250,43 @@ const AudioScreen = ({route, navigation}) => {
 
   const handleVideoCallConfirm = async () => {
     setShowVideoCallModal(false);
-    
+
     try {
-        if (engine.current) {
-            await engine.current.leaveChannel();
-        }
-        
-        webSocket.emit('VideoCallanswerCall', { callerId: mobile });
-        
-        navigation.navigate('VideoCallScreen', {
-            config,
-            mobile,
-            reciever_data,
-        });
+      if (engine.current) {
+        await engine.current.leaveChannel();
+      }
+
+      webSocket.emit('VideoCallanswerCall', {callerId: mobile});
+
+      navigation.navigate('VideoCallScreen', {
+        config,
+        mobile,
+        reciever_data,
+      });
     } catch (error) {
-        console.error("Error handling video call confirmation:", error);
+      console.error('Error handling video call confirmation:', error);
     }
-};
+  };
+
+  // Publish local audio stream///////////////////////////////////
+
+  useEffect(() => {
+    if (engine.current && isJoined) {
+      engine.current.publish();
+    }
+
+    return () => {
+      if (engine.current && isJoined) {
+        engine.current.leaveChannel();
+      }
+    };
+  }, [engine, isJoined]);
 
   useEffect(() => {
     webSocket.on('newVideoCall', createTwoButtonAlert);
     webSocket.on('VideoCallAnswered', async () => {
       await engine.current?.leaveChannel();
-      navigation.navigate('VideoCallScreen', {config, mobile,reciever_data});
+      navigation.navigate('VideoCallScreen', {config, mobile, reciever_data});
     });
     return () => {
       webSocket.off('newVideoCall', createTwoButtonAlert);
@@ -285,7 +295,15 @@ const AudioScreen = ({route, navigation}) => {
         navigation.navigate('VideoCallScreen', {config, mobile});
       });
     };
-  }, [webSocket, engine, createTwoButtonAlert, navigation, config, mobile,reciever_data]);
+  }, [
+    webSocket,
+    engine,
+    createTwoButtonAlert,
+    navigation,
+    config,
+    mobile,
+    reciever_data,
+  ]);
 
   useEffect(() => {
     if (isBalanceZero) {
@@ -429,12 +447,11 @@ const AudioScreen = ({route, navigation}) => {
           {
             label: 'Cancel',
             onPress: handleCancel,
-            color: 'gray'
+            color: 'gray',
           },
           {
             label: 'OK',
             onPress: handleOK,
-            
           },
         ]}
       />
