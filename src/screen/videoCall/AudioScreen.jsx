@@ -290,6 +290,7 @@ const AudioScreen = ({route, navigation}) => {
     });
     return () => {
       webSocket.off('newVideoCall', createTwoButtonAlert);
+      
       webSocket.off('VideoCallAnswered', async () => {
         await engine.current?.leaveChannel();
         navigation.navigate('VideoCallScreen', {config, mobile});
