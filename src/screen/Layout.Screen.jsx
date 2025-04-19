@@ -219,20 +219,30 @@ import {SvgXml} from 'react-native-svg';
 import {View, BackHandler, Alert, TouchableOpacity, Text} from 'react-native';
 import ContactScreen from './Contact.Screen.jsx';
 import {useNetwork} from '../shared/NetworkProvider.js';
+import {useCall} from '../context/callContext.js';
+import {navigate} from '../navigation/NavigationService.js';
 
 const Tab = createBottomTabNavigator();
 
 const LayoutScreen = ({navigation}) => {
+  const {handleNavigationStateChange} = useCall();
   const [selectedTab, setSelectedTab] = useState('Home');
   useEffect(() => {
     const backAction = () => {
       const state = navigation.getState();
       const currentRoute = state.routes[state.index].name;
 
+      const tbArray = ['AudioScreen', 'VideoCallScreen'];
+
+      console.log(currentRoute, 'check currect navigation', selectedTab);
+      handleNavigationStateChange(currentRoute);
       if (currentRoute === 'LayoutScreen' && selectedTab !== 'Home') {
-        navigation.navigate('Home');
+        navigate('Home');
         handleTabPress('Home');
       } else if (selectedTab === 'Home') {
+        if (tbArray.includes(currentRoute) > 0) {
+          return navigate('SelectConsultantsScreen');
+        }
         Alert.alert('Exit App', 'Do you want to exit the app?', [
           {
             text: 'Cancel',
@@ -367,7 +377,7 @@ const TabBarWithBorder = ({state, descriptors, navigation, selectedTab}) => {
             });
 
             if (!isFocused && !event.defaultPrevented) {
-              navigation.navigate(route.name);
+              navigate(route.name);
             }
           };
 

@@ -15,7 +15,7 @@ import {useWebSocket} from '../shared/WebSocketProvider';
 const FindAnOfficerScreen = ({route, navigation}) => {
   const recieve_params = route.params;
   const {user} = userStoreAction(state => state);
-  const {webSocket,callRedirect} = useWebSocket();
+  const {webSocket, callRedirect} = useWebSocket();
   const [mobile, setMobile] = useState('');
   const {loading, error, data, fetchData} = useHttpRequest();
   const tokenData = useRef(null);
@@ -25,13 +25,13 @@ const FindAnOfficerScreen = ({route, navigation}) => {
     const now = new Date();
     const later = new Date(now);
     later.setTime(now.getTime() + 10 * 60 * 1000);
-   if(recieve_params?.ConsultationTypeName){
-    fetchData('/officer_schedule/find-officer', 'POST', {
-      startTime: now.toISOString(),
-      endTime: later.toISOString(),
-      consultationTypeName: recieve_params.ConsultationTypeName,
-    });
-  }
+    if (recieve_params?.ConsultationTypeName) {
+      fetchData('/officer_schedule/find-officer', 'POST', {
+        startTime: now.toISOString(),
+        endTime: later.toISOString(),
+        consultationTypeName: recieve_params.ConsultationTypeName,
+      });
+    }
   }, [recieve_params]);
 
   const handleCallStart = useCallback(() => {
@@ -41,18 +41,17 @@ const FindAnOfficerScreen = ({route, navigation}) => {
         uid: 0,
       });
     }
-
   }, [mobile, data, user.mobile, fetchData]);
 
   useEffect(() => {
-    if(data?.data?.mobile != undefined){
+    if (data?.data?.mobile != undefined) {
       setMobile(data?.data?.mobile);
-    } else{
+    } else {
       if (data) {
         webSocket.emit('call', {
           calleeId: mobile,
           rtcMessage: data.data,
-          consultationTypeName: recieve_params.ConsultationTypeName
+          consultationTypeName: recieve_params.ConsultationTypeName,
         });
 
         tokenData.current = {data: data.data, mobile};
@@ -60,16 +59,16 @@ const FindAnOfficerScreen = ({route, navigation}) => {
     }
   }, [data, mobile, webSocket]);
 
-  useEffect(()=>{
-    if(mobile){
+  useEffect(() => {
+    if (mobile) {
       handleCallStart();
     }
-  },[mobile])
+  }, [mobile]);
 
   useEffect(() => {
     if (webSocket) {
       const handleAudioScreen = dataSet => {
-        callRedirect(dataSet,tokenData,recieve_params)
+        callRedirect(dataSet, tokenData, recieve_params);
       };
       webSocket.on('callAnswered', handleAudioScreen);
       return () => {
@@ -78,12 +77,12 @@ const FindAnOfficerScreen = ({route, navigation}) => {
     }
   }, [webSocket, navigation]);
 
-  useEffect(()=>{
-    if(error){
-      console.log("error==>",error)
+  useEffect(() => {
+    if (error) {
+      console.log('error==>', error);
       navigation.goBack();
     }
-  },[error]);
+  }, [error]);
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -137,7 +136,7 @@ const FindAnOfficerScreen = ({route, navigation}) => {
           // onPress={handleCallStart}
           className="p-4 rounded-full mx-2 bg-[#8E8284]"
           // disabled={loading}
-          >
+        >
           <SvgXml
             xml={SVG_mic_white}
             height={'40px'}

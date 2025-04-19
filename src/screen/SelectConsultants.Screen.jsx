@@ -10,6 +10,7 @@ import useHttpRequest from '../hooks/useHttpRequest.jsx';
 import {currencySymbol} from '../Constant/theme.js';
 import useUserStore from '../stores/user.store.js';
 import {useSnackbar} from '../shared/SnackbarProvider.js';
+import {navigate} from '../navigation/NavigationService.js';
 
 const SelectConsultantsScreen = ({route, navigation}) => {
   const {showSnackbar} = useSnackbar();
@@ -65,7 +66,6 @@ const SelectConsultantsScreen = ({route, navigation}) => {
       }
     }
   };
-  
 
   useEffect(() => {
     if (error) {
@@ -95,17 +95,19 @@ const SelectConsultantsScreen = ({route, navigation}) => {
   //   setSelected(indx);
   // };
 
-  const handleSelection = (indx) => {
+  const handleSelection = indx => {
     if (!arr_type || !arr_type[indx]) return;
-  
+
     if (parseInt(user.wallet) <= parseInt(arr_type[indx].FeePerMinute) * 2) {
-      Alert.alert('Please add sufficient balance to your wallet for this call.');
+      Alert.alert(
+        'Please add sufficient balance to your wallet for this call.',
+      );
       return;
     }
-  
+
     setSelected(indx);
   };
-  
+
   return (
     <SafeAreaView className="mx-3 py-2 flex-1">
       <View>
@@ -204,10 +206,7 @@ const SelectConsultantsScreen = ({route, navigation}) => {
                 disabled={selected == null}
                 onPress={() => {
                   selected != null &&
-                    navigation.navigate(
-                      'FindAnOfficerScreen',
-                      arr_type[selected],
-                    );
+                    navigate('FindAnOfficerScreen', arr_type[selected]);
                 }}>
                 <Text className="text-[16px] font-semibold text-white">
                   Call To Officer

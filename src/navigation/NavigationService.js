@@ -1,4 +1,8 @@
-import { createNavigationContainerRef, StackActions, CommonActions } from '@react-navigation/native';
+import {
+  createNavigationContainerRef,
+  StackActions,
+  CommonActions,
+} from '@react-navigation/native';
 import * as React from 'react';
 export const navigationRef = createNavigationContainerRef();
 export const isReadyRef = React.createRef();
@@ -17,16 +21,16 @@ export function navigate(name, params) {
   if (isReadyRef.current && navigationRef.current) {
     navigationRef.current.navigate(name, params);
   } else {
-    navigationQueue.push({ name, params });
+    navigationQueue.push({name, params});
   }
 }
 
 export function processNavigationQueue() {
   if (isReadyRef.current && navigationRef.current) {
-    navigationQueue.forEach(({ name, params }) => {
+    navigationQueue.forEach(({name, params}) => {
       navigationRef.current.navigate(name, params);
     });
-    // Clear the queue after processing
+
     navigationQueue.length = 0;
   }
 }
@@ -49,7 +53,7 @@ export function reset(index, routes) {
       CommonActions.reset({
         index,
         routes,
-      })
+      }),
     );
   }
 }
@@ -82,7 +86,7 @@ export function handleNavigation(operation, name, params, count) {
       pop(count);
       break;
     case 'reset':
-      reset(0, [{ name: name, params }]);
+      reset(0, [{name: name, params}]);
       break;
     case 'replace':
       replace(name, params);
@@ -95,10 +99,9 @@ export function handleNavigation(operation, name, params, count) {
   }
 }
 
-
 export function getCurrentRoute() {
   if (navigationRef.isReady() && navigationRef.current) {
     return navigationRef.current.getCurrentRoute();
   }
-  return null; 
+  return null;
 }
