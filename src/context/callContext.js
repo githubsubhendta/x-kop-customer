@@ -12,8 +12,8 @@ import {
   ClientRoleType,
 } from 'react-native-agora';
 import {useWebSocket} from '../shared/WebSocketProvider.jsx';
-
-
+import {useCallDuration} from '../shared/CallDurationContext.js';
+import {Alert} from 'react-native';
 
 const CallContext = createContext();
 
@@ -22,6 +22,10 @@ export const CallProvider = ({children}) => {
   const [isMinimized, setIsMinimized] = useState(false);
   const engine = useRef(null);
   const {leave, webSocket} = useWebSocket();
+  const {startCall: sttartCall, stopCall, isBalanceZero} = useCallDuration();
+  // const [allInfo, setAllInfo] = useState(null);
+  const isVideoEnabled = useRef(null);
+  const currentActiveUserData = useRef(null);
 
   const [peerIds, setPeerIds] = useState([]);
   const [isJoined, setIsJoined] = useState(false);
@@ -54,18 +58,33 @@ export const CallProvider = ({children}) => {
       });
       await engine.current.setDefaultAudioRouteToSpeakerphone(true);
 
+      // if (config?.video) {
+      //   engine.current.enableVideo();
+      //   engine.current.startPreview();
+      //   isVideoEnabled.current = 'VIDEO';
+      // } else {
+      //   engine.current.enableAudio();
+      //   engine.current.disableVideo();
+      //   isVideoEnabled.current = 'AUDIO';
+      // }
+
       if (config?.video) {
         engine.current.enableVideo();
         engine.current.startPreview();
+        isVideoEnabled.current = 'VIDEO';
+        console.log('Video enabled');
       } else {
         engine.current.enableAudio();
         engine.current.disableVideo();
+        isVideoEnabled.current = 'AUDIO';
+        console.log('Audio only');
       }
+      
 
       await engine.current.joinChannel(
-        config.token,
-        config.channelName,
-        config.uid,
+        config.config.token,
+        config.config.channelName,
+        config.config.uid,
         {clientRoleType: ClientRoleType.ClientRoleBroadcaster},
       );
     } catch (error) {
@@ -74,8 +93,61 @@ export const CallProvider = ({children}) => {
     }
   };
 
+  useEffect(() => {
+    if (isBalanceZero) {
+      endCall();
+    }
+  }, [isBalanceZero, endCall]);
+
+  useEffect(() => {
+    if (
+      currentActiveUserData.current &&
+      currentActiveUserData.current?.reciever_data?.userInfo?.mobile
+    ) {
+      const startTime = new Date(
+        currentActiveUserData.current.reciever_data.consultationData.startCallTime,
+      );
+      sttartCall(
+        startTime,
+        currentActiveUserData.current.consultType,
+        currentActiveUserData.current.reciever_data.userInfo.mobile,
+        webSocket,
+      );
+    }
+    return () => {
+      stopCall();
+    };
+  }, [currentActiveUserData.current, webSocket]);
+
+  const switchToVideoCall = async () => {
+    if (engine.current) {
+      try {
+        await engine.current.enableVideo();
+        await engine.current.startPreview();
+        isVideoEnabled.current = 'VIDEO';
+      } catch (error) {
+        console.log('Error switching to video call:', error);
+      }
+    }
+  };
+
+  const switchToAudioCall = async () => {
+    if (engine.current) {
+      try {
+        await engine.current.enableAudio();
+        await engine.current.disableVideo();
+        isVideoEnabled.current = 'AUDIO';
+      } catch (error) {
+        console.log('Error switching to video call:', error);
+      }
+    }
+  };
+
   const startCall = async callData => {
-    init(callData.config);
+    currentActiveUserData.current = callData;
+    init(callData);
+    // setAllInfo(callData);
+
     setActiveCall({...callData});
     setIsMinimized(false);
   };
@@ -97,8 +169,8 @@ export const CallProvider = ({children}) => {
 
   const maximizeCall = () => {
     if (activeCall) {
-      setIsMinimized(false);
       navigate('AudioScreen', activeCall);
+      setIsMinimized(false);
     }
   };
 
@@ -108,6 +180,7 @@ export const CallProvider = ({children}) => {
       engine.current.release();
       engine.current = null;
     }
+    stopCall();
     setActiveCall(null);
     setIsMinimized(false);
     setPeerIds([]);
@@ -140,6 +213,9 @@ export const CallProvider = ({children}) => {
         minimizeCall,
         maximizeCall,
         endCall,
+        switchToVideoCall,
+        switchToAudioCall,
+        isVideoEnabled,
       }}>
       {children}
     </CallContext.Provider>

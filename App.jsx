@@ -17,7 +17,7 @@ import {
 } from './src/utils/notificationService.js';
 import {SnackbarProvider} from './src/shared/SnackbarProvider.js';
 import { NetworkProvider } from './src/shared/NetworkProvider.js';
-import { AgoraProvider } from "./src/context/callContext.js"
+
 
 function App() {
   const appState = useRef(AppState.currentState);
@@ -58,7 +58,7 @@ function App() {
 
 
   return (
-    <AgoraProvider>
+    
     <NavigationContainer
       ref={navigationRef}
       onReady={() => {
@@ -75,7 +75,7 @@ function App() {
       </SafeAreaView>
       </NetworkProvider>
     </NavigationContainer>
-    </AgoraProvider>
+    
   );
 }
 

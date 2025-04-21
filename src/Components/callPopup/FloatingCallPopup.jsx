@@ -1,12 +1,16 @@
-import React, {useEffect} from 'react';
-import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
-import {useCall} from '../../context/callContext.js';
-import {SvgXml} from 'react-native-svg';
-import {SVG_hangout_red} from '../../utils/SVGImage.js';
-import {useNavigationState} from '@react-navigation/native';
+import React, { useEffect } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useCall } from '../../context/callContext.js';
+import { SvgXml } from 'react-native-svg';
+import { SVG_hangout_red } from '../../utils/SVGImage.js';
+import { useNavigationState } from '@react-navigation/native';
+import { useCallDuration } from '../../shared/CallDurationContext.js';
+
 
 const CallPopup = () => {
-  const {activeCall, isMinimized, maximizeCall, endCall} = useCall();
+  const { activeCall, isMinimized, maximizeCall, endCall } = useCall();
+const { callDuration } = useCallDuration();
+
 
   const currentRouteName = useNavigationState(state => {
     if (!state || !state.routes || state.index == null) return null;
@@ -34,15 +38,18 @@ const CallPopup = () => {
   ) {
     return null;
   }
+ 
 
   return (
     <TouchableOpacity style={styles.popupContainer} onPress={maximizeCall}>
       <View style={styles.popupContent}>
         <View style={styles.callInfo}>
           <Text style={styles.callerName}>
-            {activeCall.userInfo?.name || 'On Call'}
+            {activeCall.reciever_data?.userInfo?.name || 'On Call'}
           </Text>
+          <Text style={styles.callDuration}>{callDuration}</Text>
         </View>
+
         <TouchableOpacity onPress={endCall}>
           <SvgXml xml={SVG_hangout_red} width={40} height={40} />
         </TouchableOpacity>
@@ -77,10 +84,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: 'bold',
   },
-  callStatus: {
+  callDuration: {
     color: 'white',
-    fontSize: 14,
+    fontSize: 10,
+    marginTop: 2,
   },
+  
 });
 
 export default CallPopup;
