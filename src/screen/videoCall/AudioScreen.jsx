@@ -123,15 +123,7 @@ const AudioScreen = ({ route, navigation }) => {
     requestPermissions();
   }, [requestPermissions]);
 
-  // useEffect(() => {
-  //   if (configuration != undefined && Object.keys(configuration).length) {
-  //     console.log(configuration, 'engine.current==', engine.current);
-  //     if (!engine.current) {
-  //       return;
-  //     }
-  //     startCall(configuration);
-  //   }
-  // }, [configuration, engine]);
+  
 
   useEffect(() => {
     if (configuration != undefined && Object.keys(configuration).length) {
@@ -250,33 +242,17 @@ const AudioScreen = ({ route, navigation }) => {
   const handleVideoCallConfirm = async () => {
     setShowVideoCallModal(false);
     webSocket.emit('VideoCallanswerCall', { callerId: configuration.mobile });
-    // await engine.current?.leaveChannel();
-    // setTimeout(() => {
-    // navigation.navigate('VideoCallScreen', {
-    //   config: configuration.config,
-    //   mobile: configuration.mobile,
-    //   chatId: configuration.reciever_data.chatId,
-    //   userInfo: configuration.userInfo,
-    // });
-    // }, 300);
+  
     swichVideo();
-    // configuration = {...configuration, video: true};
-    // startCall(configuration);
+   
   };
 
   useEffect(() => {
     webSocket.on('newVideoCall', createTwoButtonAlert);
     webSocket.on('VideoCallAnswered', async () => {
-      // await engine.current?.leaveChannel();
+     
       swichVideo();
-      // configuration = {...configuration, video: true};
-      // startCall(configuration);
-      // navigation.navigate('VideoCallScreen', {
-      //   config: configuration.config,
-      //   mobile: configuration.mobile,
-      //   chatId: configuration.reciever_data.chatId,
-      //   userInfo: configuration.userInfo,
-      // });
+     
     });
     return () => {
       webSocket.off('newVideoCall', createTwoButtonAlert);
@@ -284,16 +260,7 @@ const AudioScreen = ({ route, navigation }) => {
     };
   }, [webSocket, engine, createTwoButtonAlert, navigation, configuration]);
 
-  // useEffect(() => {
-  //   const handleCallDurationUpdate = data => {
-  //     setCallDuration(data.callDuration);
-  //   };
-
-  //   webSocket.on('updateCallDuration', handleCallDurationUpdate);
-  //   return () => {
-  //     webSocket.off('updateCallDuration', handleCallDurationUpdate);
-  //   };
-  // }, [webSocket]);
+  
 
   const handleClose = useCallback(() => setModelChat(false), []);
 
@@ -692,12 +659,12 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     position: 'absolute',
-    top: 10,
+    top: 5,
     right: 20,
     width: 40,
     height: 40,
     borderRadius: 20,
-    // backgroundColor: 'rgba(0, 0, 0, 0.6)',
+   
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 10,
