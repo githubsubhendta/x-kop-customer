@@ -24,7 +24,8 @@ export const CallProvider = ({children}) => {
   const {leave, webSocket} = useWebSocket();
   const {startCall: sttartCall, stopCall, isBalanceZero} = useCallDuration();
   // const [allInfo, setAllInfo] = useState(null);
-  const isVideoEnabled = useRef(null);
+  // const isVideoEnabled = useRef(null);
+  const isVideoEnabled = useRef('AUDIO');
   const currentActiveUserData = useRef(null);
 
   const [peerIds, setPeerIds] = useState([]);
@@ -185,7 +186,7 @@ export const CallProvider = ({children}) => {
     setIsMinimized(false);
     setPeerIds([]);
     setIsJoined(false);
-    leave();
+    // leave();
   };
 
   useEffect(() => {

@@ -97,6 +97,22 @@ export const WebSocketProvider = ({children}) => {
   }, [isConnected, localTokens]);
   // [isConnected, user, localTokens]
 
+  const wasCallRejected = useRef(false);
+
+  // const leave = (type = 'any') => {
+  //   if (!webSocket || !otherUserId.current) return;
+
+  //   webSocket.emit('handsup', {
+  //     otherUserId: otherUserId.current,
+  //     type: type,
+  //   });
+
+  //   // Clear the reference after emitting
+  //   if (type === 'call_reject') {
+  //     otherUserId.current = null;
+  //   }
+  // };
+
   const leave = (type = 'any') => {
     webSocket.emit('handsup', {
       otherUserId: otherUserId.current,
@@ -110,10 +126,14 @@ export const WebSocketProvider = ({children}) => {
   };
 
   const callRedirect = (dataSet, tokenData, recieve_params) => {
+    if (!dataSet || !tokenData) {
+      console.error('Invalid dataSet or tokenData for call redirect');
+      return;
+    }
     userInfo.current = dataSet.userInfo;
     navigate('AudioScreen', {
-      config: tokenData.current?.data,
-      mobile: tokenData.current?.mobile,
+      config: tokenData,
+      mobile: tokenData.mobile,
       reciever_data: dataSet,
       consultType: recieve_params,
     });

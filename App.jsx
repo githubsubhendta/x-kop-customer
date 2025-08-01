@@ -1,4 +1,5 @@
 import React, {useState, useEffect, useRef} from 'react';
+import notifee from '@notifee/react-native';7
 import {SafeAreaView, PermissionsAndroid, Platform} from 'react-native';
 import {AppState} from 'react-native';
 import themeStore from './src/stores/theme.store.js';
@@ -19,6 +20,7 @@ import {SnackbarProvider} from './src/shared/SnackbarProvider.js';
 import { NetworkProvider } from './src/shared/NetworkProvider.js';
 
 
+
 function App() {
   const appState = useRef(AppState.currentState);
   const [appStateVisible, setAppStateVisible] = useState(appState.current);
@@ -35,6 +37,28 @@ function App() {
       processNavigationQueue();
     }
   }, [isReadyRef.current]);
+
+
+  useEffect(() => {
+  const checkInitialNotification = async () => {
+    try {
+      const initialNotification = await notifee.getInitialNotification();
+      if (initialNotification) {
+        const { pressAction, notification } = initialNotification;
+        if (pressAction?.id === 'answer' && notification?.data) {
+          console.log('[App] Answer button pressed on cold start');
+
+          const useCallStore = require('./src/stores/call.store.js').default;
+          useCallStore.getState().setBackgroundCallPayload(notification.data);
+        }
+      }
+    } catch (error) {
+      console.error('Error checking initial notification:', error);
+    }
+  };
+
+  checkInitialNotification();
+}, []);
 
 
   useEffect(() => {

@@ -19,8 +19,14 @@ import useUserStore from '../stores/user.store.js';
 import useCallHistory from '../Api/callHistory.js';
 import {deleteSchedule, getAllSchedules} from '../Api/scheduleService.js';
 import {useFocusEffect} from '@react-navigation/native';
+import useHttpRequest from '../hooks/useHttpRequest.jsx';
+import {useWebSocket} from '../shared/WebSocketProvider.jsx';
 
 const ScheduleScreen = ({navigation}) => {
+  const {webSocket, callRedirect} = useWebSocket();
+  const {error, data, fetchData} = useHttpRequest();
+  const tokenData = React.useRef(null);
+
   const [scheduleCall, setScheduleCall] = useState(false);
   const [selected, setSelected] = useState(null);
   const [slot, setSlot] = useState(0);
@@ -30,6 +36,8 @@ const ScheduleScreen = ({navigation}) => {
   const [scheduleList, setScheduleList] = useState([]);
   const [selectedSchedule, setSelectedSchedule] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [isJoining, setIsJoining] = useState(false);
+
   useEffect(() => {
     const currentDate = new Date().toISOString().split('T')[0];
     setSelected(currentDate);
@@ -89,6 +97,42 @@ const ScheduleScreen = ({navigation}) => {
     const allHistory = await getAllSchedules();
     setScheduleList(allHistory);
     setRefreshing(false);
+  };
+
+  const startCallDirectly = async item => {
+    const now = new Date();
+    const later = new Date(now.getTime() + 10 * 60 * 1000); // 10 min later
+
+    // Fetch officer mobile - mimic FindAnOfficerScreen fetchData call
+    await fetchData('/officer_schedule/find-officer', 'POST', {
+      startTime: now.toISOString(),
+      endTime: later.toISOString(),
+      consultationTypeName:
+        item.officer.officerDetails.ConsultationTypeID?.ConsultationTypeName,
+    });
+
+    if (data?.data?.mobile) {
+      const officerMobile = data.data.mobile;
+
+      // Emit call event to websocket directly
+      webSocket.emit('call', {
+        calleeId: officerMobile,
+        rtcMessage: data.data,
+        consultationTypeName:
+          item.officer.officerDetails.ConsultationTypeID?.ConsultationTypeName,
+      });
+
+      tokenData.current = {data: data.data, mobile: officerMobile};
+
+      // Optionally handle callRedirect like in FindAnOfficerScreen if you want auto navigation after call is answered
+      webSocket.on('callAnswered', dataSet => {
+        callRedirect(dataSet, tokenData, {
+          ConsultationTypeName:
+            item.officer.officerDetails.ConsultationTypeID
+              ?.ConsultationTypeName,
+        });
+      });
+    }
   };
 
   const marked = useMemo(
@@ -339,10 +383,21 @@ const ScheduleScreen = ({navigation}) => {
             <View className="px-4 h-44">
               <FlatList
                 data={scheduleList}
+                keyExtractor={item => item._id}
+                scrollEnabled
+                style={{height: 100}}
+                ListEmptyComponent={
+                  <View className="py-10 items-center">
+                    <Text className="text-gray-500">
+                      No schedules available
+                    </Text>
+                  </View>
+                }
                 renderItem={({item}) => (
-                  <View className="flex flex-row justify-between items-center py-3 border-b-2 border-slate-200 ">
-                    <View className="flex flex-row flex-1 items-center mr-2">
-                      {/* Avatar Container */}
+                  <View className="flex flex-row justify-between items-start py-4 border-b border-slate-200">
+                    {/* Avatar + Info Container */}
+                    <View className="flex flex-row flex-1 items-start space-x-3 mr-2">
+                      {/* Avatar */}
                       <View className="w-[18%] max-w-[50px] aspect-square rounded-full overflow-hidden bg-gray-200">
                         <Image
                           source={{uri: item.officer.avatar}}
@@ -351,22 +406,21 @@ const ScheduleScreen = ({navigation}) => {
                         />
                       </View>
 
-                      {/* Details Container */}
-                      <View className="pl-3">
-                        {/* Name */}
+                      {/* Info */}
+                      <View className="flex-1">
+                        {/* Name & Reschedule */}
                         <View className="flex flex-row justify-between items-center">
                           <Text
-                            className="text-black font-medium text-sm truncate overflow-hidden whitespace-nowrap"
+                            className="text-black font-medium text-sm flex-1"
                             numberOfLines={1}
                             ellipsizeMode="tail">
                             {item.officer.name}
                           </Text>
 
-                          {item.startTime !== undefined && (
+                          {item.startTime && (
                             <TouchableOpacity
                               onPress={() => handleReschedule(item)}
                               hitSlop={{top: 0, bottom: 10, left: 10, right: 5}}
-                              accessible
                               accessibilityLabel="Reschedule appointment">
                               <Text className="text-red-800 text-xs font-bold underline pl-2">
                                 Reschedule
@@ -375,22 +429,22 @@ const ScheduleScreen = ({navigation}) => {
                           )}
                         </View>
 
-                        {/* Duration & Fee Row */}
-                        <View className="flex flex-row  items-center ">
-                          <Text className="text-secondary text-sm font-light mr-4">
+                        {/* Duration & Fee */}
+                        <View className="flex flex-row items-center flex-wrap mt-1 space-x-4">
+                          <Text className="text-secondary text-sm font-light">
                             Duration:{' '}
                             {(() => {
-                              const durationInMs =
+                              const durationMs =
                                 new Date(item.endTime) -
                                 new Date(item.startTime);
                               const hours = Math.floor(
-                                durationInMs / (1000 * 60 * 60),
+                                durationMs / (1000 * 60 * 60),
                               );
                               const minutes = Math.floor(
-                                (durationInMs % (1000 * 60 * 60)) / (1000 * 60),
+                                (durationMs % (1000 * 60 * 60)) / (1000 * 60),
                               );
                               const seconds = Math.floor(
-                                (durationInMs % (1000 * 60)) / 1000,
+                                (durationMs % (1000 * 60)) / 1000,
                               );
                               const pad = num => String(num).padStart(2, '0');
                               return `${pad(hours)}:${pad(minutes)}:${pad(
@@ -402,48 +456,67 @@ const ScheduleScreen = ({navigation}) => {
                           <Text className="text-black text-sm font-medium">
                             Fee: ₹
                             {(
-                              parseInt(
-                                (new Date(item.endTime) -
-                                  new Date(item.startTime)) /
-                                  (1000 * 60),
-                              ) *
+                              ((new Date(item.endTime) -
+                                new Date(item.startTime)) /
+                                (1000 * 60)) *
                               parseFloat(
                                 item.officer.officerDetails.ConsultationTypeID
-                                  .FeePerMinute,
+                                  ?.FeePerMinute,
                               )
                             ).toFixed(2)}
                           </Text>
                         </View>
 
-                        {/* Date/Time Row */}
-                        {item.startTime !== undefined && (
-                          <View className="flex flex-row  items-center">
-                            <Text className="text-black text-[12px] font-medium mr-2">
-                              {dateFormate(item.startTime)}
-                            </Text>
-                            <Text className="text-black text-[12px]">
-                              {timeFormate(item.startTime)} -{' '}
-                              {timeFormate(item.endTime)}
-                            </Text>
-                            <Text className="text-[#36D158] text-sm font-medium ml-4">
-                              Unpaid
-                            </Text>
+                        {/* Date, Time, Status & Join */}
+                        {item.startTime && (
+                          <View className="flex flex-row justify-between items-center mt-2 flex-wrap">
+                            {/* Date + Time + Status */}
+                            <View className="flex flex-row items-center flex-wrap flex-1 space-x-2">
+                              <Text className="text-black text-[12px] font-medium">
+                                {dateFormate(item.startTime)}
+                              </Text>
+                              <Text className="text-black text-[12px]">
+                                {timeFormate(item.startTime)} -{' '}
+                                {timeFormate(item.endTime)}
+                              </Text>
+                              <Text className="text-[#36D158] text-sm font-medium ml-2">
+                                Unpaid
+                              </Text>
+                            </View>
+
+                            {/* Join Button */}
+                            {new Date(item.startTime) <= new Date() && (
+                              <TouchableOpacity
+                                disabled={isJoining}
+                                className={`bg-[#36D158] px-3 py-1 rounded-md ml-2 ${
+                                  isJoining ? 'opacity-50' : ''
+                                }`}
+                                onPress={() => {
+                                  if (isJoining) return;
+                                  setIsJoining(true);
+                                  navigation.navigate(
+                                    'RequestingMeetingScreen',
+                                    {
+                                      ConsultationTypeName:
+                                        item.officer.officerDetails
+                                          .ConsultationTypeID
+                                          ?.ConsultationTypeName,
+                                      officerMobile: item.officer.mobile,
+                                      scheduleId: item._id,
+                                    },
+                                  );
+                                }}>
+                                <Text className="text-white text-xs font-bold">
+                                  Join
+                                </Text>
+                              </TouchableOpacity>
+                            )}
                           </View>
                         )}
                       </View>
                     </View>
                   </View>
                 )}
-                keyExtractor={item => item._id}
-                ListEmptyComponent={
-                  <View className="py-10 items-center">
-                    <Text className="text-gray-500">
-                      No schedules available
-                    </Text>
-                  </View>
-                }
-                scrollEnabled
-                style={{height: 100}}
               />
             </View>
           </View>

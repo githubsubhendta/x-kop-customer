@@ -1,20 +1,23 @@
 // notificationService.js
 import messaging from '@react-native-firebase/messaging';
-import notifee, { AndroidImportance, EventType } from '@notifee/react-native';
-import { navigate } from './../navigation/NavigationService.js';
+import notifee, {
+  AndroidCategory,
+  AndroidImportance,
+  EventType,
+} from '@notifee/react-native';
+import {navigate} from './../navigation/NavigationService.js';
+import useCallStore from '../stores/call.store.js';
 
 // Set up the notification channel
 export async function setupNotificationChannel() {
   try {
     await notifee.createChannel({
-      id: 'default',
-      name: 'Default Channel',
-      importance: AndroidImportance.HIGH,
-    });
-    await notifee.createChannel({
       id: 'call',
-      name: 'Call Channel',
+      name: 'Call Notifications',
+      sound: 'incoming_call',
       importance: AndroidImportance.HIGH,
+      vibration: true,
+      vibrationPattern: [500, 700, 900, 1100, 1300, 1500, 1700, 1800],
     });
   } catch (error) {
     console.error('Error creating notification channel:', error);
@@ -22,66 +25,120 @@ export async function setupNotificationChannel() {
 }
 
 // Handle background messages from Firebase
+// Handle background messages from Firebase
 export async function handleBackgroundMessage(remoteMessage) {
   try {
     await setupNotificationChannel();
 
-    // Check if the message is a call or a normal notification
-    const messageType = remoteMessage.data?.type || 'default'; // Assuming 'type' field indicates the message type
+    let payload = remoteMessage?.data || {};
 
-    if (messageType === 'call') {
-      // Handle call notifications
+    // Parse nested JSON if needed
+    if (typeof payload.data === 'string') {
+      try {
+        const inner = JSON.parse(payload.data);
+        payload = {...payload, ...inner};
+      } catch (e) {
+        console.warn('⚠️ Failed to parse inner data string:', e);
+      }
+    }
+
+    // Normalize the caller info
+    const callerInfo = payload?.userInfo || payload?.officer;
+    if (!callerInfo || !callerInfo.mobile) {
+      console.error(
+        '❌ Invalid call payload: missing userInfo or officer',
+        payload,
+      );
+      return;
+    }
+
+    // Prepare safe stringified data
+    const safeData = Object.entries({
+      ...payload,
+      rtcMessage: JSON.stringify(payload.rtcMessage || {}),
+      userInfo: JSON.stringify(payload.userInfo || {}),
+    }).reduce((acc, [key, value]) => {
+      acc[key] = typeof value === 'string' ? value : JSON.stringify(value);
+      return acc;
+    }, {});
+
+    const messageType = payload?.type || 'default';
+
+    if (messageType === 'incoming_call' || messageType === 'call') {
       await notifee.displayNotification({
-        title: remoteMessage.data?.title || 'Incoming Call',
-        body: remoteMessage.data?.body || 'You have an incoming call.',
+        title: payload.title || 'Incoming Call',
+        body: payload.body || 'You have an incoming call.',
+        data: safeData,
         android: {
           channelId: 'call',
+          category: AndroidCategory.CALL,
+          importance: AndroidImportance.HIGH,
+          fullScreenIntent: true,
           sound: 'incoming_call',
-          vibrationPattern: [300, 500],
+          smallIcon: 'ic_notification',
+          color: '#4CAF50',
+          largeIcon: 'ic_launcher',
+          vibrationPattern: [500, 700, 900, 1100, 1300, 1500],
+          pressAction: {
+            id: 'default',
+            launchActivity: 'default',
+          },
           actions: [
-            { title: 'Answer', pressAction: { id: 'answer' } },
-            { title: 'Decline', pressAction: { id: 'decline' } },
+            {
+              title: '<p style="color: #128111;"><b>Accept</b></p>',
+              pressAction: {
+                id: 'answer',
+                launchActivity: 'com.xkopconsultancy.xkop.MainActivity',
+              },
+              icon: 'ic_answer_icon',
+            },
+            {
+              title: '<p style="color: #f44336;"> <b>Reject</b></p>',
+              pressAction: {
+                id: 'decline',
+              },
+              icon: 'ic_decline_icon',
+            },
           ],
         },
       });
     } else {
-      // Handle regular message notifications
       await notifee.displayNotification({
-        title: remoteMessage.data?.title || 'Default Title',
-        body: remoteMessage.data?.body || 'Default Body',
+        title: payload.title || 'Notification',
+        body: payload.body || 'You have a new notification.',
+        data: safeData,
         android: {
           channelId: 'default',
           sound: 'default',
-          vibrationPattern: [300, 500],
+          vibrationPattern: [500, 700, 500, 700],
         },
       });
     }
   } catch (error) {
-    console.error('Error handling background message:', error);
+    console.error('❗ Error handling background message:', error);
   }
 }
 
-// Handle background notification actions
 export function setupNotificationListeners() {
-  notifee.onBackgroundEvent(async ({ type, detail }) => {
-    const { notification, pressAction } = detail;
+  notifee.onBackgroundEvent(async ({type, detail}) => {
+    const {notification, pressAction} = detail;
 
-    try {
-      if (type === EventType.ACTION_PRESS) {
-        if (pressAction.id === 'answer') {
-          console.log("Redirecting to FindAnOfficerScreen...", pressAction.id);
-          navigate('FindAnOfficerScreen'); // You can adjust navigation here based on your screen names
-        } else if (pressAction.id === 'decline') {
-          console.log("Call declined", pressAction.id);
+    if (type === EventType.ACTION_PRESS && pressAction.id === 'answer') {
+      try {
+        const payload = notification?.data;
+        if (payload) {
+          console.log('[NotificationService] Answer button pressed:', payload);
+          const useCallStore = require('../stores/call.store.js').default;
+          useCallStore.getState().setBackgroundCallPayload(payload);
         }
+
         await notifee.cancelNotification(notification.id);
+      } catch (error) {
+        console.error('❗ Error handling answer action:', error);
       }
-    } catch (error) {
-      console.error('Error handling background event:', error);
     }
   });
 }
-
 
 export function initializeFirebaseMessaging() {
   messaging().setBackgroundMessageHandler(handleBackgroundMessage);

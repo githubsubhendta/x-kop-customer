@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import Svg, { Path } from 'react-native-svg';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import Svg, {Path} from 'react-native-svg';
 
 import {
   ChannelProfileType,
@@ -19,8 +19,8 @@ import {
   PermissionsAndroid,
   Dimensions,
 } from 'react-native';
-import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
-import { SvgXml } from 'react-native-svg';
+import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
+import {SvgXml} from 'react-native-svg';
 import RNFS from 'react-native-fs';
 import useAgoraEngine from '../../hooks/useAgoraEngine';
 import {
@@ -34,19 +34,19 @@ import {
   SVG_switch_camera,
   SVG_unmute_mic,
 } from '../../utils/SVGImage.js';
-import { useWebSocket } from '../../shared/WebSocketProvider.jsx';
+import {useWebSocket} from '../../shared/WebSocketProvider.jsx';
 import ChatModal from '../../Components/chat/ChatModal.jsx';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import CustomModal from '../../Components/CustomModal.jsx';
-import { navigate } from '../../navigation/NavigationService.js';
-import { useCall } from '../../context/callContext.js';
-import { useCallDuration } from '../../shared/CallDurationContext.js';
+import {navigate} from '../../navigation/NavigationService.js';
+import {useCall} from '../../context/callContext.js';
+import {useCallDuration} from '../../shared/CallDurationContext.js';
 
-const { width, height } = Dimensions.get('window');
+const {width, height} = Dimensions.get('window');
 
-const AudioScreen = ({ route, navigation }) => {
+const AudioScreen = ({route, navigation}) => {
   const configuration = route.params || {};
-  const { webSocket, leave } = useWebSocket();
+  const {webSocket, leave} = useWebSocket();
   const [isMuted, setIsMuted] = useState(false);
   const [isSpeakerEnabled, setIsSpeakerEnabled] = useState(true);
   const [connectionStatus, setConnectionStatus] = useState('Not Connected');
@@ -58,7 +58,7 @@ const AudioScreen = ({ route, navigation }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isCameraOn, setCameraOn] = useState(true);
 
-  const { callDuration, isBalanceEnough } = useCallDuration();
+  const {callDuration, isBalanceEnough} = useCallDuration();
 
   const {
     startCall,
@@ -90,13 +90,13 @@ const AudioScreen = ({ route, navigation }) => {
         ]);
         if (
           granted['android.permission.WRITE_EXTERNAL_STORAGE'] ===
-          PermissionsAndroid.RESULTS.GRANTED &&
+            PermissionsAndroid.RESULTS.GRANTED &&
           granted['android.permission.READ_EXTERNAL_STORAGE'] ===
-          PermissionsAndroid.RESULTS.GRANTED &&
+            PermissionsAndroid.RESULTS.GRANTED &&
           granted['android.permission.RECORD_AUDIO'] ===
-          PermissionsAndroid.RESULTS.GRANTED &&
+            PermissionsAndroid.RESULTS.GRANTED &&
           granted['android.permission.CAMERA'] ===
-          PermissionsAndroid.RESULTS.GRANTED
+            PermissionsAndroid.RESULTS.GRANTED
         ) {
           console.log('Permissions granted');
         } else {
@@ -123,15 +123,12 @@ const AudioScreen = ({ route, navigation }) => {
     requestPermissions();
   }, [requestPermissions]);
 
-  
-
   useEffect(() => {
     if (configuration != undefined && Object.keys(configuration).length) {
       console.log(configuration, 'Calling startCall...');
       startCall(configuration);
     }
   }, [configuration]);
-
 
   const getRecordingFilePath = useCallback(() => {
     const directoryPath =
@@ -169,7 +166,7 @@ const AudioScreen = ({ route, navigation }) => {
       const filePath = getRecordingFilePath();
       const directoryPath = filePath.substring(0, filePath.lastIndexOf('/'));
 
-      await RNFS.mkdir(directoryPath, { recursive: true });
+      await RNFS.mkdir(directoryPath, {recursive: true});
 
       console.log('Recording filePath ====>', filePath);
 
@@ -227,7 +224,7 @@ const AudioScreen = ({ route, navigation }) => {
 
   const switchToVideoCall = useCallback(async () => {
     if (engine.current) {
-      webSocket.emit('videocall', { calleeId: configuration.mobile });
+      webSocket.emit('videocall', {calleeId: configuration.mobile});
     }
   }, [engine, webSocket, configuration]);
 
@@ -241,26 +238,21 @@ const AudioScreen = ({ route, navigation }) => {
 
   const handleVideoCallConfirm = async () => {
     setShowVideoCallModal(false);
-    webSocket.emit('VideoCallanswerCall', { callerId: configuration.mobile });
-  
+    webSocket.emit('VideoCallanswerCall', {callerId: configuration.mobile});
+
     swichVideo();
-   
   };
 
   useEffect(() => {
     webSocket.on('newVideoCall', createTwoButtonAlert);
     webSocket.on('VideoCallAnswered', async () => {
-     
       swichVideo();
-     
     });
     return () => {
       webSocket.off('newVideoCall', createTwoButtonAlert);
       webSocket.off('VideoCallAnswered');
     };
   }, [webSocket, engine, createTwoButtonAlert, navigation, configuration]);
-
-  
 
   const handleClose = useCallback(() => setModelChat(false), []);
 
@@ -300,14 +292,12 @@ const AudioScreen = ({ route, navigation }) => {
     if (peerIds.length > 0) {
       const id = peerIds[0];
       return (
-        <RtcSurfaceView style={styles.remote} canvas={{ uid: id }} key={id} />
+        <RtcSurfaceView style={styles.remote} canvas={{uid: id}} key={id} />
       );
     } else {
       return <Text style={styles.text}>No remote video</Text>;
     }
   };
-
-  
 
   const toggleCamera = () => {
     if (isCameraOn) {
@@ -324,21 +314,21 @@ const AudioScreen = ({ route, navigation }) => {
     +engine.current?.switchCamera();
   };
 
-
-
   const _renderVideos = () => (
     <View style={styles.fullView}>
       <View style={styles.splitContainer}>
         <View style={styles.remoteContainer}>
           <View style={styles.counterContainerVideo}>
-            <Text style={styles.callDurationVideo}>{callDuration} mins left</Text>
+            <Text style={styles.callDurationVideo}>
+              {callDuration} mins left
+            </Text>
           </View>
           {_renderRemoteVideos()}
         </View>
-  
+
         {isCameraOn ? (
           <View style={styles.localContainer}>
-            <RtcSurfaceView style={styles.local} canvas={{ uid: 0 }} />
+            <RtcSurfaceView style={styles.local} canvas={{uid: 0}} />
           </View>
         ) : (
           <View style={styles.localContainer2}>
@@ -362,7 +352,9 @@ const AudioScreen = ({ route, navigation }) => {
 
   return (
     <>
-      {console.log('hello', isVideoEnabled.current)}
+      {/* {console.log('hello', isVideoEnabled.current)} */}
+      {console.log('Call Mode (isVideoEnabled):', isVideoEnabled?.current)}
+
       {isVideoEnabled.current === 'AUDIO' ? (
         <View style={styles.container}>
           {connectionStatus !== 'Connected' ? (
@@ -381,13 +373,15 @@ const AudioScreen = ({ route, navigation }) => {
                 <Image
                   source={
                     configuration?.userInfo?.avatar
-                      ? { uri: configuration?.userInfo?.avatar }
+                      ? {uri: configuration?.userInfo?.avatar}
                       : require('./../../images/book2.jpg')
                   }
                   style={styles.profileImage}
                 />
                 <View style={styles.textContainer}>
-                  <Text style={styles.name}>{configuration?.reciever_data?.userInfo?.name}</Text>
+                  <Text style={styles.name}>
+                    {configuration?.reciever_data?.userInfo?.name}
+                  </Text>
                   <Text style={styles.title}>General Offences</Text>
                   <Text style={styles.status}>Call in Progress</Text>
                   <View style={styles.counterContainerAudio}>
@@ -419,7 +413,9 @@ const AudioScreen = ({ route, navigation }) => {
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.button}
-                  onPress={isRecording ? stopRecording : confirmAndStartRecording}>
+                  onPress={
+                    isRecording ? stopRecording : confirmAndStartRecording
+                  }>
                   <Icon
                     name={isRecording ? 'stop' : 'fiber-manual-record'}
                     size={24}
@@ -450,20 +446,20 @@ const AudioScreen = ({ route, navigation }) => {
               {chatModal}
             </View>
           )}
-  
+
           <CustomModal
             isVisible={showModal}
             onClose={() => setShowModal(false)}
             message="Your balance is not enough. Please add more funds."
             buttons={[
-              { label: 'Cancel', onPress: handleModalClose, color: 'gray' },
+              {label: 'Cancel', onPress: handleModalClose, color: 'gray'},
               {
                 label: 'Go to Wallet',
                 onPress: handleNavigateToWallet,
               },
             ]}
           />
-  
+
           <CustomModal
             isVisible={showVideoCallModal}
             onClose={handleVideoCallModalClose}
@@ -480,7 +476,7 @@ const AudioScreen = ({ route, navigation }) => {
               },
             ]}
           />
-  
+
           <CustomModal
             isVisible={isModalVisible}
             onClose={handleCancel}
@@ -530,7 +526,9 @@ const AudioScreen = ({ route, navigation }) => {
                 <Path d="M284 224.8a34.1 34.1 0 1 0 34.3 34.1A34.2 34.2 0 0 0 284 224.8zm-110.5 0a34.1 34.1 0 1 0 34.3 34.1A34.2 34.2 0 0 0 173.6 224.8zm220.9 0a34.1 34.1 0 1 0 34.3 34.1A34.2 34.2 0 0 0 394.5 224.8zm153.8-55.3c-15.5-24.2-37.3-45.6-64.7-63.6-52.9-34.8-122.4-54-195.7-54a406 406 0 0 0 -72 6.4 238.5 238.5 0 0 0 -49.5-36.6C99.7-11.7 40.9 .7 11.1 11.4A14.3 14.3 0 0 0 5.6 34.8C26.5 56.5 61.2 99.3 52.7 138.3c-33.1 33.9-51.1 74.8-51.1 117.3 0 43.4 18 84.2 51.1 118.1 8.5 39-26.2 81.8-47.1 103.5a14.3 14.3 0 0 0 5.6 23.3c29.7 10.7 88.5 23.1 155.3-10.2a238.7 238.7 0 0 0 49.5-36.6A406 406 0 0 0 288 460.1c73.3 0 142.8-19.2 195.7-54 27.4-18 49.1-39.4 64.7-63.6 17.3-26.9 26.1-55.9 26.1-86.1C574.4 225.4 565.6 196.4 548.3 169.5zM285 409.9a345.7 345.7 0 0 1 -89.4-11.5l-20.1 19.4a184.4 184.4 0 0 1 -37.1 27.6 145.8 145.8 0 0 1 -52.5 14.9c1-1.8 1.9-3.6 2.8-5.4q30.3-55.7 16.3-100.1c-33-26-52.8-59.2-52.8-95.4 0-83.1 104.3-150.5 232.8-150.5s232.9 67.4 232.9 150.5C517.9 342.5 413.6 409.9 285 409.9z" />
               </Svg>
             </TouchableOpacity>
-            <TouchableOpacity onPress={toggleSpeaker} style={styles.Videobutton}>
+            <TouchableOpacity
+              onPress={toggleSpeaker}
+              style={styles.Videobutton}>
               {isSpeakerEnabled ? (
                 <SvgXml xml={SVG_speaker} />
               ) : (
@@ -584,7 +582,7 @@ const styles = StyleSheet.create({
   counterContainerVideo: {
     position: 'absolute',
     top: 10,
-    left: 'auto', 
+    left: 'auto',
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
     paddingVertical: 3,
     paddingHorizontal: 12,
@@ -616,7 +614,7 @@ const styles = StyleSheet.create({
         shadowColor: '#000',
         shadowOpacity: 0.3,
         shadowRadius: 5,
-        shadowOffset: { width: 0, height: 2 },
+        shadowOffset: {width: 0, height: 2},
       },
       android: {
         elevation: 5,
@@ -636,7 +634,7 @@ const styles = StyleSheet.create({
         shadowColor: '#000',
         shadowOpacity: 0.3,
         shadowRadius: 5,
-        shadowOffset: { width: 0, height: 2 },
+        shadowOffset: {width: 0, height: 2},
       },
       android: {
         elevation: 5,
@@ -664,7 +662,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-   
+
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 10,

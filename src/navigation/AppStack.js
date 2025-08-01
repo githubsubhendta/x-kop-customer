@@ -4,7 +4,7 @@ import LayoutScreen from './../screen/Layout.Screen.jsx';
 import WhatWeDoScreen from './../screen/WhatWeDo.Screen.jsx';
 import FindAnOfficerScreen from './../screen/FindAnOfficer.Screen.jsx';
 import AudioScreen from './../screen/videoCall/AudioScreen.jsx';
-import VideoCallScreen from './../screen/videoCall/VideoCallScreen.jsx';
+// import VideoCallScreen from './../screen/videoCall/VideoCallScreen.jsx';
 import TransactionsScreen from './../screen/profile/Transactions.Screen.jsx';
 import SelectConsultantsScreen from './../screen/SelectConsultants.Screen.jsx';
 import EditProfile from './../screen/profile/EditProfile.jsx';
@@ -19,6 +19,7 @@ import ScheduleScreen from '../screen/Schedule.Screen.jsx';
 import Reschedule from '../screen/Reschedule.Screen.jsx';
 import CallPopup from '../Components/callPopup/FloatingCallPopup.jsx';
 import {CallProvider} from '../context/callContext.js';
+import RequestMeetingScreen from '../screen/RequestMeetingScreen.jsx';
 
 const Stack = createStackNavigator();
 
@@ -52,17 +53,18 @@ const AppStack = () => {
                   component={FindAnOfficerScreen}
                   options={{headerShown: false}}
                 />
+                <Stack.Screen
+                  name="RequestingMeetingScreen"
+                  component={RequestMeetingScreen}
+                  options={{headerShown: false}}
+                />
 
                 <Stack.Screen
                   name="AudioScreen"
                   component={AudioScreen}
                   options={{headerShown: false}}
                 />
-                <Stack.Screen
-                  name="VideoCallScreen"
-                  component={VideoCallScreen}
-                  options={{headerShown: false}}
-                />
+                
 
                 <Stack.Screen
                   name="TransactionsScreen"

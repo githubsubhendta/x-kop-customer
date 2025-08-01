@@ -28,24 +28,53 @@
 
 // export default usecallStore;
 
-import create from 'zustand';
+// import {create} from 'zustand';
 
-const useCallStore = create(set => ({
+// const useCallStore = create(set => ({
+//   backgroundCallPayload: null,
+//   isMuted: false,
+//   isSpeakerEnabled: true,
+//   connectionStatus: 'Not Connected',
+//   callDuration: '00:00:00',
+//   peerIds: [],
+//   callStatus: true, // Whether the call is active or not
+
+//   // Actions to update state
+//   toggleMute: () => set(state => ({isMuted: !state.isMuted})),
+//   toggleSpeaker: () =>
+//     set(state => ({isSpeakerEnabled: !state.isSpeakerEnabled})),
+//   setConnectionStatus: status => set({connectionStatus: status}),
+//   setCallDuration: duration => set({callDuration: duration}),
+//   setPeerIds: peerIds => set({peerIds}),
+//   setCallStatus: status => set({callStatus: status}),
+
+//   setBackgroundCallPayload: payload => {
+//     set({backgroundCallPayload: payload});
+//   },
+// }));
+
+// export default useCallStore;
+ 
+
+import { create } from 'zustand';
+
+const useCallStore = create((set) => ({
+  backgroundCallPayload: null,
   isMuted: false,
   isSpeakerEnabled: true,
   connectionStatus: 'Not Connected',
   callDuration: '00:00:00',
   peerIds: [],
-  callStatus: true, // Whether the call is active or not
+  callStatus: true,
 
-  // Actions to update state
-  toggleMute: () => set(state => ({isMuted: !state.isMuted})),
-  toggleSpeaker: () =>
-    set(state => ({isSpeakerEnabled: !state.isSpeakerEnabled})),
-  setConnectionStatus: status => set({connectionStatus: status}),
-  setCallDuration: duration => set({callDuration: duration}),
-  setPeerIds: peerIds => set({peerIds}),
-  setCallStatus: status => set({callStatus: status}),
+  toggleMute: () => set((state) => ({ isMuted: !state.isMuted })),
+  toggleSpeaker: () => set((state) => ({ isSpeakerEnabled: !state.isSpeakerEnabled })),
+  setConnectionStatus: (status) => set({ connectionStatus: status }),
+  setCallDuration: (duration) => set({ callDuration: duration }),
+  setPeerIds: (peerIds) => set({ peerIds }),
+  setCallStatus: (status) => set({ callStatus: status }),
+
+  setBackgroundCallPayload: (payload) => set({ backgroundCallPayload: payload }),
 }));
 
 export default useCallStore;
